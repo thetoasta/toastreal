@@ -7,7 +7,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true })); // Important: Parses form data
 app.use(express.static('public')); // Serves static files (like login.html)
 app.use(session({
-    secret: 'averysecretkey', // Change this in production!
+    secret: '53454t2f345cfn40j79dc7f', // Change this in production!
     resave: false,
     saveUninitialized: false
 }));
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
     if (req.session.authenticated) {
         res.send('<h1>Welcome to the protected area!</h1>');
     } else {
-        res.sendFile(__dirname + '/public/login.html');
+        res.sendFile(__dirname + 'index.html');
     }
 });
 
