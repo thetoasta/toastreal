@@ -1,7 +1,35 @@
-@import url('https://fonts.cdnfonts.com/css/uni-sans-regular');
+@font-face {
+    font-family: 'GoogleSans-Regular';
+    src: url('fonts/GoogleSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'GoogleSans-MediumItalic';
+    src: url('fonts/GoogleSans-MediumItalic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'GoogleSans-Medium';
+    src: url('fonts/GoogleSans-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'GoogleSans-Italic';
+    src: url('fonts/GoogleSans-Italic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'GoogleSans-BoldItalic';
+    src: url('fonts/GoogleSans-BoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'GoogleSans-Bold';
+    src: url('fonts/GoogleSans-Bold.ttf') format('truetype');
+}
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'GoogleSans-Regular', sans-serif;
     color: #ffffff;
     margin: 0;
     padding: 0;
