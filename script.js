@@ -34,9 +34,12 @@ app.post('/login', (req, res) => {
         req.session.authenticated = true;
         res.redirect('/');
     } else {
-        res.send('Login failed');
+        res.send('Invalid username or password');
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
