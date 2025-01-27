@@ -5,7 +5,6 @@ const app = express();
 
 // Middleware
 app.use(express.urlencoded({ extended: true })); // Important: Parses form data
-app.use(express.static('public')); // Serves static files (like login.html)
 app.use(session({
     secret: 'averysecretkey', // Change this in production!
     resave: false,
@@ -37,6 +36,9 @@ app.post('/login', (req, res) => {
         res.send('Invalid username or password');
     }
 });
+
+// Serve static files
+app.use(express.static('public')); // Serves static files (like login.html)
 
 // Start the server
 const PORT = process.env.PORT || 3000;
