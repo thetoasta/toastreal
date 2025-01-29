@@ -22,6 +22,10 @@ app.get('/accounts', (req, res) => {
     res.sendFile(__dirname + '/public/accounts.html');
 });
 
+app.get('/profile', (req, res) => {
+    res.sendFile(__dirname + '/public/profile.html');
+});
+
 app.get('/soon', (req, res) => {
     res.sendFile(__dirname + '/public/soon.html');
 });

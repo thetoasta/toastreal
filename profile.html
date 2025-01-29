@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Check if user is logged in
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('user-email').innerText = user.email;
+                // Fetch and display user nickname
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        document.getElementById('nickname').value = doc.data().nickname || '';
+                    }
+                });
+            } else {
+                window.location.href = 'accounts.html';
+            }
+        });
+
+        // Update nickname
+        document.getElementById('update-nickname-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const nickname = document.getElementById('nickname').value;
+            const user = firebase.auth().currentUser;
+            db.collection('users').doc(user.uid).set({ nickname: nickname }, { merge: true })
+                .then(() => {
+                    alert('Nickname updated successfully');
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+        });
+
+        // Log out
+        document.getElementById('logout').addEventListener('click', function() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><strong>Profile Management</strong></h1>
+            <p>Email: <span id="user-email"></span></p>
+            <div class="form-container">
+                <div class="form-section">
+                    <h2>Update Nickname</h2>
+                    <form id="update-nickname-form">
+                        <input type="text" id="nickname" placeholder="Nickname" required><br>
+                        <button type="submit">Update Nickname</button>
+                    </form>
+                </div>
+                <div class="form-section">
+                    <button id="logout">Log Out</button>
+                </div>
+            </div>
+        </header>
+    </div>
+</body>
+</html>

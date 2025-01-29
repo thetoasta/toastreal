@@ -73,6 +73,7 @@
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     alert('User logged in successfully');
+                    window.location.href = 'profile.html';
                 })
                 .catch((error) => {
                     alert('Error: ' + error.message);
@@ -85,6 +86,7 @@
             firebase.auth().signInWithPopup(provider)
                 .then((result) => {
                     alert('User signed in with Google');
+                    window.location.href = 'profile.html';
                 })
                 .catch((error) => {
                     alert('Error: ' + error.message);
