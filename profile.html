@@ -55,13 +55,13 @@
         });
 
         // Log out
-        document.getElementById('logout').addEventListener('click', function() {
+        function logout() {
             firebase.auth().signOut().then(() => {
                 window.location.href = 'accounts.html';
-            }).catch(error => {
+            }).catch((error) => {
                 alert('Error: ' + error.message);
             });
-        });
+        }
     </script>
 </head>
 <body>
@@ -78,7 +78,7 @@
                     </form>
                 </div>
                 <div class="form-section">
-                    <button id="logout">Log Out</button>
+                    <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
                 </div>
             </div>
         </header>
