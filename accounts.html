@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><strong>Account Management</strong></h1>
+            <div class="form-container">
+                <div class="form-section">
+                    <h2>Register</h2>
+                    <form id="register-form">
+                        <input type="text" id="register-username" placeholder="Email" required><br>
+                        <input type="password" id="register-password" placeholder="Password" required><br>
+                        <button type="submit">Register</button>
+                    </form>
+                </div>
+                <div class="form-section">
+                    <h2>Login</h2>
+                    <form id="login-form">
+                        <input type="text" id="login-username" placeholder="Email" required><br>
+                        <input type="password" id="login-password" placeholder="Password" required><br>
+                        <button type="submit">Login</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+    </div>
+    <script>
+        // Register user
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('register-username').value;
+            var password = document.getElementById('register-password').value;
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert('User registered successfully');
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        });
+
+        // Login user
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('login-username').value;
+            var password = document.getElementById('login-password').value;
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert('User logged in successfully');
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        });
+    </script>
+</body>
+</html>
