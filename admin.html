@@ -23,6 +23,7 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
 
         // Admin credentials
@@ -57,6 +58,20 @@
             displayMessage('Account disabled (requires server-side implementation)', 'success');
         }
 
+        // Add global notification
+        function addNotification() {
+            const message = document.getElementById('notification-message').value;
+            db.collection('notifications').add({
+                message: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                displayMessage('Notification added successfully', 'success');
+                document.getElementById('notification-message').value = '';
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
+        }
+
         // Display message
         function displayMessage(message, type) {
             const messageBox = document.getElementById('message-box');
@@ -82,7 +97,12 @@
                     <input type="text" id="disable-email" placeholder="User Email" required><br>
                     <button onclick="disableAccount()">Disable Account</button>
                 </div>
-                <button onclick="window.location.href = 'index.html';">home! <em>wait ur already home.</em></button>
+                <div class="form-section">
+                    <h2>Add Notification</h2>
+                    <input type="text" id="notification-message" placeholder="Notification Message" required><br>
+                    <button onclick="addNotification()">Add Notification</button>
+                </div>
+                <button onclick="window.location.href = 'index.html';">home! </button>
             </div>
         </header>
     </div>

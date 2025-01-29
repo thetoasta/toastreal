@@ -60,6 +60,10 @@
                         <h3>${post.username}</h3>
                         <p>${post.content}</p>
                         <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
+                        ${auth.currentUser && auth.currentUser.email === post.username ? `
+                            <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
+                            <button onclick="deletePost('${doc.id}')">Delete</button>
+                        ` : ''}
                     `;
                     postsContainer.appendChild(postElement);
                 });
@@ -87,6 +91,33 @@
             }).catch(error => {
                 showNotification('Error: ' + error.message, 'error');
             });
+        }
+
+        // Edit post
+        function editPost(postId, currentContent) {
+            const newContent = prompt('Edit your post:', currentContent);
+            if (newContent) {
+                db.collection('posts').doc(postId).update({
+                    content: newContent
+                }).then(() => {
+                    showNotification('Post updated successfully!', 'success');
+                    loadPosts(); // Reload posts after editing
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Delete post
+        function deletePost(postId) {
+            if (confirm('Are you sure you want to delete this post?')) {
+                db.collection('posts').doc(postId).delete().then(() => {
+                    showNotification('Post deleted successfully!', 'success');
+                    loadPosts(); // Reload posts after deleting
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
         }
 
         // Show notification
@@ -139,7 +170,7 @@
             <form onsubmit="addPost(event)">
                 <textarea id="post-content" placeholder="What's on your mind?" required></textarea><br>
                 <button type="submit">Post</button>
-                <button onclick="window.location.href = 'index.html';">home! <em>wait ur already home.</em></button>
+                <button onclick="window.location.href = 'index.html';">home!</button>
             </form>
         </div>
         <div id="posts-container"></div>
