@@ -30,6 +30,10 @@ app.get('/soon', (req, res) => {
     res.sendFile(__dirname + '/public/soon.html');
 });
 
+app.get('/admin', (req, res) => {
+    res.sendFile(__dirname + '/public/admin.html');
+});
+
 // Serve static files
 app.use(express.static('public'));
 

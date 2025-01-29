@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Management</title>
+    <title>Admin Panel</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
@@ -25,43 +25,36 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Check if user is logged in
+        // Admin credentials
+        const adminEmail = "nolanp678@gmail.com";
+
+        // Check if user is logged in and is admin
         firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('logout-button').style.display = 'block';
-                // Fetch and display user nickname
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        document.getElementById('nickname').value = doc.data().nickname || '';
-                    }
-                });
+            if (user && user.email === adminEmail) {
+                document.getElementById('admin-panel').style.display = 'block';
             } else {
                 window.location.href = 'accounts.html';
             }
         });
 
-        // Update nickname
-        document.getElementById('update-nickname-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const nickname = document.getElementById('nickname').value;
-            const user = firebase.auth().currentUser;
-            db.collection('users').doc(user.uid).set({ nickname: nickname }, { merge: true })
+        // Reset user password
+        function resetPassword() {
+            const email = document.getElementById('reset-email').value;
+            firebase.auth().sendPasswordResetEmail(email)
                 .then(() => {
-                    displayMessage('Nickname updated successfully', 'success');
+                    displayMessage('Password reset email sent', 'success');
                 })
                 .catch(error => {
                     displayMessage('Error: ' + error.message, 'error');
                 });
-        });
+        }
 
-        // Log out
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                window.location.href = 'accounts.html';
-            }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
-            });
+        // Disable user account
+        function disableAccount() {
+            const email = document.getElementById('disable-email').value;
+            // This requires Firebase Admin SDK on the server side
+            // Here we just display a message for demonstration
+            displayMessage('Account disabled (requires server-side implementation)', 'success');
         }
 
         // Display message
@@ -74,21 +67,20 @@
     </script>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="admin-panel" style="display: none;">
         <header>
-            <h1><strong>Profile Management</strong></h1>
-            <p>Email: <span id="user-email"></span></p>
+            <h1><strong>Admin Panel</strong></h1>
             <div id="message-box" style="display: none;"></div>
             <div class="form-container">
                 <div class="form-section">
-                    <h2>Update Nickname</h2>
-                    <form id="update-nickname-form">
-                        <input type="text" id="nickname" placeholder="Nickname" required><br>
-                        <button type="submit">Update Nickname</button>
-                    </form>
+                    <h2>Reset User Password</h2>
+                    <input type="text" id="reset-email" placeholder="User Email" required><br>
+                    <button onclick="resetPassword()">Reset Password</button>
                 </div>
                 <div class="form-section">
-                    <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+                    <h2>Disable User Account</h2>
+                    <input type="text" id="disable-email" placeholder="User Email" required><br>
+                    <button onclick="disableAccount()">Disable Account</button>
                 </div>
             </div>
         </header>
