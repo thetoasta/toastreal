@@ -52,30 +52,6 @@
     </div>
 
     <script>
-        // Login user
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const email = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Signed in
-                    const user = userCredential.user;
-                    console.log('User logged in:', user); // Debugging line
-                    alert('User logged in successfully');
-                    window.location.href = 'profile.html'; // Redirect on success
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error("Login Error:", errorCode, errorMessage); // Log to console
-                    alert('Error: ' + errorMessage);
-                });
-        });
-    </script>
-
-    <script>
         // Register user
         document.getElementById('register-form').addEventListener('submit', function(event) {
             event.preventDefault();
