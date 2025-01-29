@@ -44,6 +44,8 @@
                         <input type="password" id="login-password" placeholder="Password" required><br>
                         <button type="submit">Login</button>
                     </form>
+                    <button id="google-signin">Sign in with Google</button>
+                    <button id="reset-password">Reset Password</button>
                 </div>
             </div>
         </header>
@@ -75,6 +77,32 @@
                 .catch((error) => {
                     alert('Error: ' + error.message);
                 });
+        });
+
+        // Google Sign-In
+        document.getElementById('google-signin').addEventListener('click', function() {
+            var provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then((result) => {
+                    alert('User signed in with Google');
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        });
+
+        // Reset Password
+        document.getElementById('reset-password').addEventListener('click', function() {
+            var email = prompt('Please enter your email for password reset:');
+            if (email) {
+                firebase.auth().sendPasswordResetEmail(email)
+                    .then(() => {
+                        alert('Password reset email sent');
+                    })
+                    .catch((error) => {
+                        alert('Error: ' + error.message);
+                    });
+            }
         });
     </script>
 </body>

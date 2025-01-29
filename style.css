@@ -32,6 +32,9 @@ body::after {
     align-items: center;
     justify-content: center;
     text-align: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
 }
 
 header {
