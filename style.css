@@ -53,6 +53,7 @@ body::after {
     background-size: cover;
     z-index: -1;
     filter: blur(20px);
+    font-family: 'GoogleSans-Regular', sans-serif;
 }
 
 .container {
@@ -67,6 +68,11 @@ body::after {
 header {
     margin-bottom: 50px;
     background-color: transparent;
+    font-family: 'GoogleSans-Bold', sans-serif; /* Apply bold font to header */
+}
+
+h1, h2, nav, ul, li, a {
+    font-family: 'GoogleSans-Regular', sans-serif; /* Apply regular font to all text elements */
 }
 
 h1 {
