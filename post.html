@@ -10,23 +10,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="firebaseConfig.js"></script>
     <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
-            authDomain: "toastrealxyz.firebaseapp.com",
-            projectId: "toastrealxyz",
-            storageBucket: "toastrealxyz.appspot.com",
-            messagingSenderId: "774884910313",
-            appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX"
-        };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
 
         // Check if user is logged in
-        firebase.auth().onAuthStateChanged(user => {
+        auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('logout-button').style.display = 'block';
                 document.getElementById('post-form').style.display = 'block';
@@ -39,7 +31,7 @@
 
         // Log out user
         function logout() {
-            firebase.auth().signOut().then(() => {
+            auth.signOut().then(() => {
                 window.location.href = 'accounts.html';
             }).catch((error) => {
                 alert('Error: ' + error.message);
@@ -68,7 +60,7 @@
         // Add new post
         function addPost(event) {
             event.preventDefault();
-            const user = firebase.auth().currentUser;
+            const user = auth.currentUser;
             const content = document.getElementById('post-content').value;
             db.collection('posts').add({
                 username: user.email,
