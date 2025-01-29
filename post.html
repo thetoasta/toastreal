@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Check if user is logged in
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('logout-button').style.display = 'block';
+                document.getElementById('post-form').style.display = 'block';
+                loadPosts();
+            } else {
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('post-form').style.display = 'none';
+            }
+        });
+
+        // Log out user
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        // Load posts
+        function loadPosts() {
+            db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const postsContainer = document.getElementById('posts-container');
+                postsContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const post = doc.data();
+                    const postElement = document.createElement('div');
+                    postElement.className = 'post';
+                    postElement.innerHTML = `
+                        <h3>${post.username}</h3>
+                        <p>${post.content}</p>
+                        <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
+                    `;
+                    postsContainer.appendChild(postElement);
+                });
+            });
+        }
+
+        // Add new post
+        function addPost(event) {
+            event.preventDefault();
+            const user = firebase.auth().currentUser;
+            const content = document.getElementById('post-content').value;
+            db.collection('posts').add({
+                username: user.email,
+                content: content,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('post-content').value = '';
+            }).catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><strong>Posts</strong></h1>
+            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </header>
+        <div id="post-form" style="display: none;">
+            <form onsubmit="addPost(event)">
+                <textarea id="post-content" placeholder="What's on your mind?" required></textarea><br>
+                <button type="submit">Post</button>
+            </form>
+        </div>
+        <div id="posts-container"></div>
+    </div>
+</body>
+</html>
