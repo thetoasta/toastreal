@@ -1,35 +1,5 @@
-@font-face {
-    font-family: 'GoogleSans-Regular';
-    src: url('public/fonts/GoogleSans-Regular.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'GoogleSans-MediumItalic';
-    src: url('public/fonts/GoogleSans-MediumItalic.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'GoogleSans-Medium';
-    src: url('public/fonts/GoogleSans-Medium.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'GoogleSans-Italic';
-    src: url('public/fonts/GoogleSans-Italic.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'GoogleSans-BoldItalic';
-    src: url('public/fonts/GoogleSans-BoldItalic.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'GoogleSans-Bold';
-    src: url('public/fonts/GoogleSans-Bold.ttf') format('truetype');
-}
-
 body {
-    font-family: 'GoogleSans-Regular', sans-serif;
+    font-family: 'Google Sans', sans-serif;
     color: #ffffff;
     margin: 0;
     padding: 0;
@@ -53,7 +23,6 @@ body::after {
     background-size: cover;
     z-index: -1;
     filter: blur(20px);
-    font-family: 'GoogleSans-Regular', sans-serif;
 }
 
 .container {
@@ -68,11 +37,11 @@ body::after {
 header {
     margin-bottom: 50px;
     background-color: transparent;
-    font-family: 'GoogleSans-Bold', sans-serif; /* Apply bold font to header */
+    font-family: 'Google Sans', sans-serif; /* Apply Google Sans font to header */
 }
 
 h1, h2, nav, ul, li, a {
-    font-family: 'GoogleSans-Regular', sans-serif; /* Apply regular font to all text elements */
+    font-family: 'Google Sans', sans-serif; /* Apply Google Sans font to all text elements */
 }
 
 h1 {
