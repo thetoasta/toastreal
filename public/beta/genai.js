@@ -1,15 +1,10 @@
-// import the Genkit and Google AI plugin libraries
-import { gemini15Flash, googleAI } from '@genkit-ai/googleai';
-import { genkit } from 'genkit';
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// configure a Genkit instance
-const ai = genkit({
-  plugins: [googleAI({ apiKey: 'AIzaSyBZNcjk_mMbr0LV1pdempfANK2ERAnO8h4' })],
-  model: gemini15Flash, // set default model
-});
+const genAI = new GoogleGenerativeAI("AIzaSyBZNcjk_mMbr0LV1pdempfANK2ERAnO8h4");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-export const helloFlow = ai.defineFlow('helloFlow', async (name) => {
-  // make a generation request
-  const { text } = await ai.generate(`Hello Gemini, my name is ${name}`);
-  return { text };
-});
+export const helloFlow = async (name) => {
+  const prompt = `${name}}`;
+  const result = await model.generateContent(prompt);
+  return { text: result.response.text() };
+};
