@@ -57,7 +57,7 @@
         }
 
         // Update nickname
-        document.getElementById('update-nickname-form').addEventListener('submit', function(event) {
+        function updateNickname(event) {
             event.preventDefault();
             const user = auth.currentUser;
             if (!user) {
@@ -65,17 +65,16 @@
                 return;
             }
             const nickname = document.getElementById('nickname').value;
-            console.log('Updating nickname to:', nickname); // Debugging log
-            db.collection('users').doc(user.uid).set({
+            db.collection('users').doc(user.uid).update({
                 nickname: nickname
-            }, { merge: true }).then(() => {
-                console.log('Nickname updated successfully'); // Debugging log
+            }).then(() => {
                 showNotification('Nickname updated successfully!', 'success');
             }).catch(error => {
-                console.error('Error updating nickname:', error); // Debugging log
                 showNotification('Error: ' + error.message, 'error');
             });
-        });
+        }
+
+        document.getElementById('update-nickname-form').addEventListener('submit', updateNickname);
 
         // Log out user
         function logout() {
