@@ -56,40 +56,25 @@
             });
         }
 
-        function updateNickname(event) {
-            event.preventDefault();
-            const newusername = prompt('What do you want your new nickname to be?');
-            const user = auth.currentUser;
-            if (newusername) {
-                db.collection('users').doc(user.uid).update({
-                    username: newusername
-                }).then(() => {
-                    showNotification('Nickname updated successfully!', 'success');
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
-            }
-        }
-
         // Update nickname
-        function closedNNC(event) {
-            event.preventDefault();
+        function updateNickname() {
             const user = auth.currentUser;
             if (!user) {
                 showNotification('You must be logged in to update your nickname.', 'error');
                 return;
             }
-            const nickname = document.getElementById('nickname').value;
-            db.collection('users').doc(user.uid).update({
-                nickname: nickname
-            }).then(() => {
-                showNotification('Nickname updated successfully!', 'success');
-            }).catch(error => {
-                showNotification('Error: ' + error.message, 'error');
-            });
+            const newNickname = prompt('What do you want your new nickname to be?');
+            if (newNickname) {
+                db.collection('users').doc(user.uid).update({
+                    nickname: newNickname
+                }).then(() => {
+                    showNotification('Nickname updated successfully!', 'success');
+                    loadNickname(user.uid); // Reload nickname after updating
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
         }
-
-        document.getElementById('update-nickname-form').addEventListener('submit', updateNickname);
 
         // Log out user
         function logout() {
@@ -112,7 +97,7 @@
             <div class="form-container">
                 <div class="form-section">
                     <h2>Update Nickname</h2>
-                    <form id="update-nickname-form">
+                    <form id="update-nickname-form" onsubmit="event.preventDefault(); updateNickname();">
                         <input type="text" id="nickname" placeholder="Nickname" required><br>
                         <button type="submit">Update Nickname</button>
                     </form>
