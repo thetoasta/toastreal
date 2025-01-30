@@ -22,13 +22,30 @@
             storageBucket: "toastrealxyz.appspot.com",
             messagingSenderId: "774884910313",
             appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX"
+            measurementId: "G-3H38LZB2BX",
+            GOOGLE_GENAI_API_KEY: "AIzaSyBZNcjk_mMbr0LV1pdempfANK2ERAnO8h4"
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // Check if user is logged in
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login').style.display = 'none';
+            } else {
+                document.getElementById('login').style.display = 'block';
+            }
+        });
+
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('profile').style.display = 'block';
+            } else {
+                document.getElementById('profile').style.display = 'none';
+            }
+        });
+
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('logout-button').style.display = 'block';
@@ -44,6 +61,14 @@
             }).catch((error) => {
                 showNotification('Error: ' + error.message, 'error');
             });
+        }
+
+        function profile() {
+            window.location.href = 'profile.html';
+        }
+
+        function signin() {
+            window.location.href = 'accounts.html';
         }
 
         // Load notifications
@@ -72,10 +97,11 @@
             <h2>explore!!</h2>
             <div class="container">
                 <button onclick="window.location.href = 'index.html';">home <em>wait ur already home.</em></button>
-                <button onclick="window.location.href = 'accounts.html';">account management</button>
+                <button id="profile" onclick="profile()" style="display: none;">profile</button>
+                <button id="login" onclick="login()" style="display: none;">log in</button>
                 <button onclick="window.location.href = 'post.html';">social</button>
-                <button onclick="window.location.href = 'soon.html';">coming soon</button>
-                <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+                <button onclick="window.location.href = 'soon.html';">in progress</button>
+                <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
             </div>
         </header>
         <div id="notifications-container"></div>
