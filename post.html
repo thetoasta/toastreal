@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script src="notifications.js"></script>
-    <link rel="stylesheet" href="notifications.css">
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -58,17 +58,32 @@
                     const post = doc.data();
                     const postElement = document.createElement('div');
                     postElement.className = 'post';
-                    postElement.innerHTML = `
-                        <h3>${post.username}</h3>
-                        <p>${post.content}</p>
-                        <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
-                        ${auth.currentUser && auth.currentUser.email === post.username ? `
-                            <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
-                            <button onclick="deletePost('${doc.id}')">Delete</button>
-                        ` : ''}
-                    `;
-                    postsContainer.appendChild(postElement);
+                    getUserNickname(post.username).then(nickname => {
+                        postElement.innerHTML = `
+                            <h3>${nickname}</h3>
+                            <p>${post.content}</p>
+                            <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
+                            ${auth.currentUser && auth.currentUser.email === post.username ? `
+                                <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
+                                <button onclick="deletePost('${doc.id}')">Delete</button>
+                            ` : ''}
+                        `;
+                        postsContainer.appendChild(postElement);
+                    });
                 });
+            });
+        }
+
+        // Get user nickname
+        function getUserNickname(email) {
+            return db.collection('users').doc(email).get().then(doc => {
+                if (doc.exists && doc.data().nickname) {
+                    return doc.data().nickname;
+                } else {
+                    return email;
+                }
+            }).catch(() => {
+                return email;
             });
         }
 
@@ -120,17 +135,6 @@
                     showNotification('Error: ' + error.message, 'error');
                 });
             }
-        }
-
-        // Show notification
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerText = message;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
         }
     </script>
     <style>

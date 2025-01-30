@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Management</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="notifications.js"></script>
     <script>
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
             authDomain: "toastrealxyz.firebaseapp.com",
@@ -23,53 +25,56 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
 
         // Check if user is logged in
-        firebase.auth().onAuthStateChanged(user => {
+        auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('user-email').innerText = user.email;
                 document.getElementById('logout-button').style.display = 'block';
-                // Fetch and display user nickname
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        document.getElementById('nickname').value = doc.data().nickname || '';
-                    }
-                });
+                loadNickname(user.uid);
             } else {
                 window.location.href = 'accounts.html';
             }
         });
 
-        // Update nickname
-        document.getElementById('update-nickname-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const nickname = document.getElementById('nickname').value;
-            const user = firebase.auth().currentUser;
-            db.collection('users').doc(user.uid).set({ nickname: nickname }, { merge: true })
-                .then(() => {
-                    displayMessage('Nickname updated successfully', 'success');
-                })
-                .catch(error => {
-                    displayMessage('Error: ' + error.message, 'error');
-                });
-        });
-
-        // Log out
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                window.location.href = 'accounts.html';
+        // Load nickname
+        function loadNickname(userId) {
+            db.collection('users').doc(userId).get().then(doc => {
+                if (doc.exists) {
+                    document.getElementById('nickname').value = doc.data().nickname || '';
+                }
             }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
+                showNotification('Error: ' + error.message, 'error');
             });
         }
 
-        // Display message
-        function displayMessage(message, type) {
-            const messageBox = document.getElementById('message-box');
-            messageBox.innerText = message;
-            messageBox.className = type;
-            messageBox.style.display = 'block';
+        // Update nickname
+        document.getElementById('update-nickname-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to update your nickname.', 'error');
+                return;
+            }
+            const nickname = document.getElementById('nickname').value;
+            db.collection('users').doc(user.uid).set({
+                nickname: nickname
+            }, { merge: true }).then(() => {
+                showNotification('Nickname updated successfully!', 'success');
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        });
+
+        // Log out user
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                showNotification('Error: ' + error.message, 'error');
+            });
         }
     </script>
 </head>
