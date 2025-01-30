@@ -13,6 +13,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <!-- Notification Script -->
     <script src="notifications.js"></script>
+    <!-- GenAI Script -->
+    <script type="module" src="beta/genai.js"></script>
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -33,23 +35,11 @@
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('login').style.display = 'none';
-            } else {
-                document.getElementById('login').style.display = 'block';
-            }
-        });
-
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
                 document.getElementById('profile').style.display = 'block';
-            } else {
-                document.getElementById('profile').style.display = 'none';
-            }
-        });
-
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
                 document.getElementById('logout-button').style.display = 'block';
             } else {
+                document.getElementById('login').style.display = 'block';
+                document.getElementById('profile').style.display = 'none';
                 document.getElementById('logout-button').style.display = 'none';
             }
         });
@@ -98,7 +88,7 @@
             <div class="container">
                 <button onclick="window.location.href = 'index.html';">home <em>wait ur already home.</em></button>
                 <button id="profile" onclick="profile()" style="display: none;">profile</button>
-                <button id="login" onclick="login()" style="display: none;">log in</button>
+                <button id="login" onclick="signin()" style="display: none;">log in</button>
                 <button onclick="window.location.href = 'post.html';">social</button>
                 <button onclick="window.location.href = 'soon.html';">in progress</button>
                 <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
