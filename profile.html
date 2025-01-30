@@ -64,7 +64,7 @@
                 showNotification('You must be logged in to update your nickname.', 'error');
                 return;
             }
-            const nickname = document.getElementById('nickname').value;
+            const new_nickname = document.getElementById('new_nickname').value;
             db.collection('users').doc(user.uid).update({
                 nickname: new_nickname
             }).then(() => {
