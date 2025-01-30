@@ -64,9 +64,9 @@
                 showNotification('You must be logged in to update your nickname.', 'error');
                 return;
             }
-            const new_nickname = document.getElementById('new_nickname').value;
+            const nickname = document.getElementById('nickname').value;
             db.collection('users').doc(user.uid).update({
-                nickname: new_nickname
+                nickname: nickname
             }).then(() => {
                 showNotification('Nickname updated successfully!', 'success');
             }).catch(error => {
@@ -98,7 +98,7 @@
                 <div class="form-section">
                     <h2>Update Nickname</h2>
                     <form id="update-nickname-form">
-                        <input type="text" id="new_nickname" placeholder="Nickname" required><br>
+                        <input type="text" id="nickname" placeholder="Nickname" required><br>
                         <button type="submit">Update Nickname</button>
                     </form>
                 </div>
