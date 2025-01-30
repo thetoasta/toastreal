@@ -65,9 +65,9 @@
             }
             const newNickname = prompt('What do you want your new nickname to be?');
             if (newNickname) {
-                db.collection('users').doc(user.uid).update({
+                db.collection('users').doc(user.uid).set({
                     nickname: newNickname
-                }).then(() => {
+                }, { merge: true }).then(() => {
                     showNotification('Nickname updated successfully!', 'success');
                     loadNickname(user.uid); // Reload nickname after updating
                 }).catch(error => {
