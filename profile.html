@@ -31,10 +31,12 @@
         // Check if user is logged in
         auth.onAuthStateChanged(user => {
             if (user) {
+                console.log('User logged in:', user.email); // Debugging log
                 document.getElementById('user-email').innerText = user.email;
                 document.getElementById('logout-button').style.display = 'block';
                 loadNickname(user.uid);
             } else {
+                console.log('No user logged in'); // Debugging log
                 window.location.href = 'accounts.html';
             }
         });
@@ -43,9 +45,13 @@
         function loadNickname(userId) {
             db.collection('users').doc(userId).get().then(doc => {
                 if (doc.exists) {
+                    console.log('Nickname loaded:', doc.data().nickname); // Debugging log
                     document.getElementById('nickname').value = doc.data().nickname || '';
+                } else {
+                    console.log('No nickname found'); // Debugging log
                 }
             }).catch(error => {
+                console.error('Error loading nickname:', error); // Debugging log
                 showNotification('Error: ' + error.message, 'error');
             });
         }
@@ -59,11 +65,14 @@
                 return;
             }
             const nickname = document.getElementById('nickname').value;
+            console.log('Updating nickname to:', nickname); // Debugging log
             db.collection('users').doc(user.uid).set({
                 nickname: nickname
             }, { merge: true }).then(() => {
+                console.log('Nickname updated successfully'); // Debugging log
                 showNotification('Nickname updated successfully!', 'success');
             }).catch(error => {
+                console.error('Error updating nickname:', error); // Debugging log
                 showNotification('Error: ' + error.message, 'error');
             });
         });
@@ -71,8 +80,10 @@
         // Log out user
         function logout() {
             auth.signOut().then(() => {
+                console.log('User logged out'); // Debugging log
                 window.location.href = 'accounts.html';
             }).catch((error) => {
+                console.error('Error logging out:', error); // Debugging log
                 showNotification('Error: ' + error.message, 'error');
             });
         }
