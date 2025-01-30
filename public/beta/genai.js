@@ -8,10 +8,8 @@ const ai = genkit({
   model: gemini15Flash, // set default model
 });
 
-const helloFlow = ai.defineFlow('helloFlow', async (name) => {
+export const helloFlow = ai.defineFlow('helloFlow', async (name) => {
   // make a generation request
   const { text } = await ai.generate(`Hello Gemini, my name is ${name}`);
-  console.log(text);
+  return { text };
 });
-
-helloFlow('Chris');
