@@ -56,8 +56,23 @@
             });
         }
 
-        // Update nickname
         function updateNickname(event) {
+            event.preventDefault();
+            const newusername = prompt('What do you want your new nickname to be?');
+            const user = auth.currentUser;
+            if (newusername) {
+                db.collection('users').doc(user.uid).update({
+                    username: newusername
+                }).then(() => {
+                    showNotification('Nickname updated successfully!', 'success');
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Update nickname
+        function closedNNC(event) {
             event.preventDefault();
             const user = auth.currentUser;
             if (!user) {
