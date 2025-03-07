@@ -33,15 +33,15 @@
             if (user) {
                 document.getElementById('user-email').innerText = user.email;
                 document.getElementById('logout-button').style.display = 'block';
-                loadNickname(user.uid);
+                loadNickname(user.email);
             } else {
                 window.location.href = 'accounts.html';
             }
         });
 
         // Load nickname
-        function loadNickname(userId) {
-            db.collection('nicknames').doc(userId).get().then(doc => {
+        function loadNickname(email) {
+            db.collection('nicknames').doc(email).get().then(doc => {
                 if (doc.exists) {
                     document.getElementById('nickname').value = doc.data().nickname || '';
                 }
@@ -59,11 +59,11 @@
             }
             const newNickname = document.getElementById('nickname').value;
             if (newNickname) {
-                db.collection('nicknames').doc(user.uid).set({
+                db.collection('nicknames').doc(user.email).set({
                     nickname: newNickname
                 }).then(() => {
                     showNotification('Nickname updated successfully!', 'success');
-                    loadNickname(user.uid); // Reload nickname after updating
+                    loadNickname(user.email); // Reload nickname after updating
                 }).catch(error => {
                     showNotification('Error: ' + error.message, 'error');
                 });
