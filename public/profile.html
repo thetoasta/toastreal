@@ -31,27 +31,21 @@
         // Check if user is logged in
         auth.onAuthStateChanged(user => {
             if (user) {
-                console.log('User logged in:', user.email); // Debugging log
                 document.getElementById('user-email').innerText = user.email;
                 document.getElementById('logout-button').style.display = 'block';
                 loadNickname(user.uid);
             } else {
-                console.log('No user logged in'); // Debugging log
                 window.location.href = 'accounts.html';
             }
         });
 
         // Load nickname
         function loadNickname(userId) {
-            db.collection('users').doc(userId).get().then(doc => {
+            db.collection('nicknames').doc(userId).get().then(doc => {
                 if (doc.exists) {
-                    console.log('Nickname loaded:', doc.data().nickname); // Debugging log
                     document.getElementById('nickname').value = doc.data().nickname || '';
-                } else {
-                    console.log('No nickname found'); // Debugging log
                 }
             }).catch(error => {
-                console.error('Error loading nickname:', error); // Debugging log
                 showNotification('Error: ' + error.message, 'error');
             });
         }
@@ -63,11 +57,11 @@
                 showNotification('You must be logged in to update your nickname.', 'error');
                 return;
             }
-            const newNickname = prompt('What do you want your new nickname to be?');
+            const newNickname = document.getElementById('nickname').value;
             if (newNickname) {
-                db.collection('users').doc(user.uid).set({
+                db.collection('nicknames').doc(user.uid).set({
                     nickname: newNickname
-                }, { merge: true }).then(() => {
+                }).then(() => {
                     showNotification('Nickname updated successfully!', 'success');
                     loadNickname(user.uid); // Reload nickname after updating
                 }).catch(error => {
@@ -79,10 +73,8 @@
         // Log out user
         function logout() {
             auth.signOut().then(() => {
-                console.log('User logged out'); // Debugging log
                 window.location.href = 'accounts.html';
             }).catch((error) => {
-                console.error('Error logging out:', error); // Debugging log
                 showNotification('Error: ' + error.message, 'error');
             });
         }
