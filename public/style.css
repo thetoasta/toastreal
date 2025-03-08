@@ -4,12 +4,11 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    position: relative;
-    overflow: hidden;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
     background: url('images/background.png') no-repeat center center;
+    background-size: cover;
 }
 
 body::after {
@@ -35,6 +34,7 @@ body::after {
     padding: 20px;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
+    flex: 1;
 }
 
 header {
@@ -108,4 +108,13 @@ input[type="text"]:focus, input[type="password"]:focus {
 #message-box.error {
     background-color: #f44336;
     color: white;
+}
+
+.footer {
+    width: 100%;
+    background-color: #f0f0f0; /* Example styling */
+    text-align: center;
+    padding: 10px;
+    position: relative;
+    bottom: 0;
 }
