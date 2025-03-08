@@ -112,7 +112,7 @@
         }
 
         // Edit post
-        function editPost(postId, currentContent) {
+        function edtPost(postId, currentContent) {
             const newContent = prompt('Edit your post:', currentContent);
             if (newContent) {
                 db.collection('posts').doc(postId).update({
@@ -127,7 +127,7 @@
         }
 
         // Delete post
-        function deletePost(postId) {
+        function deleePost(postId) {
             if (confirm('Are you sure you want to delete this post?')) {
                 db.collection('posts').doc(postId).delete().then(() => {
                     showNotification('Post deleted successfully!', 'success');
