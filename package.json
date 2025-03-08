@@ -2,5 +2,8 @@
   "dependencies": {
     "@genkit-ai/googleai": "^0.9.12",
     "genkit": "^0.9.12"
+  },
+  "devDependencies": {
+    "supabase": "^2.15.8"
   }
 }
