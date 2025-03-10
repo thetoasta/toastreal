@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploding Kittens</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let gameId = null;
+        let currentUser = null;
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('logout-button').style.display = 'block';
+                document.getElementById('game-controls').style.display = 'block';
+            } else {
+                currentUser = null;
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('game-controls').style.display = 'none';
+            }
+        });
+
+        // Log out user
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Create a new game
+        function createGame() {
+            const gameData = {
+                players: [currentUser.uid],
+                deck: shuffle([
+                    'Kitten', 'Kitten', 'Kitten', 'Kitten', 'Kitten',
+                    'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten',
+                    'Attack', 'Attack', 'Skip', 'Skip', 'Favor', 'Favor', 'Shuffle', 'Shuffle',
+                    'Nope', 'Nope', 'See the Future', 'See the Future'
+                ]),
+                currentPlayer: currentUser.uid,
+                status: 'waiting'
+            };
+            db.collection('games').add(gameData).then(docRef => {
+                gameId = docRef.id;
+                joinGame(gameId);
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Join an existing game
+        function joinGame(id) {
+            gameId = id;
+            db.collection('games').doc(gameId).update({
+                players: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+            }).then(() => {
+                listenToGameUpdates();
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Listen to game updates
+        function listenToGameUpdates() {
+            db.collection('games').doc(gameId).onSnapshot(doc => {
+                const gameData = doc.data();
+                updateGameBoard(gameData);
+            });
+        }
+
+        // Update the game board
+        function updateGameBoard(gameData) {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = '';
+            gameData.deck.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.innerText = card;
+                cardElement.addEventListener('click', () => {
+                    if (gameData.currentPlayer === currentUser.uid) {
+                        playCard(card);
+                    } else {
+                        showNotification('It\'s not your turn!', 'error');
+                    }
+                });
+                gameBoard.appendChild(cardElement);
+            });
+        }
+
+        // Play a card
+        function playCard(card) {
+            db.collection('games').doc(gameId).get().then(doc => {
+                const gameData = doc.data();
+                if (card === 'Exploding Kitten') {
+                    alert('Boom! You found an Exploding Kitten!');
+                    gameData.deck = gameData.deck.filter(c => c !== card);
+                    gameData.status = 'ended';
+                } else if (card === 'Attack') {
+                    alert('You played an Attack card!');
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                } else if (card === 'Skip') {
+                    alert('You played a Skip card!');
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                } else if (card === 'Favor') {
+                    alert('You played a Favor card!');
+                    // Implement Favor card logic
+                } else if (card === 'Shuffle') {
+                    alert('You played a Shuffle card!');
+                    gameData.deck = shuffle(gameData.deck);
+                } else if (card === 'Nope') {
+                    alert('You played a Nope card!');
+                    // Implement Nope card logic
+                } else if (card === 'See the Future') {
+                    alert('You played a See the Future card!');
+                    // Implement See the Future card logic
+                } else {
+                    alert('Safe! You found a Kitten.');
+                    gameData.deck = gameData.deck.filter(c => c !== card);
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                }
+                db.collection('games').doc(gameId).set(gameData).then(() => {
+                    updateGameBoard(gameData);
+                });
+            });
+        }
+
+        // Get the next player
+        function getNextPlayer(players, currentPlayer) {
+            const currentIndex = players.indexOf(currentPlayer);
+            return players[(currentIndex + 1) % players.length];
+        }
+
+        // Shuffle an array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Google Sans', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #game-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 100px;
+            height: 150px;
+            margin: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background-color: green;
+        }
+
+        .notification.error {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Exploding Kittens</h1>
+            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </header>
+        <div id="game-controls" style="display: none;">
+            <button onclick="createGame()">Create Game</button>
+            <input type="text" id="game-id" placeholder="Enter Game ID">
+            <button onclick="joinGame(document.getElementById('game-id').value)">Join Game</button>
+        </div>
+        <div id="game-board"></div>
+        <div class="footer">
+            
+        </div>
+    </div>
+</body>
+</html>
