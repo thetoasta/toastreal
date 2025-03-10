@@ -164,7 +164,7 @@
                     gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
                 } else if (card === 'Favor') {
                     alert('You played a Favor card!');
-                    // Implement Favor card logic
+                    requestFavor(gameData);
                 } else if (card === 'Shuffle') {
                     alert('You played a Shuffle card!');
                     gameData.deck = shuffle(gameData.deck);
@@ -173,7 +173,7 @@
                     // Implement Nope card logic
                 } else if (card === 'See the Future') {
                     alert('You played a See the Future card!');
-                    // Implement See the Future card logic
+                    seeTheFuture(gameData);
                 } else {
                     alert('Safe! You found a Kitten.');
                     gameData.deck = gameData.deck.filter(c => c !== card);
@@ -183,6 +183,24 @@
                     updateGameBoard(gameData);
                 });
             });
+        }
+
+        // Request a favor
+        function requestFavor(gameData) {
+            const otherPlayers = gameData.players.filter(player => player !== currentUser.uid);
+            if (otherPlayers.length === 0) {
+                showNotification('No other players to request a favor from!', 'error');
+                return;
+            }
+            const favorPlayer = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+            alert(`Requesting a favor from player ${favorPlayer}`);
+            // Implement logic to transfer a card from favorPlayer to currentUser
+        }
+
+        // See the future
+        function seeTheFuture(gameData) {
+            const futureCards = gameData.deck.slice(-3);
+            alert(`The next three cards are: ${futureCards.join(', ')}`);
         }
 
         // Get the next player
