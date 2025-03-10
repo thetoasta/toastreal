@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script> const SUPABASE_URL = 'https://vcmhevdumlebhwkwzbgw.supabase.co'; // Replace with your Supabase URL
+    <script> 
+    import { createClient } from '@supabase/supabase-js'
+    const SUPABASE_URL = 'https://vcmhevdumlebhwkwzbgw.supabase.co'; // Replace with your Supabase URL
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjbWhldmR1bWxlYmh3a3d6Ymd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0MDEyNDEsImV4cCI6MjA1Njk3NzI0MX0.2BYkMmARGHhNCb6qCDPLjn_hFmEPGFzA8pQ--shTMCQ'; // Replace with your Supabase anon key
     
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</script>
