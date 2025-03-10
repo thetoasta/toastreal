@@ -61,6 +61,7 @@
                     'Attack', 'Attack', 'Skip', 'Skip', 'Favor', 'Favor', 'Shuffle', 'Shuffle',
                     'Nope', 'Nope', 'See the Future', 'See the Future'
                 ]),
+                drawPile: [],
                 currentPlayer: currentUser.uid,
                 status: 'waiting'
             };
@@ -99,7 +100,7 @@
             gameData.deck.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
-                cardElement.innerText = card;
+                cardElement.innerHTML = `<img src="images/${card.toLowerCase().replace(/ /g, '-')}.png" alt="${card}">`;
                 cardElement.addEventListener('click', () => {
                     if (gameData.currentPlayer === currentUser.uid) {
                         playCard(card);
@@ -108,6 +109,42 @@
                     }
                 });
                 gameBoard.appendChild(cardElement);
+            });
+
+            // Draw pile
+            const drawPile = document.createElement('div');
+            drawPile.className = 'draw-pile';
+            drawPile.innerHTML = `<img src="images/draw-pile.png" alt="Draw Pile">`;
+            drawPile.addEventListener('click', () => {
+                if (gameData.currentPlayer === currentUser.uid) {
+                    drawCard();
+                } else {
+                    showNotification('It\'s not your turn!', 'error');
+                }
+            });
+            gameBoard.appendChild(drawPile);
+        }
+
+        // Draw a card
+        function drawCard() {
+            db.collection('games').doc(gameId).get().then(doc => {
+                const gameData = doc.data();
+                if (gameData.deck.length === 0) {
+                    showNotification('No more cards to draw!', 'error');
+                    return;
+                }
+                const drawnCard = gameData.deck.pop();
+                gameData.drawPile.push(drawnCard);
+                if (drawnCard === 'Exploding Kitten') {
+                    alert('Boom! You drew an Exploding Kitten!');
+                    gameData.status = 'ended';
+                } else {
+                    alert(`You drew a ${drawnCard}!`);
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                }
+                db.collection('games').doc(gameId).set(gameData).then(() => {
+                    updateGameBoard(gameData);
+                });
             });
         }
 
@@ -198,7 +235,7 @@
             margin-top: 20px;
         }
 
-        .card {
+        .card, .draw-pile {
             width: 100px;
             height: 150px;
             margin: 10px;
@@ -210,6 +247,12 @@
             justify-content: center;
             font-size: 24px;
             cursor: pointer;
+        }
+
+        .card img, .draw-pile img {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
         }
 
         #controls {
