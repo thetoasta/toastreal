@@ -60,12 +60,12 @@
             if (unsubscribePosts) {
                 unsubscribePosts();
             }
-            unsubscribePosts = db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+            unsubscribePosts = db.collection('posts').orderBy('timestamp').onSnapshot(snapshot => {
                 const postsContainer = document.getElementById('posts-container');
                 postsContainer.innerHTML = '';
                 snapshot.forEach(doc => {
                     const post = doc.data();
-                    db.collection('users').doc(post.username).get().then(userDoc => {
+                    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                         const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
                         const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
                         const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
