@@ -129,7 +129,7 @@ function loadPosts() {
                 }).then(() => {
                     document.getElementById('post-content').value = '';
                     showNotification('Post added successfully!', 'success');
-                    loadPosts(); // Reload posts after adding
+                    window.location.reload();  // Reload posts after adding
                 }).catch(error => {
                     showNotification('Error: ' + error.message, 'error');
                 });
