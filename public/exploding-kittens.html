@@ -100,7 +100,7 @@
             gameData.deck.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
-                cardElement.innerHTML = `<img src="public/images/${card.toLowerCase().replace(/ /g, '-')}.png" alt="${card}">`;
+                cardElement.innerHTML = `<img src="public/images/${card.toLowerCase().replace(/ /g, '-')}.jpg" alt="${card}">`;
                 cardElement.addEventListener('click', () => {
                     if (gameData.currentPlayer === currentUser.uid) {
                         playCard(card);
