@@ -72,10 +72,32 @@ function loadPosts() {
                 const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
                 const postElement = document.createElement('div');
                 postElement.className = 'post';
+
+                let formattedDate = 'Invalid Date'; // Default value
+                if (post.timestamp && typeof post.timestamp.toDate === 'function') {
+                    try {
+                        formattedDate = new Date(post.timestamp.toDate()).toLocaleString();
+                    } catch (error) {
+                        console.error('Error formatting date:', error);
+                    }
+                } else if (typeof post.timestamp === 'number'){
+                    try {
+                        formattedDate = new Date(post.timestamp).toLocaleString();
+                    } catch (error) {
+                        console.error('Error formatting number date:', error);
+                    }
+                } else if (typeof post.timestamp === 'string'){
+                    try{
+                        formattedDate = new Date(post.timestamp).toLocaleString();
+                    } catch(error){
+                        console.error('Error formatting string date:', error);
+                    }
+                }
+
                 postElement.innerHTML = `
                     <h3>${nickname} ${badgeImg}</h3>
                     <p>${post.content}</p>
-                    <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
+                    <small>${formattedDate}</small>
                     ${auth.currentUser && auth.currentUser.email === post.username ? `
                         <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
                         <button onclick="deletePost('${doc.id}')">Delete</button>
