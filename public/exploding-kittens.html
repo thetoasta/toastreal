@@ -67,7 +67,6 @@
             const gameData = {
                 players: players,
                 deck: initialDeck,
-                drawPile: [],
                 playerHands: playerHands,
                 currentPlayer: currentUser.uid,
                 status: 'waiting'
@@ -149,7 +148,6 @@
                     if (gameData.playerHands[currentUser.uid].includes('Defuse')) {
                         alert('You drew an Exploding Kitten but defused it!');
                         gameData.playerHands[currentUser.uid] = gameData.playerHands[currentUser.uid].filter(card => card !== 'Defuse');
-                        gameData.deck.unshift('Exploding Kitten'); // Put the Exploding Kitten back into the deck
                     } else {
                         alert('Boom! You drew an Exploding Kitten and are out of the game!');
                         gameData.players = gameData.players.filter(player => player !== currentUser.uid);
