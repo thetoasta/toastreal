@@ -41,7 +41,7 @@
 
         // Load nickname
         function loadNickname(email) {
-            db.collection('nicknames').doc(email).get().then(doc => {
+            db.collection('users').doc(email).get().then(doc => {
                 if (doc.exists) {
                     document.getElementById('nickname').value = doc.data().nickname || '';
                 }
@@ -59,9 +59,9 @@
             }
             const newNickname = document.getElementById('nickname').value;
             if (newNickname) {
-                db.collection('nicknames').doc(user.email).set({
+                db.collection('users').doc(user.email).set({
                     nickname: newNickname
-                }).then(() => {
+                }, { merge: true }).then(() => {
                     showNotification('Nickname updated successfully!', 'success');
                     loadNickname(user.email); // Reload nickname after updating
                 }).catch(error => {
@@ -78,7 +78,35 @@
                 showNotification('Error: ' + error.message, 'error');
             });
         }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
     </script>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: green;
+        }
+        .notification.error {
+            background-color: red;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -96,10 +124,7 @@
                 </div>
                 <div class="form-section">
                     <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
-                    <button onclick="window.location.href = 'index.html';">home </button>
-                </div>
-                <div class="footer">
-                    
+                    <button onclick="window.location.href = 'index.html';">Home</button>
                 </div>
             </div>
         </header>
