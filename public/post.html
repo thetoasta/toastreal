@@ -56,35 +56,36 @@
         }
 
         // Load posts
-        function loadPosts() {
-            if (unsubscribePosts) {
-                unsubscribePosts();
-            }
-            unsubscribePosts = db.collection('posts').orderBy('timestamp').onSnapshot(snapshot => {
-                const postsContainer = document.getElementById('posts-container');
-                postsContainer.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const post = doc.data();
-                    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-                        const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
-                        const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
-                        const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
-                        const postElement = document.createElement('div');
-                        postElement.className = 'post';
-                        postElement.innerHTML = `
-                            <h3>${nickname} ${badgeImg}</h3>
-                            <p>${post.content}</p>
-                            <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
-                            ${auth.currentUser && auth.currentUser.email === post.username ? `
-                                <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
-                                <button onclick="deletePost('${doc.id}')">Delete</button>
-                            ` : ''}
-                        `;
-                        postsContainer.appendChild(postElement);
-                    });
-                });
+        // Load posts
+function loadPosts() {
+    if (unsubscribePosts) {
+        unsubscribePosts();
+    }
+    unsubscribePosts = db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = '';
+        snapshot.forEach(doc => {
+            const post = doc.data();
+            db.collection('users').doc(post.username).get().then(userDoc => {
+                const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
+                const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
+                const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
+                const postElement = document.createElement('div');
+                postElement.className = 'post';
+                postElement.innerHTML = `
+                    <h3>${nickname} ${badgeImg}</h3>
+                    <p>${post.content}</p>
+                    <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
+                    ${auth.currentUser && auth.currentUser.email === post.username ? `
+                        <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
+                        <button onclick="deletePost('${doc.id}')">Delete</button>
+                    ` : ''}
+                `;
+                postsContainer.appendChild(postElement);
             });
-        }
+        });
+    });
+}
 
         // Add new post
         function addPost(event) {
