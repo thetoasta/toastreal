@@ -53,18 +53,26 @@
 
         // Create a new game
         function createGame() {
+            const initialDeck = shuffle([
+                'Kitten', 'Kitten', 'Kitten', 'Kitten', 'Kitten',
+                'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten',
+                'Attack', 'Attack', 'Skip', 'Skip', 'Favor', 'Favor', 'Shuffle', 'Shuffle',
+                'Nope', 'Nope', 'See the Future', 'See the Future', 'Defuse', 'Defuse', 'Defuse', 'Defuse'
+            ]);
+
+            const players = [currentUser.uid];
+            const playerHands = {};
+            playerHands[currentUser.uid] = initialDeck.splice(0, 7);
+
             const gameData = {
-                players: [currentUser.uid],
-                deck: shuffle([
-                    'Kitten', 'Kitten', 'Kitten', 'Kitten', 'Kitten',
-                    'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten',
-                    'Attack', 'Attack', 'Skip', 'Skip', 'Favor', 'Favor', 'Shuffle', 'Shuffle',
-                    'Nope', 'Nope', 'See the Future', 'See the Future'
-                ]),
+                players: players,
+                deck: initialDeck,
                 drawPile: [],
+                playerHands: playerHands,
                 currentPlayer: currentUser.uid,
                 status: 'waiting'
             };
+
             db.collection('games').add(gameData).then(docRef => {
                 gameId = docRef.id;
                 joinGame(gameId);
@@ -97,7 +105,9 @@
         function updateGameBoard(gameData) {
             const gameBoard = document.getElementById('game-board');
             gameBoard.innerHTML = '';
-            gameData.deck.forEach(card => {
+
+            const playerHand = gameData.playerHands[currentUser.uid] || [];
+            playerHand.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
                 cardElement.innerHTML = `<img src="images/${card.toLowerCase().replace(/ /g, '-')}.jpg" alt="${card}">`;
@@ -134,14 +144,22 @@
                     return;
                 }
                 const drawnCard = gameData.deck.pop();
-                gameData.drawPile.push(drawnCard);
+                gameData.playerHands[currentUser.uid].push(drawnCard);
                 if (drawnCard === 'Exploding Kitten') {
-                    alert('Boom! You drew an Exploding Kitten!');
-                    gameData.status = 'ended';
-                } else {
-                    alert(`You drew a ${drawnCard}!`);
-                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                    if (gameData.playerHands[currentUser.uid].includes('Defuse')) {
+                        alert('You drew an Exploding Kitten but defused it!');
+                        gameData.playerHands[currentUser.uid] = gameData.playerHands[currentUser.uid].filter(card => card !== 'Defuse');
+                        gameData.deck.unshift('Exploding Kitten'); // Put the Exploding Kitten back into the deck
+                    } else {
+                        alert('Boom! You drew an Exploding Kitten and are out of the game!');
+                        gameData.players = gameData.players.filter(player => player !== currentUser.uid);
+                        if (gameData.players.length === 1) {
+                            gameData.status = 'ended';
+                            alert(`Player ${gameData.players[0]} wins!`);
+                        }
+                    }
                 }
+                gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
                 db.collection('games').doc(gameId).set(gameData).then(() => {
                     updateGameBoard(gameData);
                 });
@@ -152,6 +170,8 @@
         function playCard(card) {
             db.collection('games').doc(gameId).get().then(doc => {
                 const gameData = doc.data();
+                const playerHand = gameData.playerHands[currentUser.uid];
+
                 if (card === 'Exploding Kitten') {
                     alert('Boom! You found an Exploding Kitten!');
                     gameData.deck = gameData.deck.filter(c => c !== card);
@@ -179,6 +199,8 @@
                     gameData.deck = gameData.deck.filter(c => c !== card);
                     gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
                 }
+
+                gameData.playerHands[currentUser.uid] = playerHand.filter(c => c !== card);
                 db.collection('games').doc(gameId).set(gameData).then(() => {
                     updateGameBoard(gameData);
                 });
