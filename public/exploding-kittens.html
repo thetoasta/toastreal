@@ -100,7 +100,7 @@
             gameData.deck.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
-                cardElement.innerHTML = `<img src="images/${card.toLowerCase().replace(/ /g, '-')}.png" alt="${card}">`;
+                cardElement.innerHTML = `<img src="public/images/${card.toLowerCase().replace(/ /g, '-')}.png" alt="${card}">`;
                 cardElement.addEventListener('click', () => {
                     if (gameData.currentPlayer === currentUser.uid) {
                         playCard(card);
@@ -114,7 +114,7 @@
             // Draw pile
             const drawPile = document.createElement('div');
             drawPile.className = 'draw-pile';
-            drawPile.innerHTML = `<img src="images/draw-pile.png" alt="Draw Pile">`;
+            drawPile.innerHTML = `<img src="public/images/draw-pile.png" alt="Draw Pile">`;
             drawPile.addEventListener('click', () => {
                 if (gameData.currentPlayer === currentUser.uid) {
                     drawCard();
