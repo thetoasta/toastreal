@@ -65,12 +65,14 @@
                 postsContainer.innerHTML = '';
                 snapshot.forEach(doc => {
                     const post = doc.data();
-                    db.collection('nicknames').doc(post.username).get().then(nicknameDoc => {
-                        const nickname = nicknameDoc.exists ? nicknameDoc.data().nickname : post.username;
+                    db.collection('users').doc(post.username).get().then(userDoc => {
+                        const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
+                        const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
+                        const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
                         const postElement = document.createElement('div');
                         postElement.className = 'post';
                         postElement.innerHTML = `
-                            <h3>${nickname}</h3>
+                            <h3>${nickname} ${badgeImg}</h3>
                             <p>${post.content}</p>
                             <small>${new Date(post.timestamp.toDate()).toLocaleString()}</small>
                             ${auth.currentUser && auth.currentUser.email === post.username ? `
@@ -175,6 +177,11 @@
         .post {
             border-bottom: 1px solid #ddd;
             padding: 10px 0;
+        }
+        .badge {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
         }
     </style>
 </head>

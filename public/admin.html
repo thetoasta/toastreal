@@ -90,6 +90,18 @@
             });
         }
 
+        // Assign badge to user
+        function assignBadge(badgeType) {
+            const email = document.getElementById('badge-email').value;
+            db.collection('users').doc(email).set({
+                badge: badgeType
+            }, { merge: true }).then(() => {
+                displayMessage(`Badge ${badgeType} assigned successfully`, 'success');
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
+        }
+
         // Display message
         function displayMessage(message, type) {
             const messageBox = document.getElementById('message-box');
@@ -123,6 +135,12 @@
                 <div class="form-section">
                     <h2>Assign Default Nicknames</h2>
                     <button onclick="assignDefaultNicknames()">Assign Default Nicknames</button>
+                </div>
+                <div class="form-section">
+                    <h2>Assign Badge</h2>
+                    <input type="text" id="badge-email" placeholder="User Email" required><br>
+                    <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
+                    <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
                 </div>
                 <button onclick="window.location.href = 'index.html';">home </button>
             </div>
