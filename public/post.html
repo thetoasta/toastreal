@@ -144,7 +144,7 @@ function loadPosts() {
                     content: newContent
                 }).then(() => {
                     showNotification('Post updated successfully!', 'success');
-                    loadPosts(); // Reload posts after editing
+                    window.location.reload(); 
                 }).catch(error => {
                     showNotification('Error: ' + error.message, 'error');
                 });
