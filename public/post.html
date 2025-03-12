@@ -35,12 +35,12 @@ auth.onAuthStateChanged(user => {
     if (user) {
         document.getElementById('logout-button').style.display = 'block';
         document.getElementById('post-form').style.display = 'block';
-        document.getElementById('post-form').style.display = 'none';
+        document.getElementById('home').style.display = 'none';
         loadPosts();
     } else {
         document.getElementById('logout-button').style.display = 'none';
         document.getElementById('post-form').style.display = 'none';
-        document.getElementById('post-form').style.display = 'block';
+        document.getElementById('home').style.display = 'block';
         if (unsubscribePosts) {
             unsubscribePosts();
             unsubscribePosts = null;
