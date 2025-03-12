@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Requests</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Load friend requests
+        function loadFriendRequests() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                showNotification('You must be logged in to view friend requests.', 'error');
+                return;
+            }
+
+            db.collection('users').doc(currentUser.email).collection('friendRequests').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const requestsContainer = document.getElementById('requests-container');
+                requestsContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const request = doc.data();
+                    const requestElement = document.createElement('div');
+                    requestElement.className = 'request';
+                    requestElement.innerHTML = `
+                        <p>${request.nickname} (${request.email})</p>
+                        <button onclick="acceptFriend('${request.email}')">Accept</button>
+                        <button onclick="declineFriend('${request.email}')">Decline</button>
+                    `;
+                    requestsContainer.appendChild(requestElement);
+                });
+            });
+        }
+
+        // Accept friend request
+        function acceptFriend(friendEmail) {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                showNotification('You must be logged in to accept friend requests.', 'error');
+                return;
+            }
+
+            db.collection('users').doc(currentUser.email).collection('friends').doc(friendEmail).set({
+                email: friendEmail
+            }).then(() => {
+                db.collection('users').doc(friendEmail).collection('friends').doc(currentUser.email).set({
+                    email: currentUser.email
+                }).then(() => {
+                    db.collection('users').doc(currentUser.email).collection('friendRequests').doc(friendEmail).delete().then(() => {
+                        showNotification('Friend request accepted!', 'success');
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Decline friend request
+        function declineFriend(friendEmail) {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                showNotification('You must be logged in to decline friend requests.', 'error');
+                return;
+            }
+
+            db.collection('users').doc(currentUser.email).collection('friendRequests').doc(friendEmail).delete().then(() => {
+                showNotification('Friend request declined.', 'success');
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loadFriendRequests();
+            } else {
+                window.location.href = 'accounts.html';
+            }
+        });
+    </script>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: rgb(111, 146, 211);
+        }
+        .notification.error {
+            background-color: rgb(241, 162, 97);
+        }
+        .request {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><strong>Friend Requests</strong></h1>
+            <button onclick="window.location.href = 'index.html';">Home</button>
+        </header>
+        <div id="requests-container"></div>
+    </div>
+</body>
+</html>
