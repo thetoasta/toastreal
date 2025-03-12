@@ -34,12 +34,26 @@
                 return;
             }
 
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                showNotification('You must be logged in to view profiles.', 'error');
+                return;
+            }
+
             db.collection('users').doc(userEmail).get().then(doc => {
                 if (doc.exists) {
                     const userData = doc.data();
                     document.getElementById('nickname').innerText = userData.nickname || 'No nickname';
                     document.getElementById('badge').innerHTML = userData.badge ? `<img src="images/${userData.badge}.png" alt="${userData.badge}" class="badge">` : 'No badge';
-                    document.getElementById('add-friend-button').style.display = 'block';
+
+                    // Check if already friends
+                    db.collection('users').doc(currentUser.email).collection('friends').doc(userEmail).get().then(friendDoc => {
+                        if (friendDoc.exists) {
+                            document.getElementById('message-button').style.display = 'block';
+                        } else {
+                            document.getElementById('add-friend-button').style.display = 'block';
+                        }
+                    });
                 } else {
                     showNotification('User not found.', 'error');
                 }
@@ -116,6 +130,7 @@
             <p><strong>Nickname:</strong> <span id="nickname"></span></p>
             <p><strong>Badge:</strong> <span id="badge"></span></p>
             <button id="add-friend-button" onclick="addFriend()" style="display: none;">Add Friend</button>
+            <button id="message-button" onclick="window.location.href = 'direct.html?user=${userEmail}'" style="display: none;">Message</button>
         </div>
     </div>
 </body>
