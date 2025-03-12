@@ -13,22 +13,22 @@
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
-        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
-            authDomain: "toastrealxyz.firebaseapp.com",
-            projectId: "toastrealxyz",
-            storageBucket: "toastrealxyz.appspot.com",
-            messagingSenderId: "774884910313",
-            appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+    apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+    authDomain: "toastrealxyz.firebaseapp.com",
+    projectId: "toastrealxyz",
+    storageBucket: "toastrealxyz.appspot.com",
+    messagingSenderId: "774884910313",
+    appId: "1:774884910313:web:e11002887adf1055acfc78",
+    measurementId: "G-3H38LZB2BX"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        let unsubscribePosts;
+let unsubscribePosts;
+let renderedPosts = {}; // Track rendered posts by ID
 
 // Check if user is logged in
 auth.onAuthStateChanged(user => {
@@ -62,15 +62,15 @@ function loadPosts() {
     }
     unsubscribePosts = db.collection("posts").orderBy("timestamp", "desc").onSnapshot(snapshot => {
         const postsContainer = document.getElementById('posts-container');
-        postsContainer.innerHTML = '';
-        snapshot.forEach(doc => {
+        snapshot.docChanges().forEach(change => {
+            const doc = change.doc;
             const post = doc.data();
+            const postId = doc.id;
+
             db.collection('users').doc(post.username).get().then(userDoc => {
                 const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
                 const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
                 const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
-                const postElement = document.createElement('div');
-                postElement.className = 'post';
 
                 let formattedDate = 'Invalid Date';
                 if (post.timestamp && typeof post.timestamp.toDate === 'function') {
@@ -93,16 +93,39 @@ function loadPosts() {
                     }
                 }
 
+                const postElement = document.createElement('div');
+                postElement.className = 'post';
                 postElement.innerHTML = `
                     <h3>${nickname} ${badgeImg}</h3>
                     <p>${post.content}</p>
                     <small>${formattedDate}</small>
                     ${auth.currentUser && auth.currentUser.email === post.username ? `
-                        <button onclick="editPost('${doc.id}', '${post.content}')">Edit</button>
-                        <button onclick="deletePost('${doc.id}')">Delete</button>
+                        <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
+                        <button onclick="deletePost('${postId}')">Delete</button>
                     ` : ''}
                 `;
-                postsContainer.appendChild(postElement);
+
+                if (change.type === 'added') {
+                    // Add new post
+                    if (postsContainer.firstChild) {
+                        postsContainer.insertBefore(postElement, postsContainer.firstChild);
+                    } else {
+                        postsContainer.appendChild(postElement);
+                    }
+                    renderedPosts[postId] = postElement;
+                } else if (change.type === 'modified') {
+                    // Update existing post
+                    if (renderedPosts[postId]) {
+                        postsContainer.replaceChild(postElement, renderedPosts[postId]);
+                        renderedPosts[postId] = postElement;
+                    }
+                } else if (change.type === 'removed') {
+                    // Remove deleted post
+                    if (renderedPosts[postId]) {
+                        postsContainer.removeChild(renderedPosts[postId]);
+                        delete renderedPosts[postId];
+                    }
+                }
             });
         });
     });
@@ -128,7 +151,6 @@ function addPost(event) {
         }).then(() => {
             document.getElementById('post-content').value = '';
             showNotification('Post added successfully!', 'success');
-            //loadPosts(); // No need for full reload. onSnapshot will update.
         }).catch(error => {
             showNotification('Error: ' + error.message, 'error');
         });
@@ -143,7 +165,6 @@ function editPost(postId, currentContent) {
             content: newContent
         }).then(() => {
             showNotification('Post updated successfully!', 'success');
-            //loadPosts(); // No need for full reload. onSnapshot will update.
         }).catch(error => {
             showNotification('Error: ' + error.message, 'error');
         });
@@ -155,7 +176,6 @@ function deletePost(postId) {
     if (confirm('Are you sure you want to delete this post?')) {
         db.collection('posts').doc(postId).delete().then(() => {
             showNotification('Post deleted successfully!', 'success');
-            //loadPosts(); // No need for full reload. onSnapshot will update.
         }).catch(error => {
             showNotification('Error: ' + error.message, 'error');
         });
