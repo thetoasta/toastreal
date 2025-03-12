@@ -13,8 +13,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <!-- Notification Script -->
     <script src="notifications.js"></script>
-    <!-- GenAI Script -->
-    <script type="module" src="beta/genai.js"></script>
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -24,8 +22,7 @@
             storageBucket: "toastrealxyz.appspot.com",
             messagingSenderId: "774884910313",
             appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX",
-            GOOGLE_GENAI_API_KEY: "AIzaSyBZNcjk_mMbr0LV1pdempfANK2ERAnO8h4"
+            measurementId: "G-3H38LZB2BX"
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -34,12 +31,8 @@
         // Check if user is logged in
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('profile').style.display = 'block';
                 document.getElementById('logout-button').style.display = 'block';
             } else {
-                document.getElementById('login').style.display = 'block';
-                document.getElementById('profile').style.display = 'none';
                 document.getElementById('logout-button').style.display = 'none';
             }
         });
@@ -51,14 +44,6 @@
             }).catch((error) => {
                 showNotification('Error: ' + error.message, 'error');
             });
-        }
-
-        function profile() {
-            window.location.href = 'profile.html';
-        }
-
-        function signin() {
-            window.location.href = 'accounts.html';
         }
 
         // Load notifications
@@ -83,21 +68,14 @@
 <body>
     <div class="container">
         <header>
-            <h1><strong>toast social and more</strong></h1>
-            <h2><strong>head to news!</strong></h2>
-            <h3>have fun!</h3>
+            <h1><strong>beta</strong></h1>
+            <h2><strong>WARNING!</strong> these features are in progress and may be VERY buggy.</h2>
             <div class="container">
-                <button id="profile" onclick="profile()" style="display: none;">profile</button>
-                <button id="login" onclick="signin()" style="display: none;">log in</button>
-                <button onclick="window.location.href = 'post.html';">social</button>
-                <button onclick="window.location.href = 'news.html';">news</button>
-                <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
-                <button onclick="window.location.href = 'beta/features.html';">beta features</button>
+                <button onclick="window.location.href = 'public/users.html';">Users</button>
+                <button onclick="window.location.href = 'public/direct.html';">Friends</button>
+                <button onclick="window.location.href = 'index.html';">Home</button>
             </div>
         </header>
-        <div class="footer">
-            
-        </div>
         <div id="notifications-container"></div>
     </div>
 </body>
