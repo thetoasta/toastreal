@@ -25,14 +25,10 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Load user profile
+        // Load user profile or friends list
         function loadUserProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             const userEmail = urlParams.get('user');
-            if (!userEmail) {
-                showNotification('No user specified.', 'error');
-                return;
-            }
 
             auth.onAuthStateChanged(currentUser => {
                 if (!currentUser) {
@@ -40,26 +36,51 @@
                     return;
                 }
 
-                db.collection('users').doc(userEmail).get().then(doc => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        document.getElementById('nickname').innerText = userData.nickname || 'No nickname';
-                        document.getElementById('badge').innerHTML = userData.badge ? `<img src="images/${userData.badge}.png" alt="${userData.badge}" class="badge">` : 'No badge';
+                if (!userEmail) {
+                    loadFriendsList(currentUser.email);
+                } else {
+                    db.collection('users').doc(userEmail).get().then(doc => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            document.getElementById('nickname').innerText = userData.nickname || 'No nickname';
+                            document.getElementById('badge').innerHTML = userData.badge ? `<img src="images/${userData.badge}.png" alt="${userData.badge}" class="badge">` : 'No badge';
 
-                        // Check if already friends
-                        db.collection('users').doc(currentUser.email).collection('friends').doc(userEmail).get().then(friendDoc => {
-                            if (friendDoc.exists) {
-                                document.getElementById('message-button').style.display = 'block';
-                            } else {
-                                document.getElementById('add-friend-button').style.display = 'block';
-                            }
-                        });
-                    } else {
-                        showNotification('User not found.', 'error');
-                    }
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
+                            // Check if already friends
+                            db.collection('users').doc(currentUser.email).collection('friends').doc(userEmail).get().then(friendDoc => {
+                                if (friendDoc.exists) {
+                                    document.getElementById('message-button').style.display = 'block';
+                                } else {
+                                    document.getElementById('add-friend-button').style.display = 'block';
+                                }
+                            });
+                        } else {
+                            showNotification('User not found.', 'error');
+                        }
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
+                }
+            });
+        }
+
+        // Load friends list
+        function loadFriendsList(currentUserEmail) {
+            db.collection('users').doc(currentUserEmail).collection('friends').get().then(snapshot => {
+                const friendsContainer = document.getElementById('friends-container');
+                friendsContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const friend = doc.data();
+                    const friendElement = document.createElement('div');
+                    friendElement.className = 'friend';
+                    friendElement.innerHTML = `
+                        <p>${friend.email}</p>
+                        <button onclick="window.location.href = 'users.html?user=${friend.email}'">View Profile</button>
+                        <button onclick="window.location.href = 'direct.html?user=${friend.email}'">Message</button>
+                    `;
+                    friendsContainer.appendChild(friendElement);
                 });
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
             });
         }
 
@@ -119,6 +140,10 @@
             height: 20px;
             vertical-align: middle;
         }
+        .friend {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -127,12 +152,13 @@
             <h1><strong>User Profile</strong></h1>
             <button onclick="window.location.href = 'index.html';">Home</button>
         </header>
-        <div class="profile-info">
+        <div class="profile-info" style="display: none;">
             <p><strong>Nickname:</strong> <span id="nickname"></span></p>
             <p><strong>Badge:</strong> <span id="badge"></span></p>
             <button id="add-friend-button" onclick="addFriend()" style="display: none;">Add Friend</button>
             <button id="message-button" onclick="window.location.href = 'direct.html?user=${userEmail}'" style="display: none;">Message</button>
         </div>
+        <div id="friends-container" style="display: none;"></div>
     </div>
 </body>
 </html>
