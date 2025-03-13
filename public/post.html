@@ -64,7 +64,7 @@
                 unsubscribePosts();
             }
             unsubscribePosts = db.collection("posts")
-            .orderBy("timestamp", "asc").onSnapshot(snapshot => {
+            .orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 const postsContainer = document.getElementById('posts-container');
                 snapshot.docChanges().forEach(change => {
                     const doc = change.doc;
