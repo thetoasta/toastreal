@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
- <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
@@ -195,33 +195,33 @@
 
         // Report post
         function reportPost(postId) {
-    const user = auth.currentUser;
-    if (!user) {
-        showNotification('You must be logged in to report posts.', 'error');
-        return;
-    }
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to report posts.', 'error');
+                return;
+            }
 
-    db.collection('posts').doc(postId).get().then(doc => {
-        if (doc.exists) {
-            const post = doc.data();
-            db.collection('reportedPosts').doc(postId).set({
-                postId: postId,
-                reportedBy: user.email,
-                postContent: post.content,
-                postUsername: post.username,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                showNotification('sendin the cops!', 'success');
+            db.collection('posts').doc(postId).get().then(doc => {
+                if (doc.exists) {
+                    const post = doc.data();
+                    db.collection('reportedPosts').doc(postId).set({
+                        postId: postId,
+                        reportedBy: user.email,
+                        postContent: post.content,
+                        postUsername: post.username,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        showNotification('Post reported.', 'success');
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
+                } else {
+                    showNotification('Post not found.', 'error');
+                }
             }).catch(error => {
                 showNotification('Error: ' + error.message, 'error');
             });
-        } else {
-            showNotification('Post not found.', 'error');
         }
-    }).catch(error => {
-        showNotification('Error: ' + error.message, 'error');
-    });
-}
 
         // Toggle menu
         function toggleMenu(postId) {
