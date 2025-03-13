@@ -211,7 +211,7 @@
                 postUsername: post.username,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                showNotification('Post reported.', 'success');
+                showNotification('sendin the cops!', 'success');
             }).catch(error => {
                 showNotification('Error: ' + error.message, 'error');
             });
@@ -337,7 +337,6 @@
             <form onsubmit="addPost(event)">
                 <textarea id="post-content" placeholder="what's up?" required></textarea><br>
                 <button onclick="window.location.href = 'index.html';">home</button><br>
-                <button id="home" onclick="window.location.href = 'index.html';">home</button><br>
                 <button type="submit">Post</button>
             </form>
         </div>
