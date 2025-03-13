@@ -14,6 +14,8 @@
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
+
+        console.log("Posts System Called");
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
             authDomain: "toastrealxyz.firebaseapp.com",
@@ -69,6 +71,7 @@
                     const doc = change.doc;
                     const post = doc.data();
                     const postId = doc.id;
+                    console.log("Posts Load Called");
 
                     db.collection('users').doc(post.username).get().then(userDoc => {
                         const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
@@ -95,6 +98,8 @@
                                 console.error('Error formatting string date:', error);
                             }
                         }
+
+                        console.log("Posts Load Complete");
 
                         const postElement = document.createElement('div');
                         postElement.className = 'post';
@@ -238,6 +243,9 @@
                 notification.remove();
             }, 3000);
         }
+
+        console.log("Posts System Complete")
+
     </script>
     <style>
         .notification {
