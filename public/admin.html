@@ -33,70 +33,52 @@
         firebase.auth().onAuthStateChanged(user => {
             if (user && user.email === adminEmail) {
                 document.getElementById('admin-panel').style.display = 'block';
+                loadReportedPosts();
             } else {
                 window.location.href = 'accounts.html';
             }
         });
 
-        // Reset user password
-        function resetPassword() {
-            const email = document.getElementById('reset-email').value;
-            firebase.auth().sendPasswordResetEmail(email)
-                .then(() => {
-                    displayMessage('Password reset email sent', 'success');
-                })
-                .catch(error => {
+        // Load reported posts
+        function loadReportedPosts() {
+            db.collection('reportedPosts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const reportedPostsContainer = document.getElementById('reported-posts-container');
+                reportedPostsContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const reportedPost = doc.data();
+                    const reportedPostElement = document.createElement('div');
+                    reportedPostElement.className = 'reported-post';
+                    reportedPostElement.innerHTML = `
+                        <p><strong>Reported By:</strong> ${reportedPost.reportedBy}</p>
+                        <p><strong>Post Content:</strong> ${reportedPost.postContent}</p>
+                        <p><strong>Post Username:</strong> ${reportedPost.postUsername}</p>
+                        <button onclick="deleteReportedPost('${reportedPost.postId}')">Delete Post</button>
+                        <button onclick="removeBadge('${reportedPost.postUsername}')">Remove Checkmark</button>
+                    `;
+                    reportedPostsContainer.appendChild(reportedPostElement);
+                });
+            });
+        }
+
+        // Delete reported post
+        function deleteReportedPost(postId) {
+            db.collection('posts').doc(postId).delete().then(() => {
+                db.collection('reportedPosts').doc(postId).delete().then(() => {
+                    displayMessage('Post deleted successfully', 'success');
+                }).catch(error => {
                     displayMessage('Error: ' + error.message, 'error');
                 });
-        }
-
-        // Disable user account
-        function disableAccount() {
-            const email = document.getElementById('disable-email').value;
-            // This requires Firebase Admin SDK on the server side
-            // Here we just display a message for demonstration
-            displayMessage('Account disabled (requires server-side implementation)', 'success');
-        }
-
-        // Add global notification
-        function addNotification() {
-            const message = document.getElementById('notification-message').value;
-            db.collection('notifications').add({
-                message: message,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                displayMessage('Notification added successfully', 'success');
-                document.getElementById('notification-message').value = '';
             }).catch(error => {
                 displayMessage('Error: ' + error.message, 'error');
             });
         }
 
-        // Assign default nickname to all users
-        function assignDefaultNicknames() {
-            const defaultNickname = "User";
-            db.collection('users').get().then(snapshot => {
-                const batch = db.batch();
-                snapshot.forEach(doc => {
-                    if (!doc.data().nickname) {
-                        batch.set(doc.ref, { nickname: defaultNickname }, { merge: true });
-                    }
-                });
-                return batch.commit();
+        // Remove badge
+        function removeBadge(username) {
+            db.collection('users').doc(username).update({
+                badge: firebase.firestore.FieldValue.delete()
             }).then(() => {
-                displayMessage('Default nicknames assigned successfully', 'success');
-            }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
-            });
-        }
-
-        // Assign badge to user
-        function assignBadge(badgeType) {
-            const email = document.getElementById('badge-email').value;
-            db.collection('users').doc(email).set({
-                badge: badgeType
-            }, { merge: true }).then(() => {
-                displayMessage(`Badge ${badgeType} assigned successfully`, 'success');
+                displayMessage('Badge removed successfully', 'success');
             }).catch(error => {
                 displayMessage('Error: ' + error.message, 'error');
             });
@@ -141,6 +123,10 @@
                     <input type="text" id="badge-email" placeholder="User Email" required><br>
                     <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
                     <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
+                </div>
+                <div class="form-section">
+                    <h2>Reported Posts</h2>
+                    <div id="reported-posts-container"></div>
                 </div>
                 <button onclick="window.location.href = 'index.html';">home </button>
             </div>

@@ -62,7 +62,8 @@
             if (unsubscribePosts) {
                 unsubscribePosts();
             }
-            unsubscribePosts = db.collection("posts").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+            unsubscribePosts = db.collection("posts")
+            .orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 const postsContainer = document.getElementById('posts-container');
                 snapshot.docChanges().forEach(change => {
                     const doc = change.doc;
@@ -101,10 +102,17 @@
                             <h3><a href="users.html?user=${post.username}">${nickname}</a> ${badgeImg}</h3>
                             <p>${post.content}</p>
                             <small>${formattedDate}</small>
-                            ${auth.currentUser && auth.currentUser.email === post.username ? `
-                                <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
-                                <button onclick="deletePost('${postId}')">Delete</button>
-                            ` : ''}
+                            <div class="menu">
+                                <button class="menu-button" onclick="toggleMenu('${postId}')">⋮</button>
+                                <div class="menu-content" id="menu-${postId}">
+                                    ${auth.currentUser && auth.currentUser.email === post.username ? `
+                                        <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
+                                        <button onclick="deletePost('${postId}')">Delete</button>
+                                    ` : `
+                                        <button onclick="reportPost('${postId}')">Report</button>
+                                    `}
+                                </div>
+                            </div>
                         `;
 
                         if (change.type === 'added') {
@@ -184,6 +192,42 @@
             }
         }
 
+        // Report post
+        function reportPost(postId) {
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('You must be logged in to report posts.', 'error');
+        return;
+    }
+
+    db.collection('posts').doc(postId).get().then(doc => {
+        if (doc.exists) {
+            const post = doc.data();
+            db.collection('reportedPosts').doc(postId).set({
+                postId: postId,
+                reportedBy: user.email,
+                postContent: post.content,
+                postUsername: post.username,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showNotification('Post reported.', 'success');
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        } else {
+            showNotification('Post not found.', 'error');
+        }
+    }).catch(error => {
+        showNotification('Error: ' + error.message, 'error');
+    });
+}
+
+        // Toggle menu
+        function toggleMenu(postId) {
+            const menu = document.getElementById(`menu-${postId}`);
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
         // Show notification
         function showNotification(message, type) {
             const notification = document.createElement('div');
@@ -244,14 +288,42 @@
             background-color: rgba(0, 123, 255, 0.2);
         }
         a {
-    color: white;
-    text-decoration: none;
-}
-
-a:hover {
-    color:rgb(111, 146, 211);
-}
-        
+            color: white;
+            text-decoration: none;
+        }
+        a:hover {
+            color: rgb(111, 146, 211);
+        }
+        .menu {
+            position: relative;
+            display: inline-block;
+        }
+        .menu-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .menu-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .menu-content button {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        .menu-content button:hover {
+            background-color: #ddd;
+        }
     </style>
 </head>
 <body>
