@@ -14,7 +14,7 @@
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
-        console.log("IV: 1.0.2")
+        console.log("IV: 1.0.3")
 
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -158,8 +158,8 @@
         </header>
         <div id="groups-container"></div>
         <div class="form-container">
-            <h2>Create New Group</h2>
             <form onsubmit="createGroup(event)">
+                <h2>Create New Group</h2>
                 <input type="text" id="new-group-name" placeholder="Group Name" required><br>
                 <input type="text" id="new-group-members" placeholder="Member Emails (comma separated)" required><br>
                 <button type="submit">Create Group</button>
