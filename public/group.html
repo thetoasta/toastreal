@@ -14,8 +14,7 @@
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
-
-        console.log("IV: 1.0.1")
+        console.log("IV: 1.0.2")
 
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -65,6 +64,33 @@
             });
         }
 
+        // Create new group
+        function createGroup(event) {
+            event.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to create a group.', 'error');
+                return;
+            }
+            const groupName = document.getElementById('new-group-name').value;
+            const members = document.getElementById('new-group-members').value.split(',').map(email => email.trim());
+            members.push(user.email); // Add the current user to the group
+
+            db.collection('groups').add({
+                name: groupName,
+                members: members,
+                createdBy: user.email,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('new-group-name').value = '';
+                document.getElementById('new-group-members').value = '';
+                showNotification('Group created successfully!', 'success');
+                loadUserGroups(user.email);
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
         // Edit group
         function editGroup(groupId) {
             window.location.href = `editgroup.html?group=${groupId}`;
@@ -89,6 +115,17 @@
             }).catch((error) => {
                 showNotification('Error: ' + error.message, 'error');
             });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
     </script>
     <style>
@@ -120,6 +157,14 @@
             <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
         </header>
         <div id="groups-container"></div>
+        <div class="form-container">
+            <h2>Create New Group</h2>
+            <form onsubmit="createGroup(event)">
+                <input type="text" id="new-group-name" placeholder="Group Name" required><br>
+                <input type="text" id="new-group-members" placeholder="Member Emails (comma separated)" required><br>
+                <button type="submit">Create Group</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
