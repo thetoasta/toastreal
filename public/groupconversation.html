@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Conversation</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script src="notifications.js"></script>
+    <link rel="stylesheet" href="notifications.css">
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let groupId = null;
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('logout-button').style.display = 'block';
+                loadGroupConversation();
+            } else {
+                document.getElementById('logout-button').style.display = 'none';
+                window.location.href = 'accounts.html';
+            }
+        });
+
+        // Load group conversation
+        function loadGroupConversation() {
+            const urlParams = new URLSearchParams(window.location.search);
+            groupId = urlParams.get('group');
+            if (!groupId) {
+                showNotification('No group specified.', 'error');
+                return;
+            }
+
+            db.collection('groups').doc(groupId).get().then(doc => {
+                if (doc.exists) {
+                    const groupData = doc.data();
+                    document.getElementById('group-name').innerText = groupData.name || 'Group Conversation';
+                    loadMessages();
+                } else {
+                    showNotification('Group not found.', 'error');
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Load messages
+        function loadMessages() {
+            db.collection('groups').doc(groupId).collection('messages').orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const message = doc.data();
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message';
+                    messageElement.innerHTML = `
+                        <p><strong>${message.sender}</strong>: ${message.text}</p>
+                        <small>${new Date(message.timestamp.toDate()).toLocaleString()}</small>
+                    `;
+                    messagesContainer.appendChild(messageElement);
+                });
+            });
+        }
+
+        // Send message
+        function sendMessage(event) {
+            event.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to send messages.', 'error');
+                return;
+            }
+            const messageText = document.getElementById('message-text').value;
+            db.collection('groups').doc(groupId).collection('messages').add({
+                sender: user.email,
+                text: messageText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('message-text').value = '';
+                showNotification('Message sent!', 'success');
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Log out user
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+    </script>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: green;
+        }
+        .notification.error {
+            background-color: red;
+        }
+        .message {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="group-name">Group Conversation</h1>
+            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </header>
+        <div id="messages-container"></div>
+        <form onsubmit="sendMessage(event)">
+            <input type="text" id="message-text" placeholder="Type a message" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</body>
+</html>
