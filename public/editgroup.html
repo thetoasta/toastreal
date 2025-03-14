@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Group</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script src="notifications.js"></script>
+    <link rel="stylesheet" href="notifications.css">
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let groupId = null;
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('logout-button').style.display = 'block';
+                loadGroupDetails();
+            } else {
+                document.getElementById('logout-button').style.display = 'none';
+                window.location.href = 'accounts.html';
+            }
+        });
+
+        // Load group details
+        function loadGroupDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            groupId = urlParams.get('group');
+            if (!groupId) {
+                showNotification('No group specified.', 'error');
+                return;
+            }
+
+            db.collection('groups').doc(groupId).get().then(doc => {
+                if (doc.exists) {
+                    const groupData = doc.data();
+                    document.getElementById('group-name').value = groupData.name || '';
+                    const membersContainer = document.getElementById('group-members');
+                    membersContainer.innerHTML = '';
+                    groupData.members.forEach(member => {
+                        const memberElement = document.createElement('div');
+                        memberElement.className = 'member';
+                        memberElement.innerHTML = `
+                            <p>${member}</p>
+                            <button onclick="removeMember('${member}')">Remove</button>
+                        `;
+                        membersContainer.appendChild(memberElement);
+                    });
+                } else {
+                    showNotification('Group not found.', 'error');
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Update group name
+        function updateGroupName() {
+            const newName = document.getElementById('group-name').value;
+            if (newName) {
+                db.collection('groups').doc(groupId).update({
+                    name: newName
+                }).then(() => {
+                    showNotification('Group name updated successfully!', 'success');
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Add member
+        function addMember() {
+            const email = prompt('Enter the email of the person you want to add:');
+            if (email) {
+                db.collection('groups').doc(groupId).update({
+                    members: firebase.firestore.FieldValue.arrayUnion(email)
+                }).then(() => {
+                    showNotification('Member added successfully!', 'success');
+                    loadGroupDetails();
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Remove member
+        function removeMember(email) {
+            if (confirm(`Are you sure you want to remove ${email} from the group?`)) {
+                db.collection('groups').doc(groupId).update({
+                    members: firebase.firestore.FieldValue.arrayRemove(email)
+                }).then(() => {
+                    showNotification('Member removed successfully!', 'success');
+                    loadGroupDetails();
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Log out user
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: green;
+        }
+        .notification.error {
+            background-color: red;
+        }
+        .member {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><strong>Edit Group</strong></h1>
+            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </header>
+        <div class="form-container">
+            <div class="form-section">
+                <h2>Group Name</h2>
+                <input type="text" id="group-name" placeholder="Group Name" required><br>
+                <button onclick="updateGroupName()">Update Group Name</button>
+            </div>
+            <div class="form-section">
+                <h2>Group Members</h2>
+                <div id="group-members"></div>
+                <button onclick="addMember()">Add Member</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
