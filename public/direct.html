@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
- <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -25,6 +25,33 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                checkUserRestrictions(user.email);
+            } else {
+                window.location.href = 'accounts.html';
+            }
+        });
+
+        // Check user restrictions
+        function checkUserRestrictions(email) {
+            db.collection('users').doc(email).get().then(doc => {
+                if (doc.exists) {
+                    const restrictions = doc.data().restrictions || {};
+                    if (restrictions.messaging) {
+                        document.getElementById('message-form').style.display = 'none';
+                        showNotification('Direct messaging is disabled for your account.', 'error');
+                    } else {
+                        document.getElementById('message-form').style.display = 'block';
+                        loadMessages();
+                    }
+                }
+            }).catch(error => {
+                console.error('Error checking user restrictions:', error);
+            });
+        }
 
         // Load messages
         function loadMessages() {
@@ -66,17 +93,25 @@
                 return;
             }
 
-            const chatId = [currentUser.email, userEmail].sort().join('_');
-            const messageText = document.getElementById('message-text').value;
-            db.collection('chats').doc(chatId).collection('messages').add({
-                sender: currentUser.email,
-                text: messageText,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('message-text').value = '';
-                showNotification('Message sent!', 'success');
-            }).catch(error => {
-                showNotification('Error: ' + error.message, 'error');
+            db.collection('users').doc(currentUser.email).get().then(userDoc => {
+                const restrictions = userDoc.data().restrictions || {};
+                if (restrictions.messaging) {
+                    showNotification('direct messaging is disabled for your account.', 'error');
+                    return;
+                }
+
+                const chatId = [currentUser.email, userEmail].sort().join('_');
+                const messageText = document.getElementById('message-text').value;
+                db.collection('chats').doc(chatId).collection('messages').add({
+                    sender: currentUser.email,
+                    text: messageText,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    document.getElementById('message-text').value = '';
+                    showNotification('Message sent!', 'success');
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
             });
         }
 
@@ -90,14 +125,6 @@
                 notification.remove();
             }, 3000);
         }
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                loadMessages();
-            } else {
-                window.location.href = 'accounts.html';
-            }
-        });
     </script>
     <style>
         .notification {
@@ -128,7 +155,7 @@
             <button onclick="window.location.href = 'index.html';">Home</button>
         </header>
         <div id="messages-container"></div>
-        <form onsubmit="sendMessage(event)">
+        <form id="message-form" onsubmit="sendMessage(event)">
             <input type="text" id="message-text" placeholder="Type a message" required>
             <button type="submit">Send</button>
         </form>

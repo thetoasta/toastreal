@@ -54,20 +54,38 @@
         });
 
         // Check if user is logged in
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('logout-button').style.display = 'block';
+        // Check if user is logged in
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('logout-button').style.display = 'block';
+        checkUserRestrictions(user.email);
+    } else {
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('post-form').style.display = 'none';
+        if (unsubscribePosts) {
+            unsubscribePosts();
+            unsubscribePosts = null;
+        }
+    }
+});
+
+// Check user restrictions
+function checkUserRestrictions(email) {
+    db.collection('users').doc(email).get().then(doc => {
+        if (doc.exists) {
+            const restrictions = doc.data().restrictions || {};
+            if (restrictions.posting) {
+                document.getElementById('post-form').style.display = 'none';
+            } else {
                 document.getElementById('post-form').style.display = 'block';
                 loadPosts();
-            } else {
-                document.getElementById('logout-button').style.display = 'none';
-                document.getElementById('post-form').style.display = 'none';
-                if (unsubscribePosts) {
-                    unsubscribePosts();
-                    unsubscribePosts = null;
-                }
             }
-        });
+            // Add other restrictions checks here
+        }
+    }).catch(error => {
+        console.error('Error checking user restrictions:', error);
+    });
+}
 
         // Log out user
         function logout() {
@@ -174,31 +192,37 @@
         }
 
         // Add new post
-        function addPost(event) {
-            event.preventDefault();
-            const user = auth.currentUser;
-            if (!user) {
-                showNotification('You must be logged in to post.', 'error');
-                return;
-            }
-            const content = document.getElementById('post-content').value;
-            db.collection('users').doc(user.email).get().then(userDoc => {
-                const nickname = userDoc.exists ? userDoc.data().nickname : user.email;
-                db.collection('posts').add({
-                    userId: user.uid,
-                    username: user.email,
-                    nickname: nickname,
-                    content: content,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    likes: 0 // Initialize likes count
-                }).then(() => {
-                    document.getElementById('post-content').value = '';
-                    showNotification('post sent! 🔥', 'success');
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
-            });
+       // Add new post
+function addPost(event) {
+    event.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('You must be logged in to post.', 'error');
+        return;
+    }
+    db.collection('users').doc(user.email).get().then(userDoc => {
+        const restrictions = userDoc.data().restrictions || {};
+        if (restrictions.posting) {
+            showNotification('public posting is disabled for your account.', 'error');
+            return;
         }
+        const content = document.getElementById('post-content').value;
+        const nickname = userDoc.exists ? userDoc.data().nickname : user.email;
+        db.collection('posts').add({
+            userId: user.uid,
+            username: user.email,
+            nickname: nickname,
+            content: content,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            likes: 0 // Initialize likes count
+        }).then(() => {
+            document.getElementById('post-content').value = '';
+            showNotification('post sent! 🔥', 'success');
+        }).catch(error => {
+            showNotification('Error: ' + error.message, 'error');
+        });
+    });
+}
 
         // Edit post
         function editPost(postId, currentContent) {
