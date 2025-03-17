@@ -1,6 +1,8 @@
+// filepath: /workspaces/toastreal/public/server.js
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const messaging = require('./firebaseAdmin'); // Import the Firebase Admin module
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +38,29 @@ app.get('/admin', (req, res) => {
 
 // Serve static files
 app.use(express.static('public'));
+
+// Endpoint to send notifications
+app.post('/send-notification', (req, res) => {
+    const { token, title, body } = req.body;
+
+    const message = {
+        notification: {
+            title: title,
+            body: body
+        },
+        token: token
+    };
+
+    messaging.send(message)
+        .then(response => {
+            console.log('Successfully sent message:', response);
+            res.status(200).send('Notification sent successfully');
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            res.status(500).send('Error sending notification');
+        });
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -10,12 +10,13 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-messaging.js"></script>
     <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
 
-        console.log("Posts System Called - Notification");
+        console.log("Posts System Called - NV2");
 
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -30,9 +31,27 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const messaging = firebase.messaging();
 
         let unsubscribePosts;
         let renderedPosts = {}; // Track rendered posts by ID
+
+        // Request permission for notifications
+        messaging.requestPermission().then(() => {
+            console.log('Notification permission granted.');
+            return messaging.getToken();
+        }).then(token => {
+            console.log('FCM Token:', token);
+            // Save the token to the database or send it to your server
+        }).catch(error => {
+            console.error('Unable to get permission to notify.', error);
+        });
+
+        // Handle incoming messages
+        messaging.onMessage(payload => {
+            console.log('Message received. ', payload);
+            showBrowserNotification(payload.notification.title, payload.notification.body);
+        });
 
         // Check if user is logged in
         auth.onAuthStateChanged(user => {
@@ -130,7 +149,7 @@
 
                             // Show notification if the tab is not active
                             if (document.hidden) {
-                                showBrowserNotification('woah! new post.', `${nickname}: ${post.content}`);
+                                showBrowserNotification('new post from toast social! 🚀', `${nickname} said: ${post.content}`);
                             }
                         } else if (change.type === 'modified') {
                             // Update existing post
