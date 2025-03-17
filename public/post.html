@@ -136,6 +136,10 @@
                                     `}
                                 </div>
                             </div>
+                            <div class="like-container">
+                                <img src="images/like.png" alt="Like" class="like-button" onclick="likePost('${postId}')">
+                                <span id="like-count-${postId}">${post.likes || 0}</span>
+                            </div>
                         `;
 
                         if (change.type === 'added') {
@@ -185,7 +189,8 @@
                     username: user.email,
                     nickname: nickname,
                     content: content,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    likes: 0 // Initialize likes count
                 }).then(() => {
                     document.getElementById('post-content').value = '';
                     showNotification('post sent! 🔥', 'success');
@@ -244,6 +249,25 @@
                     });
                 } else {
                     showNotification('Post not found.', 'error');
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Like post
+        function likePost(postId) {
+            const postRef = db.collection('posts').doc(postId);
+            postRef.get().then(doc => {
+                if (doc.exists) {
+                    const currentLikes = doc.data().likes || 0;
+                    postRef.update({
+                        likes: currentLikes + 1
+                    }).then(() => {
+                        document.getElementById(`like-count-${postId}`).innerText = currentLikes + 1;
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
                 }
             }).catch(error => {
                 showNotification('Error: ' + error.message, 'error');
@@ -309,6 +333,7 @@
         .post {
             border-bottom: 1px solid #ddd;
             padding: 10px 0;
+            position: relative;
         }
         .badge {
             width: 20px;
@@ -367,6 +392,21 @@
         }
         .menu-content button:hover {
             background-color: #ddd;
+        }
+        .like-container {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .like-button {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .like-count {
+            margin-left: 5px;
         }
     </style>
 </head>
