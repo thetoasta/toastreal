@@ -1,8 +1,10 @@
+// Import the Firebase SDK
 importScripts('https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.6.8/firebase-messaging.js');
 
+// Initialize Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+    apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc", // Replace with your config
     authDomain: "toastrealxyz.firebaseapp.com",
     projectId: "toastrealxyz",
     storageBucket: "toastrealxyz.appspot.com",
@@ -11,16 +13,22 @@ const firebaseConfig = {
     measurementId: "G-3H38LZB2BX"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+
+// Get the Firebase Messaging object
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(payload => {
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    // Customize notification here
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
+        icon: '/images/toastlogo.ico' // Replace with your icon path
     };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+console.log("service worker loaded");
