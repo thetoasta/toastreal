@@ -13,10 +13,18 @@
       ]
     }
   ],
-  "rewrites": [
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
       {
         "source": "/firebase-messaging-sw.js",
         "destination": "/firebase-messaging-sw.js"
       }
     ]
+  }
 }
