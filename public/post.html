@@ -127,6 +127,11 @@
                                 postsContainer.appendChild(postElement);
                             }
                             renderedPosts[postId] = postElement;
+
+                            // Show notification if the tab is not active
+                            if (document.hidden) {
+                                showBrowserNotification('woah! new post.', `${nickname}: ${post.content}`);
+                            }
                         } else if (change.type === 'modified') {
                             // Update existing post
                             if (renderedPosts[postId]) {
@@ -241,6 +246,19 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        // Show browser notification
+        function showBrowserNotification(title, body) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification(title, { body });
+                    }
+                });
+            }
         }
 
         console.log("Posts System Complete")
