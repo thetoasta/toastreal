@@ -199,50 +199,57 @@
         }
 
         // Add new post
-        async function addPost(event) {
-            event.preventDefault();
-            const user = auth.currentUser;
-            if (!user) {
-                showNotification('You must be logged in to post.', 'error');
-                return;
-            }
+       // Add new post
+async function addPost(event) {
+    event.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('You must be logged in to post.', 'error');
+        return;
+    }
 
-            // Load forbidden terms from CSV string
-            const forbiddenTerms = loadForbiddenTerms();
+    // Load forbidden terms from CSV string
+    const forbiddenTerms = loadForbiddenTerms();
 
-            db.collection('users').doc(user.email).get().then(userDoc => {
-                const restrictions = userDoc.data().restrictions || {};
-                if (restrictions.posting) {
-                    showNotification('Public posting is disabled for your account.', 'error');
-                    return;
-                }
-                const content = document.getElementById('post-content').value;
+    db.collection('users').doc(user.email).get().then(userDoc => {
+        const restrictions = userDoc.data().restrictions || {};
+        if (restrictions.posting) {
+            showNotification('Public posting is disabled for your account.', 'error');
+            return;
+        }
+        const content = document.getElementById('post-content').value;
 
-                // Check for forbidden terms
-                for (const term of forbiddenTerms) {
-                    if (content.includes(term)) {
-                        showNotification('why do you wanna say that! :( ', 'error');
-                        return;
-                    }
-                }
-
-                const nickname = userDoc.exists ? userDoc.data().nickname : user.email;
-                db.collection('posts').add({
-                    userId: user.uid,
-                    username: user.email,
-                    nickname: nickname,
-                    content: content,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    likes: 0 // Initialize likes count
-                }).then(() => {
-                    document.getElementById('post-content').value = '';
-                    showNotification('post sent! 🔥', 'success');
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
-            });
+        // Check for character limit
+        const characterLimit = 1; // Set your character limit here
+        if (content.length > characterLimit) {
+            showNotification(`Your post exceeds the character limit of ${characterLimit} characters.`, 'error');
+            return;
         }
 
+        // Check for forbidden terms
+        for (const term of forbiddenTerms) {
+            if (content.includes(term)) {
+                showNotification('why do you wanna say that! :( ', 'error');
+                return;
+            }
+        }
+
+        const nickname = userDoc.exists ? userDoc.data().nickname : user.email;
+        db.collection('posts').add({
+            userId: user.uid,
+            username: user.email,
+            nickname: nickname,
+            content: content,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            likes: 0 // Initialize likes count
+        }).then(() => {
+            document.getElementById('post-content').value = '';
+            showNotification('post sent! 🔥', 'success');
+        }).catch(error => {
+            showNotification('Error: ' + error.message, 'error');
+        });
+    });
+}
         // Edit post
         function editPost(postId, currentContent) {
             const newContent = prompt('Edit your post:', currentContent);
