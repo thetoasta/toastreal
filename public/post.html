@@ -220,9 +220,9 @@ async function addPost(event) {
         const content = document.getElementById('post-content').value;
 
         // Check for character limit
-        const characterLimit = 0; // Set your character limit here
+        const characterLimit = 240; // Set your character limit here
         if (content.length > characterLimit) {
-            showNotification(`Your post exceeds the character limit of ${characterLimit} characters.`, 'error');
+            showNotification(`STOP YAPPING!!!!!!!! the max character limit is 240`, 'error');
             return;
         }
 
