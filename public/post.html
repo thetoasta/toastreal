@@ -197,6 +197,13 @@ function checkUserRestrictions(email) {
        // Add new post
 // Add new post
 // Add new post
+
+async function loadForbiddenTerms() {
+    const response = await fetch('swearWords.csv'); // Replace with the correct path to your CSV file
+    const text = await response.text();
+    return text.split('\n').map(term => term.trim());
+}
+
 async function addPost(event) {
     event.preventDefault();
     const user = auth.currentUser;
@@ -206,11 +213,6 @@ async function addPost(event) {
     }
 
     // Load forbidden terms from CSV
-async function loadForbiddenTerms() {
-    const response = await fetch('swearWords.csv'); // Replace with the correct path to your CSV file
-    const text = await response.text();
-    return text.split('\n').map(term => term.trim());
-}
 
     db.collection('users').doc(user.email).get().then(async userDoc => {
         const restrictions = userDoc.data().restrictions || {};
