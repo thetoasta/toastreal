@@ -200,9 +200,17 @@ function checkUserRestrictions(email) {
 
 // Load forbidden terms from CSV
 async function loadForbiddenTerms() {
-    const response = await fetch('swearWords.csv'); // Replace with the correct path to your CSV file
-    const text = await response.text();
-    return text.split(',').map(term => term.trim());
+    try {
+        const response = await fetch('swearWords.csv');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const text = await response.text();
+        return text.split(',').map(term => term.trim());
+    } catch (error) {
+        console.error('Error loading forbidden terms:', error);
+        return []; // Return an empty array to prevent further errors
+    }
 }
 // Add new post
 // Add new post
