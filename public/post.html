@@ -196,25 +196,37 @@ function checkUserRestrictions(email) {
         // Add new post
        // Add new post
 // Add new post
-function addPost(event) {
+// Add new post
+async function addPost(event) {
     event.preventDefault();
     const user = auth.currentUser;
     if (!user) {
         showNotification('You must be logged in to post.', 'error');
         return;
     }
-    db.collection('users').doc(user.email).get().then(userDoc => {
+
+    // Load forbidden terms from CSV
+async function loadForbiddenTerms() {
+    const response = await fetch('swearWords.csv'); // Replace with the correct path to your CSV file
+    const text = await response.text();
+    return text.split('\n').map(term => term.trim());
+}
+
+    db.collection('users').doc(user.email).get().then(async userDoc => {
         const restrictions = userDoc.data().restrictions || {};
         if (restrictions.posting) {
             showNotification('Public posting is disabled for your account.', 'error');
             return;
         }
         const content = document.getElementById('post-content').value;
-        const forbiddenTerms = ["TEST$"]; // Replace with actual terms
+
+        // Load forbidden terms from CSV
+        const forbiddenTerms = await loadForbiddenTerms();
+
         // Check for forbidden terms
         for (const term of forbiddenTerms) {
             if (content.includes(term)) {
-                showNotification('why do you want to say that :<', 'error');
+                showNotification('why do you want to say that! :(', 'error');
                 return;
             }
         }
@@ -235,7 +247,6 @@ function addPost(event) {
         });
     });
 }
-
         // Edit post
         function editPost(postId, currentContent) {
             const newContent = prompt('Edit your post:', currentContent);
