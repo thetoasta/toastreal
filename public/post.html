@@ -202,8 +202,9 @@ function checkUserRestrictions(email) {
 async function loadForbiddenTerms() {
     const response = await fetch('swearWords.csv'); // Replace with the correct path to your CSV file
     const text = await response.text();
-    return text.split('\n').map(term => term.trim());
+    return text.split(',').map(term => term.trim());
 }
+// Add new post
 // Add new post
 async function addPost(event) {
     event.preventDefault();
@@ -227,7 +228,7 @@ async function addPost(event) {
         // Check for forbidden terms
         for (const term of forbiddenTerms) {
             if (content.includes(term)) {
-                showNotification('Your post contains forbidden terms.', 'error');
+                showNotification('why do you wanna say that! :( ', 'error');
                 return;
             }
         }
@@ -242,7 +243,7 @@ async function addPost(event) {
             likes: 0 // Initialize likes count
         }).then(() => {
             document.getElementById('post-content').value = '';
-            showNotification('Post sent! 🔥', 'success');
+            showNotification('post sent! 🔥', 'success');
         }).catch(error => {
             showNotification('Error: ' + error.message, 'error');
         });
