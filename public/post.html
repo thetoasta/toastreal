@@ -195,6 +195,7 @@ function checkUserRestrictions(email) {
 
         // Add new post
        // Add new post
+// Add new post
 function addPost(event) {
     event.preventDefault();
     const user = auth.currentUser;
@@ -205,10 +206,19 @@ function addPost(event) {
     db.collection('users').doc(user.email).get().then(userDoc => {
         const restrictions = userDoc.data().restrictions || {};
         if (restrictions.posting) {
-            showNotification('public posting is disabled for your account.', 'error');
+            showNotification('Public posting is disabled for your account.', 'error');
             return;
         }
         const content = document.getElementById('post-content').value;
+        const forbiddenTerms = ["TEST$"]; // Replace with actual terms
+        // Check for forbidden terms
+        for (const term of forbiddenTerms) {
+            if (content.includes(term)) {
+                showNotification('why do you want to say that :<', 'error');
+                return;
+            }
+        }
+
         const nickname = userDoc.exists ? userDoc.data().nickname : user.email;
         db.collection('posts').add({
             userId: user.uid,
@@ -219,7 +229,7 @@ function addPost(event) {
             likes: 0 // Initialize likes count
         }).then(() => {
             document.getElementById('post-content').value = '';
-            showNotification('post sent! 🔥', 'success');
+            showNotification('Post sent! 🔥', 'success');
         }).catch(error => {
             showNotification('Error: ' + error.message, 'error');
         });
