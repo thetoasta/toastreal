@@ -198,12 +198,13 @@ function checkUserRestrictions(email) {
 // Add new post
 // Add new post
 
+// Load forbidden terms from CSV
 async function loadForbiddenTerms() {
     const response = await fetch('swearWords.csv'); // Replace with the correct path to your CSV file
     const text = await response.text();
     return text.split('\n').map(term => term.trim());
 }
-
+// Add new post
 async function addPost(event) {
     event.preventDefault();
     const user = auth.currentUser;
@@ -213,8 +214,9 @@ async function addPost(event) {
     }
 
     // Load forbidden terms from CSV
+    const forbiddenTerms = await loadForbiddenTerms();
 
-    db.collection('users').doc(user.email).get().then(async userDoc => {
+    db.collection('users').doc(user.email).get().then(userDoc => {
         const restrictions = userDoc.data().restrictions || {};
         if (restrictions.posting) {
             showNotification('Public posting is disabled for your account.', 'error');
@@ -222,13 +224,10 @@ async function addPost(event) {
         }
         const content = document.getElementById('post-content').value;
 
-        // Load forbidden terms from CSV
-        const forbiddenTerms = await loadForbiddenTerms();
-
         // Check for forbidden terms
         for (const term of forbiddenTerms) {
             if (content.includes(term)) {
-                showNotification('why do you want to say that! :(', 'error');
+                showNotification('Your post contains forbidden terms.', 'error');
                 return;
             }
         }
