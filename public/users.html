@@ -3,16 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
     <title>User Profile</title>
-    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
- <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: rgb(111, 146, 211);
+        }
+        .notification.error {
+            background-color: rgb(241, 162, 97);
+        }
+        .badge {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+        .friend {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .profile-info {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
+
+        #friends-container {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+    <style>
+      body {
+        font-family: 'Google Sans', sans-serif;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100vh;
+        background: url('images/background.png') no-repeat center center;
+        background-size: cover;
+      }
+
+      body::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: url('images/background.png') no-repeat center center;
+        background-size: cover;
+        z-index: -1;
+      }
+
+      header.v2 {
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 10px 20px;
+        position: sticky;
+        top: 0;
+        width: 100%;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+
+      header.v2 nav ul.nav-list {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      header.v2 nav ul.nav-list li.nav-item {
+        margin: 0 15px;
+        box-sizing: border-box;
+      }
+
+      header.v2 nav ul.nav-list li.nav-item a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        transition: color 0.3s ease;
+        box-sizing: border-box;
+        display: block;
+      }
+
+      header.v2 nav ul.nav-list li.nav-item a:hover {
+        color: #cccccc;
+      }
+
+      .container {
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        flex: 1;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      h1,
+      h2 {
+        font-weight: 300;
+      }
+
+      button {
+        font-size: 16px;
+        font-weight: 500;
+        color: white;
+        background-color: #173357;
+        border: none;
+        padding: 15px 32px;
+        margin: 4px 2px;
+        border-radius: 20px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+        outline: none;
+        font-family: 'Google Sans', sans-serif;
+        width: auto;
+        box-sizing: border-box;
+      }
+
+      button:hover {
+        background-color: rgb(52, 7, 126);
+      }
+
+      .form-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 20px;
+      }
+
+      .form-section {
+        width: 45%;
+        box-sizing: border-box;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        font-family: 'Google Sans', sans-serif;
+        color: #eee;
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+        border-color: #052659;
+        outline: none;
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+
+      #message-box {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        text-align: center;
+        font-family: 'Google Sans', sans-serif;
+        box-sizing: border-box;
+      }
+
+      #message-box.success {
+        background-color: #4CAF50;
+        color: white;
+      }
+
+      #message-box.error {
+        background-color: #f44336;
+        color: white;
+      }
+
+      .footer {
+        width: 100%;
+        background-color: #f0f0f000;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+        bottom: 0;
+        box-sizing: border-box;
+      }
+    </style>
+</head>
+<body>
+    <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="index.html">home</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <header>
+            <h1><strong>User Profile</strong></h1>
+        </header>
+        <div class="profile-info" style="display: none;">
+            <p><strong>Nickname:</strong> <span id="nickname"></span></p>
+            <p><strong>Badge:</strong> <span id="badge"></span></p>
+            <p><strong>Bio:</strong> <span id="bio"></span></p>
+            <button id="add-friend-button" onclick="addFriend()" style="display: none;">Add Friend</button>
+            <button id="message-button" style="display: none;">Message</button>
+        </div>
+        <div id="friends-container" style="display: none;"></div>
+    </div>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -48,6 +282,7 @@
                             const userData = doc.data();
                             document.getElementById('nickname').innerText = userData.nickname || 'No nickname';
                             document.getElementById('badge').innerHTML = userData.badge ? `<img src="images/${userData.badge}.png" alt="${userData.badge}" class="badge">` : 'No badge';
+                            document.getElementById('bio').innerText = userData.bio || 'No bio'; //display bio
 
                             // Check if already friends
                             db.collection('users').doc(currentUser.email).collection('friends').doc(userEmail).get().then(friendDoc => {
@@ -124,58 +359,5 @@
 
         window.onload = loadUserProfile;
     </script>
-    <style>
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            z-index: 1000;
-        }
-        .notification.success {
-            background-color: rgb(111, 146, 211);
-        }
-        .notification.error {
-            background-color: rgb(241, 162, 97);
-        }
-        .badge {
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
-        }
-        .friend {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
-    </style>
-</head>
-<body>
-   <header class="v2">
-        <nav>
-            <ul class="nav-list">
-                <li class="nav-item"><a href="index.html">home</a></li>
-                <li class="nav-item"><a href="profile.html">profile</a></li>
-                <li class="nav-item"><a href="users.html">friends</a></li>
-                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
-                <li class="nav-item"><a href="group.html">group chats</a></li>
-                <li class="nav-item"><a href="news.html">news</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <header>
-            <h1><strong>User Profile</strong></h1>
-
-        </header>
-        <div class="profile-info" style="display: none;">
-            <p><strong>Nickname:</strong> <span id="nickname"></span></p>
-            <p><strong>Badge:</strong> <span id="badge"></span></p>
-            <button id="add-friend-button" onclick="addFriend()" style="display: none;">Add Friend</button>
-            <button id="message-button" style="display: none;">Message</button>
-        </div>
-        <div id="friends-container" style="display: none;"></div>
-    </div>
 </body>
 </html>
