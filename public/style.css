@@ -129,7 +129,7 @@ header.v2 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-nav ul.nav-list {
+header.v2 nav ul.nav-list {
     list-style: none;
     display: flex;
     justify-content: center;
@@ -137,17 +137,18 @@ nav ul.nav-list {
     padding: 0;
 }
 
-nav ul.nav-list li.nav-item {
+header.v2 nav ul.nav-list li.nav-item {
     margin: 0 15px;
 }
 
-nav ul.nav-list li.nav-item a {
+header.v2 nav ul.nav-list li.nav-item a {
     color: white;
     text-decoration: none;
     font-size: 16px;
     transition: color 0.3s ease;
 }
 
-nav ul.nav-list li.nav-item a:hover {
+header.v2 nav ul.nav-list li.nav-item a:hover {
     color: #cccccc;
 }
+
