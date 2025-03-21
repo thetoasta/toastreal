@@ -55,18 +55,19 @@ button {
     font-size: 16px;
     font-weight: 500;
     color: white;
-    background-color: #5677a8;
+    background-color: #173357;
     border: none;
     padding: 15px 32px;
     margin: 4px 2px;
-    border-radius: 5px;
+    border-radius: 20px;
     transition-duration: 0.4s;
     cursor: pointer;
     outline: none;
+    font-family: 'Google Sans', sans-serif;
 }
 
 button:hover {
-    background-color: rgb(120, 52, 230);
+    background-color: rgb(52, 7, 126);
 }
 
 .form-container {
