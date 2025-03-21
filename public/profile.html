@@ -56,6 +56,17 @@
         }
 
         // Update nickname
+        function loadBio(email) {
+            db.collection('users').doc(email).get().then(doc => {
+                if (doc.exists) {
+                    document.getElementById('bio').value = doc.data().bio || '';
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Update nickname
         function updateNickname() {
             const user = auth.currentUser;
             if (!user) {
@@ -75,6 +86,25 @@
             }
         }
 
+        // Update bio
+        function updateBio() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to update your bio.', 'error');
+                return;
+            }
+            const newBio = document.getElementById('bio').value;
+            if (newBio) {
+                db.collection('users').doc(user.email).set({
+                    bio: newBio
+                }, { merge: true }).then(() => {
+                    showNotification('Bio updated successfully!', 'success');
+                    loadBio(user.email); // Reload bio after updating
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
         // Log out user
         function logout() {
             auth.signOut().then(() => {
@@ -140,8 +170,14 @@
                     </form>
                 </div>
                 <div class="form-section">
+                    <h2>Update Bio</h2>
+                    <form id="update-bio-form" onsubmit="event.preventDefault(); updateBio();">
+                        <textarea id="bio" placeholder="Enter your bio"></textarea><br>
+                        <button type="submit">Update Bio</button>
+                    </form>
+                </div>
+                <div class="form-section">
                     <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
-        
                 </div>
             </div>
         </header>
