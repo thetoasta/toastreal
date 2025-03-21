@@ -55,18 +55,18 @@ button {
     font-size: 16px;
     font-weight: 500;
     color: white;
-    background-color: #052659;
+    background-color: #5677a8;
     border: none;
     padding: 15px 32px;
     margin: 4px 2px;
-    border-radius: 25px;
+    border-radius: 5px;
     transition-duration: 0.4s;
     cursor: pointer;
     outline: none;
 }
 
 button:hover {
-    background-color: rgb(58, 47, 252);
+    background-color: rgb(120, 52, 230);
 }
 
 .form-container {
