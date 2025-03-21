@@ -115,6 +115,44 @@
         });
     </script>
     <style>
+header.v2 {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Added width 100% */
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item {
+    margin: 0 15px;
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    box-sizing: border-box; /* Added box-sizing */
+    display: block; /* added display block */
+}
+
+header.v2 nav ul.nav-list li.nav-item a:hover {
+    color: #cccccc;
+}
         .notification {
             position: fixed;
             top: 20px;
