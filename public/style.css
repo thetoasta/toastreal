@@ -21,7 +21,39 @@ body::after {
     background: url('images/background.png') no-repeat center center;
     background-size: cover;
     z-index: -1;
-    /* filter: blur(20px); */
+}
+
+header.v2 {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header.v2 nav ul.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+header.v2 nav ul.nav-list li.nav-item {
+    margin: 0 15px;
+}
+
+header.v2 nav ul.nav-list li.nav-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+header.v2 nav ul.nav-list li.nav-item a:hover {
+    color: #cccccc;
 }
 
 .container {
@@ -37,17 +69,7 @@ body::after {
     flex: 1;
 }
 
-header {
-    margin-bottom: 50px;
-    background-color: transparent;
-    font-family: 'Google Sans', sans-serif;
-}
-
-h1, h2, nav, ul, li, a {
-    font-family: 'Google Sans', sans-serif;
-}
-
-h1 {
+h1, h2 {
     font-weight: 300;
 }
 
@@ -113,41 +135,9 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 .footer {
     width: 100%;
-    background-color: #f0f0f000; /* Example styling */
+    background-color: #f0f0f000;
     text-align: center;
     padding: 10px;
     position: relative;
     bottom: 0;
-}
-header {
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 10px 20px;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 100;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-nav ul.nav-list {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
-}
-
-nav ul.nav-list li.nav-item {
-    margin: 0 15px;
-}
-
-nav ul.nav-list li.nav-item a {
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-nav ul.nav-list li.nav-item a:hover {
-    color: #cccccc;
 }
