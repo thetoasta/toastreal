@@ -151,10 +151,21 @@
     </style>
 </head>
 <body>
+   <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="index.html">home</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+            </ul>
+        </nav>
+    </header>
     <div class="container">
         <header>
             <h1><strong>Direct Messages</strong></h1>
-            <button onclick="window.location.href = 'index.html';">Home</button>
         </header>
         <div id="messages-container"></div>
         <form id="message-form" onsubmit="sendMessage(event)">

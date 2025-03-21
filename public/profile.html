@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+            crossorigin="anonymous"></script>
     <title>Profile Management</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
- <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+            crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="notifications.js"></script>
     <script>
         // Firebase configuration
@@ -26,7 +25,8 @@
             storageBucket: "toastrealxyz.appspot.com",
             messagingSenderId: "774884910313",
             appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX"
+            measurementId: "G-3H38LZB2BX",
+            GOOGLE_GENAI_API_KEY: "AIzaSyBZNcjk_mMbr0LV1pdempfANK2ERAnO8h4"
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -39,6 +39,7 @@
                 document.getElementById('user-email').innerText = user.email;
                 document.getElementById('logout-button').style.display = 'block';
                 loadNickname(user.email);
+                loadBio(user.email); // Load bio
             } else {
                 window.location.href = 'accounts.html';
             }
@@ -49,6 +50,17 @@
             db.collection('users').doc(email).get().then(doc => {
                 if (doc.exists) {
                     document.getElementById('nickname').value = doc.data().nickname || '';
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Load bio
+        function loadBio(email) {
+            db.collection('users').doc(email).get().then(doc => {
+                if (doc.exists) {
+                    document.getElementById('bio').value = doc.data().bio || '';
                 }
             }).catch(error => {
                 showNotification('Error: ' + error.message, 'error');
@@ -69,6 +81,26 @@
                 }, { merge: true }).then(() => {
                     showNotification('Nickname updated successfully!', 'success');
                     loadNickname(user.email); // Reload nickname after updating
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Update bio
+        function updateBio() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to update your bio.', 'error');
+                return;
+            }
+            const newBio = document.getElementById('bio').value;
+            if (newBio) {
+                db.collection('users').doc(user.email).set({
+                    bio: newBio
+                }, { merge: true }).then(() => {
+                    showNotification('Bio updated successfully!', 'success');
+                    loadBio(user.email); // Reload bio after updating
                 }).catch(error => {
                     showNotification('Error: ' + error.message, 'error');
                 });
@@ -114,6 +146,18 @@
     </style>
 </head>
 <body>
+    <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="index.html">home</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+            </ul>
+        </nav>
+    </header>
     <div class="container">
         <header>
             <h1><strong>Profile Management</strong></h1>
@@ -128,8 +172,14 @@
                     </form>
                 </div>
                 <div class="form-section">
+                    <h2>Update Bio</h2>
+                    <form id="update-bio-form" onsubmit="event.preventDefault(); updateBio();">
+                        <textarea id="bio" placeholder="Enter your bio"></textarea><br>
+                        <button type="submit">Update Bio</button>
+                    </form>
+                </div>
+                <div class="form-section">
                     <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
-                    <button onclick="window.location.href = 'index.html';">Home</button>
                 </div>
             </div>
         </header>
