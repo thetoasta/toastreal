@@ -31,6 +31,7 @@ header.v2 {
     width: 100%;
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Added box-sizing */
 }
 
 header.v2 nav ul.nav-list {
@@ -39,10 +40,13 @@ header.v2 nav ul.nav-list {
     justify-content: center;
     margin: 0;
     padding: 0;
+    width: 100%; /* Added width 100% */
+    box-sizing: border-box; /* Added box-sizing */
 }
 
 header.v2 nav ul.nav-list li.nav-item {
     margin: 0 15px;
+    box-sizing: border-box; /* Added box-sizing */
 }
 
 header.v2 nav ul.nav-list li.nav-item a {
@@ -50,6 +54,8 @@ header.v2 nav ul.nav-list li.nav-item a {
     text-decoration: none;
     font-size: 16px;
     transition: color 0.3s ease;
+    box-sizing: border-box; /* Added box-sizing */
+    display: block; /* added display block */
 }
 
 header.v2 nav ul.nav-list li.nav-item a:hover {
@@ -67,6 +73,8 @@ header.v2 nav ul.nav-list li.nav-item a:hover {
     background: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     flex: 1;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 h1, h2 {
@@ -86,6 +94,8 @@ button {
     cursor: pointer;
     outline: none;
     font-family: 'Google Sans', sans-serif;
+    width: auto;
+    box-sizing: border-box; /* Added box-sizing */
 }
 
 button:hover {
@@ -96,10 +106,13 @@ button:hover {
     display: flex;
     justify-content: space-around;
     width: 100%;
+    box-sizing: border-box;
+    margin-top: 20px;
 }
 
 .form-section {
     width: 45%;
+    box-sizing: border-box;
 }
 
 input[type="text"], input[type="password"] {
@@ -109,10 +122,15 @@ input[type="text"], input[type="password"] {
     box-sizing: border-box;
     border: 2px solid #ccc;
     border-radius: 4px;
+    font-family: 'Google Sans', sans-serif;
+    color: #eee;
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 input[type="text"]:focus, input[type="password"]:focus {
     border-color: #052659;
+    outline: none;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 #message-box {
@@ -121,6 +139,8 @@ input[type="text"]:focus, input[type="password"]:focus {
     margin: 10px 0;
     border-radius: 4px;
     text-align: center;
+    font-family: 'Google Sans', sans-serif;
+    box-sizing: border-box;
 }
 
 #message-box.success {
@@ -140,4 +160,5 @@ input[type="text"]:focus, input[type="password"]:focus {
     padding: 10px;
     position: relative;
     bottom: 0;
+    box-sizing: border-box;
 }
