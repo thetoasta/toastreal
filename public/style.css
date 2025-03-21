@@ -121,7 +121,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 header.v2 {
     background-color: rgba(0, 0, 0, 0.8);
-    padding: 10px 20px;
     position: sticky;
     top: 0;
     width: 100%;
