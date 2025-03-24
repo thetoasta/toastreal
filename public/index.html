@@ -120,15 +120,19 @@
     </footer>
 <style>
 .footer {
-    background-color: rgba(255, 255, 255, 0.7);
-    color: #1d1d1f;
+    /* Removed from the container */
+    position: fixed; /* Fix to bottom of the screen */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with 50% opacity */
+    color: #fff; /* White text */
     padding: 15px;
     text-align: center;
     font-size: 0.7em;
     line-height: 1.5;
-    border-top: 1px solid #d2d2d7;
-    margin-top: 50px;
-    backdrop-filter: blur(10px);
+    border-top: 1px solid #d2d2d7; /* Light border */
+    backdrop-filter: blur(10px); /* Apply blur effect */
 }
 
 .footer-links {
