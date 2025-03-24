@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
-    <title>toast home</title>
+    <title>toast social dev</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
- <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
-    <!-- Notification Script -->
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="notifications.js"></script>
-    <!-- GenAI Script -->
     <script type="module" src="beta/genai.js"></script>
     <script>
         // Firebase configuration
@@ -29,8 +22,7 @@
             storageBucket: "toastrealxyz.appspot.com",
             messagingSenderId: "774884910313",
             appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX",
-            GOOGLE_GENAI_API_KEY: "AIzaSyBZNcjk_mMbr0LV1pdempfANK2ERAnO8h4"
+            measurementId: "G-3H38LZB2BX"
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -86,7 +78,7 @@
     </script>
 </head>
 <body>
-   <header class="v2">
+    <header class="v2">
         <nav>
             <ul class="nav-list">
                 <li class="nav-item"><a href="post.html">posts</a></li>
@@ -101,7 +93,7 @@
     <div class="container">
         <header>
             <h1><strong>toast social and more</strong></h1>
-            <h2><strong>head to news!</strong></h2>
+            <h2><strong>welcome! 🔥</strong></h2>
             <h3>have fun!</h3>
             <div class="container">
                 <button id="profile" onclick="profile()" style="display: none;">profile</button>
@@ -114,10 +106,102 @@
                 <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
             </div>
         </header>
-        <div class="footer">
-            
-        </div>
         <div id="notifications-container"></div>
     </div>
-</body>
+    <footer class="footer">
+        <ul class="footer-links">
+            <li><a href="#">Coming Soon</a></li>
+            <li><a href="https://status.toastreal.xyz">Status</a></li>
+        </ul>
+        <p class="footer-country">
+            United States
+        </p>
+    </footer>
+<style>
+body {
+    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding in width/height */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links li::after {
+    content: "•";
+    color: #d2d2d7;
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.footer-links li:last-child::after {
+    content: "";
+}
+
+.footer-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #0066cc;
+}
+
+.footer-copyright {
+    margin-bottom: 5px;
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+.footer-country {
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 15px;
+        font-size: 0.6em;
+    }
+
+    .footer-links {
+        gap: 10px;
+    }
+
+    .footer-links li::after {
+        display: none;
+    }
+
+    .footer-links li {
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+}
+</style>
 </html>
