@@ -1,22 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
      crossorigin="anonymous"></script>
     <title>Group Conversation</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <script src="https://ewww.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="notifications.js"></script>
     <link rel="stylesheet" href="notifications.css">
     <script>
+
         console.log("IV: 1.0.1")
+
+
 
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -33,24 +36,12 @@
         const db = firebase.firestore();
 
         let groupId = null;
-        let userNickname = null;
 
         // Check if user is logged in
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('logout-button').style.display = 'block';
-                // Get the user's nickname
-                db.collection('users').doc(user.email).get().then(doc => {
-                    if (doc.exists) {
-                        userNickname = doc.data().nickname;
-                        loadGroupConversation();
-                    } else {
-                        showNotification('User data not found. Please update your profile.', 'error');
-                        window.location.href = 'profile.html';
-                    }
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
+                loadGroupConversation();
             } else {
                 document.getElementById('logout-button').style.display = 'none';
                 window.location.href = 'accounts.html';
@@ -89,7 +80,7 @@
                     const messageElement = document.createElement('div');
                     messageElement.className = 'message';
                     messageElement.innerHTML = `
-                        <p><strong>${message.senderName || message.sender}</strong>: ${message.text}</p>
+                        <p><strong>${message.sender}</strong>: ${message.text}</p>
                         <small>${new Date(message.timestamp.toDate()).toLocaleString()}</small>
                     `;
                     messagesContainer.appendChild(messageElement);
@@ -106,22 +97,16 @@
                 return;
             }
             const messageText = document.getElementById('message-text').value;
-             db.collection('users').doc(user.email).get().then(userDoc => {
-                  if(userDoc.exists){
-                       const senderName = userDoc.data().nickname;
-                       db.collection('groups').doc(groupId).collection('messages').add({
-                            sender: user.email,
-                            senderName: senderName,
-                            text: messageText,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        }).then(() => {
-                            document.getElementById('message-text').value = '';
-                            showNotification('Message sent!', 'success');
-                        }).catch(error => {
-                            showNotification('Error: ' + error.message, 'error');
-                        });
-                  }
-             });
+            db.collection('groups').doc(groupId).collection('messages').add({
+                sender: user.email,
+                text: messageText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('message-text').value = '';
+                showNotification('Message sent!', 'success');
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
         }
 
         // Log out user
@@ -194,7 +179,7 @@ header.v2 nav ul.nav-list li.nav-item a:hover {
     </style>
 </head>
 <body>
-    <header class="v2">
+   <header class="v2">
         <nav>
             <ul class="nav-list">
                 <li class="nav-item"><a href="post.html">posts</a></li>
