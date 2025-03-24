@@ -168,3 +168,79 @@ input[type="text"]:focus, input[type="password"]:focus {
     bottom: 0;
     box-sizing: border-box;
 }
+
+/* Updated Styles for Apple-like Footer */
+.footer {
+    background-color: #f5f5f7; /* Light gray background, similar to Apple's */
+    color: #1d1d1f; /* Very dark gray text, almost black */
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em; /* Smaller font size */
+    line-height: 1.5; /* Increased line height for better spacing */
+    border-top: 1px solid #d2d2d7; /* Subtle top border */
+    margin-top: 40px; /* Add some margin above the footer */
+  }
+  
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center; /* Center the links horizontally */
+    flex-wrap: wrap; /* Allow links to wrap to the next line on small screens */
+    gap: 15px; /* Add some gap between the links */
+  }
+  
+  .footer-links li {
+    display: inline; /* Removed list-style, using display:inline for spacing control*/
+  }
+  
+  .footer-links li::after {
+    content: "•"; /* Use a dot separator, consistent with Apple */
+    color: #d2d2d7; /* Light gray separator color */
+    margin-left: 8px; /* Add space after the separator */
+    padding-left: 8px; /* Add space before the separator */
+  }
+  
+  .footer-links li:last-child::after {
+    content: ""; /* Remove the separator after the last link */
+  }
+  
+  
+  .footer-links a {
+    color: #0066cc; /* Apple's link blue */
+    text-decoration: none;
+  }
+  
+  .footer-links a:hover {
+    text-decoration: underline; /* Underline on hover for better UX */
+  }
+  
+  .footer-copyright {
+    margin-bottom: 10px; /* Add space above the copyright notice */
+    color: #6e6e73; /* Medium gray for copyright */
+    font-size: 0.7em;
+  }
+  
+  .footer-country {
+    color: #6e6e73; /* Medium gray for country */
+    font-size: 0.7em;
+  }
+  
+  @media (max-width: 600px) {
+    .footer {
+      padding: 15px;
+      font-size: 0.7em; /* Adjust font size for small screens if needed */
+    }
+    .footer-links {
+        gap: 10px; /* Adjust gap for smaller screens */
+    }
+    .footer-links li::after{
+        display: none; /* remove separator for very small screens */
+    }
+    .footer-links li{
+        margin-right: 5px; /* Add right margin to the links */
+        margin-left: 5px; /* Add left margin to the links */
+    }
+  }
+  
