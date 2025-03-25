@@ -31,10 +31,12 @@
 
         // Admin credentials
         const adminEmail = "nolanp678@gmail.com";
+        const adminEmail2 = "theodore.crowellmcgo@student.dedham.k12.ma.us";
+    
 
         // Check if user is logged in and is admin
         firebase.auth().onAuthStateChanged(user => {
-            if (user && user.email === adminEmail) {
+            if (user && user.email === adminEmail, adminEmail2) {
                 document.getElementById('admin-panel').style.display = 'block';
                 loadReportedPosts();
             } else {
