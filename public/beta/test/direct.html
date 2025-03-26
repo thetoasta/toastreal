@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Messages</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let userNicknames = {};  // Store user nicknames
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                checkUserRestrictions(user.email);
+            } else {
+                window.location.href = 'accounts.html';
+            }
+        });
+
+        // Check user restrictions
+        function checkUserRestrictions(email) {
+            db.collection('users').doc(email).get().then(doc => {
+                if (doc.exists) {
+                    const restrictions = doc.data().restrictions || {};
+                    if (restrictions.messaging) {
+                        document.getElementById('message-form').style.display = 'none';
+                        showNotification('Direct messaging is disabled for your account.', 'error');
+                    } else {
+                        document.getElementById('message-form').style.display = 'block';
+                        loadMessages();
+                    }
+                }
+            }).catch(error => {
+                console.error('Error checking user restrictions:', error);
+            });
+        }
+
+        // Function to fetch nickname and then load message
+        function fetchNicknameAndLoadMessage(messageData) {
+            const senderEmail = messageData.sender;
+            if (userNicknames[senderEmail]) {
+                // Nickname is already in the cache
+                loadMessageWithNickname(messageData, userNicknames[senderEmail]);
+            } else {
+                // Fetch nickname from Firestore
+                db.collection('users').doc(senderEmail).get().then(userDoc => {
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const nickname = userData.nickname || senderEmail; // Use email if nickname doesn't exist
+                        userNicknames[senderEmail] = nickname; // Store in cache
+                        loadMessageWithNickname(messageData, nickname);
+                    } else {
+                        // User document not found, use email as fallback
+                        userNicknames[senderEmail] = senderEmail;
+                        loadMessageWithNickname(messageData, senderEmail);
+                    }
+                }).catch(error => {
+                    console.error("Error fetching nickname:", error);
+                    userNicknames[senderEmail] = senderEmail;
+                    loadMessageWithNickname(messageData, senderEmail); //show email
+                });
+            }
+        }
+
+        function loadMessageWithNickname(messageData, senderName) {
+            const messagesContainer = document.getElementById('messages-container');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.innerHTML = `
+                    <p><strong>${senderName}</strong>: ${messageData.text}</p>
+                    <small>${new Date(messageData.timestamp.toDate()).toLocaleString()}</small>
+                `;
+            messagesContainer.appendChild(messageElement);
+        }
+
+        // Load messages
+        function loadMessages() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('user');
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                showNotification('You must be logged in to view messages.', 'error');
+                return;
+            }
+
+            const chatId = [currentUser.email, userEmail].sort().join('_');
+            db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const messageData = doc.data();
+                    fetchNicknameAndLoadMessage(messageData); // Get nickname and then display
+                });
+            });
+        }
+
+        // Send message
+        function sendMessage(event) {
+            event.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('user');
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                showNotification('You must be logged in to send messages.', 'error');
+                return;
+            }
+
+            db.collection('users').doc(currentUser.email).get().then(userDoc => {
+                const restrictions = userDoc.data().restrictions || {};
+                if (restrictions.messaging) {
+                    showNotification('direct messaging is disabled for your account.', 'error');
+                    return;
+                }
+
+                const chatId = [currentUser.email, userEmail].sort().join('_');
+                const messageText = document.getElementById('message-text').value;
+                db.collection('chats').doc(chatId).collection('messages').add({
+                    sender: currentUser.email,
+                    text: messageText,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    document.getElementById('message-text').value = '';
+                    showNotification('Message sent!', 'success');
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+    <style>
+header.v2 {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Added width 100% */
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item {
+    margin: 0 15px;
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    box-sizing: border-box; /* Added box-sizing */
+    display: block; /* added display block */
+}
+
+header.v2 nav ul.nav-list li.nav-item a:hover {
+    color: #cccccc;
+}
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: rgb(111, 146, 211);
+        }
+        .notification.error {
+            background-color: rgb(241, 162, 97);
+        }
+        .message {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="post.html">posts</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <header>
+            <h1><strong>Direct Messages</strong></h1>
+        </header>
+        <div id="messages-container"></div>
+        <form id="message-form" onsubmit="sendMessage(event)">
+            <input type="text" id="message-text" placeholder="Type a message" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+<style>
+body {
+    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding in width/height */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links li::after {
+    content: "•";
+    color: #d2d2d7;
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.footer-links li:last-child::after {
+    content: "";
+}
+
+.footer-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #0066cc;
+}
+
+.footer-copyright {
+    margin-bottom: 5px;
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+.footer-country {
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 15px;
+        font-size: 0.6em;
+    }
+
+    .footer-links {
+        gap: 10px;
+    }
+
+    .footer-links li::after {
+        display: none;
+    }
+
+    .footer-links li {
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+}
+</style>
+</html>

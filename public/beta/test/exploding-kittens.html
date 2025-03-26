@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+     crossorigin="anonymous"></script>
+    <title>Exploding Kittens</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+ <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let gameId = null;
+        let currentUser = null;
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('logout-button').style.display = 'block';
+                document.getElementById('game-controls').style.display = 'block';
+            } else {
+                currentUser = null;
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('game-controls').style.display = 'none';
+            }
+        });
+
+        // Log out user
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Create a new game
+        function createGame() {
+            const initialDeck = shuffle([
+                'Kitten', 'Kitten', 'Kitten', 'Kitten', 'Kitten',
+                'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten', 'Exploding Kitten',
+                'Attack', 'Attack', 'Skip', 'Skip', 'Favor', 'Favor', 'Shuffle', 'Shuffle',
+                'Nope', 'Nope', 'See the Future', 'See the Future', 'Defuse', 'Defuse', 'Defuse', 'Defuse'
+            ]);
+
+            const players = [currentUser.uid];
+            const playerHands = {};
+            playerHands[currentUser.uid] = initialDeck.splice(0, 7);
+
+            const gameData = {
+                players: players,
+                deck: initialDeck,
+                playerHands: playerHands,
+                currentPlayer: currentUser.uid,
+                status: 'waiting'
+            };
+
+            db.collection('games').add(gameData).then(docRef => {
+                gameId = docRef.id;
+                joinGame(gameId);
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Join an existing game
+        function joinGame(id) {
+            gameId = id;
+            db.collection('games').doc(gameId).update({
+                players: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+            }).then(() => {
+                listenToGameUpdates();
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Listen to game updates
+        function listenToGameUpdates() {
+            db.collection('games').doc(gameId).onSnapshot(doc => {
+                const gameData = doc.data();
+                updateGameBoard(gameData);
+            });
+        }
+
+        // Update the game board
+        function updateGameBoard(gameData) {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = '';
+
+            const playerHand = gameData.playerHands[currentUser.uid] || [];
+            playerHand.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.innerHTML = `<img src="images/${card.toLowerCase().replace(/ /g, '-')}.jpg" alt="${card}">`;
+                cardElement.addEventListener('click', () => {
+                    if (gameData.currentPlayer === currentUser.uid) {
+                        playCard(card);
+                    } else {
+                        showNotification('It\'s not your turn!', 'error');
+                    }
+                });
+                gameBoard.appendChild(cardElement);
+            });
+
+            // Draw pile
+            const drawPile = document.createElement('div');
+            drawPile.className = 'draw-pile';
+            drawPile.innerHTML = `<img src="images/draw-pile.png" alt="Draw Pile">`;
+            drawPile.addEventListener('click', () => {
+                if (gameData.currentPlayer === currentUser.uid) {
+                    drawCard();
+                } else {
+                    showNotification('It\'s not your turn!', 'error');
+                }
+            });
+            gameBoard.appendChild(drawPile);
+        }
+
+        // Draw a card
+        function drawCard() {
+            db.collection('games').doc(gameId).get().then(doc => {
+                const gameData = doc.data();
+                if (gameData.deck.length === 0) {
+                    showNotification('No more cards to draw!', 'error');
+                    return;
+                }
+                const drawnCard = gameData.deck.pop();
+                gameData.playerHands[currentUser.uid].push(drawnCard);
+                if (drawnCard === 'Exploding Kitten') {
+                    if (gameData.playerHands[currentUser.uid].includes('Defuse')) {
+                        alert('You drew an Exploding Kitten but defused it!');
+                        gameData.playerHands[currentUser.uid] = gameData.playerHands[currentUser.uid].filter(card => card !== 'Defuse');
+                    } else {
+                        alert('Boom! You drew an Exploding Kitten and are out of the game!');
+                        gameData.players = gameData.players.filter(player => player !== currentUser.uid);
+                        if (gameData.players.length === 1) {
+                            gameData.status = 'ended';
+                            alert(`Player ${gameData.players[0]} wins!`);
+                        }
+                    }
+                }
+                gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                db.collection('games').doc(gameId).set(gameData).then(() => {
+                    updateGameBoard(gameData);
+                });
+            });
+        }
+
+        // Play a card
+        function playCard(card) {
+            db.collection('games').doc(gameId).get().then(doc => {
+                const gameData = doc.data();
+                const playerHand = gameData.playerHands[currentUser.uid];
+
+                if (card === 'Exploding Kitten') {
+                    alert('Boom! You found an Exploding Kitten!');
+                    gameData.deck = gameData.deck.filter(c => c !== card);
+                    gameData.status = 'ended';
+                } else if (card === 'Attack') {
+                    alert('You played an Attack card!');
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                } else if (card === 'Skip') {
+                    alert('You played a Skip card!');
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                } else if (card === 'Favor') {
+                    alert('You played a Favor card!');
+                    requestFavor(gameData);
+                } else if (card === 'Shuffle') {
+                    alert('You played a Shuffle card!');
+                    gameData.deck = shuffle(gameData.deck);
+                } else if (card === 'Nope') {
+                    alert('You played a Nope card!');
+                    // Implement Nope card logic
+                } else if (card === 'See the Future') {
+                    alert('You played a See the Future card!');
+                    seeTheFuture(gameData);
+                } else {
+                    alert('Safe! You found a Kitten.');
+                    gameData.deck = gameData.deck.filter(c => c !== card);
+                    gameData.currentPlayer = getNextPlayer(gameData.players, gameData.currentPlayer);
+                }
+
+                gameData.playerHands[currentUser.uid] = playerHand.filter(c => c !== card);
+                db.collection('games').doc(gameId).set(gameData).then(() => {
+                    updateGameBoard(gameData);
+                });
+            });
+        }
+
+        // Request a favor
+        function requestFavor(gameData) {
+            const otherPlayers = gameData.players.filter(player => player !== currentUser.uid);
+            if (otherPlayers.length === 0) {
+                showNotification('No other players to request a favor from!', 'error');
+                return;
+            }
+            const favorPlayer = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+            alert(`Requesting a favor from player ${favorPlayer}`);
+            // Implement logic to transfer a card from favorPlayer to currentUser
+        }
+
+        // See the future
+        function seeTheFuture(gameData) {
+            const futureCards = gameData.deck.slice(-3);
+            alert(`The next three cards are: ${futureCards.join(', ')}`);
+        }
+
+        // Get the next player
+        function getNextPlayer(players, currentPlayer) {
+            const currentIndex = players.indexOf(currentPlayer);
+            return players[(currentIndex + 1) % players.length];
+        }
+
+        // Shuffle an array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+    <style>
+header.v2 {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Added width 100% */
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item {
+    margin: 0 15px;
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    box-sizing: border-box; /* Added box-sizing */
+    display: block; /* added display block */
+}
+
+header.v2 nav ul.nav-list li.nav-item a:hover {
+    color: #cccccc;
+}
+        body {
+            font-family: 'Google Sans', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #game-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .card, .draw-pile {
+            width: 100px;
+            height: 150px;
+            margin: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .card img, .draw-pile img {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background-color: green;
+        }
+
+        .notification.error {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+   <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="post.html">posts</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <header>
+            <h1>Exploding Kittens</h1>
+            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </header>
+        <div id="game-controls" style="display: none;">
+            <button onclick="createGame()">Create Game</button>
+            <input type="text" id="game-id" placeholder="Enter Game ID">
+            <button onclick="joinGame(document.getElementById('game-id').value)">Join Game</button>
+        </div>
+        <div id="game-board"></div>
+
+    </div>
+
+<style>
+body {
+    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding in width/height */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links li::after {
+    content: "•";
+    color: #d2d2d7;
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.footer-links li:last-child::after {
+    content: "";
+}
+
+.footer-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #0066cc;
+}
+
+.footer-copyright {
+    margin-bottom: 5px;
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+.footer-country {
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 15px;
+        font-size: 0.6em;
+    }
+
+    .footer-links {
+        gap: 10px;
+    }
+
+    .footer-links li::after {
+        display: none;
+    }
+
+    .footer-links li {
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+}
+</style>
+</html>

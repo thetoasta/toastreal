@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <link href="style.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+</head>
+<body>
+    <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="post.html">posts</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <header>
+            <h1><strong>User Profile</strong></h1>
+        </header>
+        <div class="profile-info" style="display: none;">
+            <p><strong>Nickname:</strong> <span id="nickname"></span></p>
+            <p><strong>Badge:</strong> <span id="badge"></span></p>
+            <p><strong>Bio:</strong> <span id="bio"></span></p>
+            <button id="add-friend-button" onclick="addFriend()" style="display: none;">Add Friend</button>
+            <button id="message-button" style="display: none;">Message</button>
+        </div>
+        <div id="friends-container" style="display: none;"></div>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Load user profile or friends list
+        function loadUserProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('user');
+
+            auth.onAuthStateChanged(currentUser => {
+                if (!currentUser) {
+                    showNotification('You must be logged in to view profiles.', 'error');
+                    return;
+                }
+
+                if (!userEmail) {
+                    loadFriendsList(currentUser.email);
+                    document.getElementById('friends-container').style.display = 'block';
+                } else {
+                    db.collection('users').doc(userEmail).get().then(doc => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            document.getElementById('nickname').innerText = userData.nickname || 'No nickname';
+                            document.getElementById('badge').innerHTML = userData.badge ? `<img src="images/${userData.badge}.png" alt="${userData.badge}" class="badge">` : 'No badge';
+                            document.getElementById('bio').innerText = userData.bio || 'No bio'; //display bio
+
+                            // Check if already friends
+                            db.collection('users').doc(currentUser.email).collection('friends').doc(userEmail).get().then(friendDoc => {
+                                if (friendDoc.exists) {
+                                    document.getElementById('message-button').style.display = 'block';
+                                } else {
+                                    document.getElementById('add-friend-button').style.display = 'block';
+                                }
+                            });
+                            document.querySelector('.profile-info').style.display = 'block';
+                        } else {
+                            showNotification('User not found.', 'error');
+                        }
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
+                }
+            });
+        }
+
+        // Load friends list
+        function loadFriendsList(currentUserEmail) {
+            db.collection('users').doc(currentUserEmail).collection('friends').get().then(snapshot => {
+                const friendsContainer = document.getElementById('friends-container');
+                friendsContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const friend = doc.data();
+                    const friendElement = document.createElement('div');
+                    friendElement.className = 'friend';
+                    friendElement.innerHTML = `
+                        <p>${friend.email}</p>
+                        <button onclick="window.location.href = 'users.html?user=${friend.email}'">View Profile</button>
+                        <button onclick="window.location.href = 'direct.html?user=${friend.email}'">Message</button>
+                    `;
+                    friendsContainer.appendChild(friendElement);
+                });
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Add friend
+        function addFriend() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('user');
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                showNotification('You must be logged in to add friends.', 'error');
+                return;
+            }
+
+            db.collection('users').doc(userEmail).collection('friendRequests').doc(currentUser.email).set({
+                email: currentUser.email,
+                nickname: currentUser.displayName || currentUser.email,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showNotification('Friend request sent!', 'success');
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        window.onload = loadUserProfile;
+    </script>
+
+<style>
+body {
+    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding in width/height */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links li::after {
+    content: "•";
+    color: #d2d2d7;
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.footer-links li:last-child::after {
+    content: "";
+}
+
+.footer-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #0066cc;
+}
+
+.footer-copyright {
+    margin-bottom: 5px;
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+.footer-country {
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 15px;
+        font-size: 0.6em;
+    }
+
+    .footer-links {
+        gap: 10px;
+    }
+
+    .footer-links li::after {
+        display: none;
+    }
+
+    .footer-links li {
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+}
+</style>
+</html>

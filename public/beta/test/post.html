@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-messaging.js"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script src="notifications.js"></script>
+    <link rel="stylesheet" href="notifications.css">
+    <script>
+
+        console.log("Posts System Called - NV2");
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const messaging = firebase.messaging();
+
+        let unsubscribePosts;
+        let renderedPosts = {}; // Track rendered posts by ID
+
+        // Request permission for notifications
+        messaging.requestPermission().then(() => {
+            console.log('Notification permission granted.');
+            return messaging.getToken();
+        }).then(token => {
+            console.log('FCM Token:', token);
+            // Save the token to the database or send it to your server
+        }).catch(error => {
+            console.error('Unable to get permission to notify.', error);
+        });
+
+        // Handle incoming messages
+        messaging.onMessage(payload => {
+            console.log('Message received. ', payload);
+            showBrowserNotification(payload.notification.title, payload.notification.body);
+        });
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('logout-button').style.display = 'block';
+                checkUserRestrictions(user.email);
+            } else {
+                document.getElementById('logout-button').style.display = 'none';
+                document.getElementById('post-form').style.display = 'none';
+                if (unsubscribePosts) {
+                    unsubscribePosts();
+                    unsubscribePosts = null;
+                }
+            }
+        });
+
+        // Check user restrictions
+        function checkUserRestrictions(email) {
+            db.collection('users').doc(email).get().then(doc => {
+                if (doc.exists) {
+                    const restrictions = doc.data().restrictions || {};
+                    if (restrictions.posting) {
+                        document.getElementById('post-form').style.display = 'none';
+                    } else {
+                        document.getElementById('post-form').style.display = 'block';
+                        loadPosts();
+                    }
+                    // Add other restrictions checks here
+                }
+            }).catch(error => {
+                console.error('Error checking user restrictions:', error);
+            });
+        }
+
+        // Log out user
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Load posts
+        function loadPosts() {
+            if (unsubscribePosts) {
+                unsubscribePosts();
+            }
+            unsubscribePosts = db.collection("posts").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                const postsContainer = document.getElementById('posts-container');
+                snapshot.docChanges().forEach(change => {
+                    const doc = change.doc;
+                    const post = doc.data();
+                    const postId = doc.id;
+                    console.log("Posts Load Called");
+
+                    db.collection('users').doc(post.username).get().then(userDoc => {
+                        const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
+                        const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
+                        const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
+
+                        let formattedDate = 'Invalid Date';
+                        if (post.timestamp && typeof post.timestamp.toDate === 'function') {
+                            try {
+                                formattedDate = new Date(post.timestamp.toDate()).toLocaleString();
+                            } catch (error) {
+                                console.error('Error formatting date:', error);
+                            }
+                        } else if (typeof post.timestamp === 'number') {
+                            try {
+                                formattedDate = new Date(post.timestamp).toLocaleString();
+                            } catch (error) {
+                                console.error('Error formatting number date:', error);
+                            }
+                        } else if (typeof post.timestamp === 'string') {
+                            try {
+                                formattedDate = new Date(post.timestamp).toLocaleString();
+                            } catch (error) {
+                                console.error('Error formatting string date:', error);
+                            }
+                        }
+
+                        console.log("Posts Load Complete");
+
+                        const postElement = document.createElement('div');
+                        postElement.className = 'post';
+                        postElement.innerHTML = `
+                            <h3><a href="users.html?user=${post.username}">${nickname}</a> ${badgeImg}</h3>
+                            <p>${post.content}</p>
+                            <small>${formattedDate}</small>
+                            <div class="menu">
+                                <button class="menu-button" onclick="toggleMenu('${postId}')">⋮</button>
+                                <div class="menu-content" id="menu-${postId}">
+                                    ${auth.currentUser && auth.currentUser.email === post.username ? `
+                                        <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
+                                        <button onclick="deletePost('${postId}')">Delete</button>
+                                    ` : `
+                                        <button onclick="reportPost('${postId}')">Report</button>
+                                    `}
+                                </div>
+                            </div>
+                            <div class="like-container">
+                                <img src="images/icon.png" alt="Like" class="like-button" onclick="likePost('${postId}')">
+                                <span id="like-count-${postId}">${post.likes || 0}</span>
+                            </div>
+                        `;
+
+                        if (change.type === 'added') {
+                            // Add new post
+                            if (postsContainer.firstChild) {
+                                postsContainer.insertBefore(postElement, postsContainer.firstChild);
+                            } else {
+                                postsContainer.appendChild(postElement);
+                            }
+                            renderedPosts[postId] = postElement;
+
+                            // Show notification if the tab is not active
+                            if (document.hidden) {
+                                showBrowserNotification('new post from toast social! 🚀', `${nickname} said: ${post.content}`);
+                            }
+                        } else if (change.type === 'modified') {
+                            // Update existing post
+                            if (renderedPosts[postId]) {
+                                postsContainer.replaceChild(postElement, renderedPosts[postId]);
+                                renderedPosts[postId] = postElement;
+                            }
+                        } else if (change.type === 'removed') {
+                            // Remove deleted post
+                            if (renderedPosts[postId]) {
+                                postsContainer.removeChild(renderedPosts[postId]);
+                                delete renderedPosts[postId];
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        // Forbidden terms CSV string
+        const forbiddenTermsCSV = "anal,anus,arse,ballsack,bastard,bitch,biatch,bloody,blowjob,blow job,bollock,bollok,boner,boob,bugger,buttplug,clitoris,cock,coon,crap,cunt,dick,dildo,dyke,fag,feck,fellate,fellatio,felching,fuck,f u c k,fudgepacker,fudge packer,flange,Goddamn,homo,jizz,knobend,knob end,labia,muff,nigger,nigga,penis,piss,prick,pube,pussy,queer,scrotum,sex,shit,s hit,sh1t,slut,smegma,spunk,tit,tosser,turd,twat,vagina,wank,whore,testswear000"; // Replace with actual forbidden terms
+
+        // Load forbidden terms from CSV string
+        function loadForbiddenTerms() {
+            return forbiddenTermsCSV.split(',').map(term => term.trim());
+        }
+        // Add new post
+       // Add new post
+async function addPost(event) {
+    event.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('You must be logged in to post.', 'error');
+        return;
+    }
+
+    // Load forbidden terms from CSV string
+    const forbiddenTerms = loadForbiddenTerms();
+
+    db.collection('users').doc(user.email).get().then(userDoc => {
+        const restrictions = userDoc.data().restrictions || {};
+        if (restrictions.posting) {
+            showNotification('Public posting is disabled for your account.', 'error');
+            return;
+        }
+        const content = document.getElementById('post-content').value;
+
+        // Check for character limit
+        const characterLimit = 240; // Set your character limit here
+        if (content.length > characterLimit) {
+            showNotification(`STOP YAPPING!!!!!!!! the max character limit is 240`, 'error');
+            return;
+        }
+
+        // Check for forbidden terms
+        for (const term of forbiddenTerms) {
+            if (content.includes(term)) {
+                showNotification('why do you wanna say that! :( ', 'error');
+                return;
+            }
+        }
+
+        const nickname = userDoc.exists ? userDoc.data().nickname : user.email;
+        db.collection('posts').add({
+            userId: user.uid,
+            username: user.email,
+            nickname: nickname,
+            content: content,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            likes: 0 // Initialize likes count
+        }).then(() => {
+            document.getElementById('post-content').value = '';
+            showNotification('post sent! 🔥', 'success');
+        }).catch(error => {
+            showNotification('Error: ' + error.message, 'error');
+        });
+    });
+}
+        // Edit post
+        function editPost(postId, currentContent) {
+            const newContent = prompt('Edit your post:', currentContent);
+            if (newContent) {
+                db.collection('posts').doc(postId).update({
+                    content: newContent
+                }).then(() => {
+                    showNotification('post edited!', 'success');
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Delete post
+        function deletePost(postId) {
+            if (confirm('Are you sure you want to delete this post?')) {
+                db.collection('posts').doc(postId).delete().then(() => {
+                    showNotification('post removed from feed', 'success');
+                }).catch(error => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Report post
+        function reportPost(postId) {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('You must be logged in to report posts.', 'error');
+                return;
+            }
+
+            db.collection('posts').doc(postId).get().then(doc => {
+                if (doc.exists) {
+                    const post = doc.data();
+                    db.collection('reportedPosts').doc(postId).set({
+                        postId: postId,
+                        reportedBy: user.email,
+                        postContent: post.content,
+                        postUsername: post.username,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        showNotification('Post reported.', 'success');
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
+                } else {
+                    showNotification('Post not found.', 'error');
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Like post
+        function likePost(postId) {
+            const postRef = db.collection('posts').doc(postId);
+            postRef.get().then(doc => {
+                if (doc.exists) {
+                    const currentLikes = doc.data().likes || 0;
+                    postRef.update({
+                        likes: currentLikes + 1
+                    }).then(() => {
+                        document.getElementById(`like-count-${postId}`).innerText = currentLikes + 1;
+                    }).catch(error => {
+                        showNotification('Error: ' + error.message, 'error');
+                    });
+                }
+            }).catch(error => {
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Toggle menu
+        function toggleMenu(postId) {
+            const menu = document.getElementById(`menu-${postId}`);
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Show browser notification
+        function showBrowserNotification(title, body) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification(title, { body });
+                    }
+                });
+            }
+        }
+
+        console.log("Posts System Complete")
+
+    </script>
+    <style>
+header.v2 {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Added width 100% */
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item {
+    margin: 0 15px;
+    box-sizing: border-box; /* Added box-sizing */
+}
+
+header.v2 nav ul.nav-list li.nav-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    box-sizing: border-box; /* Added box-sizing */
+    display: block; /* added display block */
+}
+
+header.v2 nav ul.nav-list li.nav-item a:hover {
+    color: #cccccc;
+}
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+        .notification.success {
+            background-color: rgb(111, 146, 211);
+        }
+        .notification.error {
+            background-color: rgb(241, 162, 97);
+        }
+        #posts-container {
+            max-height: 400px; /* Adjust the height as needed */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .post {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            position: relative;
+        }
+        .badge {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: rgba(0, 123, 255, 0.1);
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px;
+            resize: none;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.2);
+        }
+        a {
+            color: white;
+            text-decoration: none;
+        }
+        a:hover {
+            color: rgb(111, 146, 211);
+        }
+        .menu {
+            position: relative;
+            display: inline-block;
+        }
+        .menu-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .menu-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .menu-content button {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        .menu-content button:hover {
+            background-color: #ddd;
+        }
+        .like-container {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .like-button {
+            width: 45px;
+            height: 40px;
+            cursor: pointer;
+        }
+        .like-count {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+   <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="post.html">posts</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <header>
+            <h1><strong>Posts</strong></h1>
+            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+        </header>
+        <div id="post-form" style="display: none;">
+            <form onsubmit="addPost(event)">
+                <textarea id="post-content" placeholder="what's up?" required></textarea><br>
+                <button type="submit">Post</button>
+            </form>
+        </div>
+        <div id="posts-container"></div>
+
+    </div>
+
+<style>
+body {
+    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding in width/height */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links li::after {
+    content: "•";
+    color: #d2d2d7;
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.footer-links li:last-child::after {
+    content: "";
+}
+
+.footer-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #0066cc;
+}
+
+.footer-copyright {
+    margin-bottom: 5px;
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+.footer-country {
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 15px;
+        font-size: 0.6em;
+    }
+
+    .footer-links {
+        gap: 10px;
+    }
+
+    .footer-links li::after {
+        display: none;
+    }
+
+    .footer-links li {
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+}
+</style>
+</html>

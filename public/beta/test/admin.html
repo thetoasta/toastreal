@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+     crossorigin="anonymous"></script>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Admin credentials
+        const adminEmail = "nolanp678@gmail.com";
+        const adminEmail2 = "theodore.crowellmcgo@student.dedham.k12.ma.us";
+    
+
+        // Check if user is logged in and is admin
+        firebase.auth().onAuthStateChanged(user => {
+            if (user && user.email === adminEmail, adminEmail2) {
+                document.getElementById('admin-panel').style.display = 'block';
+                loadReportedPosts();
+            } else {
+                window.location.href = 'accounts.html';
+            }
+        });
+
+        // Load reported posts
+        function loadReportedPosts() {
+            db.collection('reportedPosts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const reportedPostsContainer = document.getElementById('reported-posts-container');
+                reportedPostsContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const reportedPost = doc.data();
+                    const reportedPostElement = document.createElement('div');
+                    reportedPostElement.className = 'reported-post';
+                    reportedPostElement.innerHTML = `
+                        <p><strong>Reported By:</strong> ${reportedPost.reportedBy}</p>
+                        <p><strong>Post Content:</strong> ${reportedPost.postContent}</p>
+                        <p><strong>Post Username:</strong> ${reportedPost.postUsername}</p>
+                        <button onclick="deleteReportedPost('${reportedPost.postId}')">Delete Post</button>
+                        <button onclick="removeBadge('${reportedPost.postUsername}')">Remove Checkmark</button>
+                    `;
+                    reportedPostsContainer.appendChild(reportedPostElement);
+                });
+            });
+        }
+
+        // Delete reported post
+        function deleteReportedPost(postId) {
+            db.collection('posts').doc(postId).delete().then(() => {
+                db.collection('reportedPosts').doc(postId).delete().then(() => {
+                    displayMessage('Post deleted successfully', 'success');
+                }).catch(error => {
+                    displayMessage('Error: ' + error.message, 'error');
+                });
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Remove badge
+        function removeBadge(username) {
+            db.collection('users').doc(username).update({
+                badge: firebase.firestore.FieldValue.delete()
+            }).then(() => {
+                displayMessage('Badge removed successfully', 'success');
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Display message
+        function displayMessage(message, type) {
+            const messageBox = document.getElementById('message-box');
+            messageBox.innerText = message;
+            messageBox.className = type;
+            messageBox.style.display = 'block';
+        }
+
+        // Update user permissions
+        function updateUserPermissions() {
+            const email = document.getElementById('permissions-email').value;
+            const canPost = document.getElementById('can-post').checked;
+            const canMessage = document.getElementById('can-message').checked;
+
+            db.collection('users').doc(email).set({
+                restrictions: {
+                    posting: !canPost,
+                    messaging: !canMessage
+                }
+            }, { merge: true }).then(() => {
+                displayMessage('User permissions updated successfully', 'success');
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
+        }
+    </script>
+</head>
+
+    <div class="container" id="admin-panel" style="display: none;">
+        <header>
+            <h1><strong>Admin Panel</strong></h1>
+            <div id="message-box" style="display: none;"></div>
+            <div class="form-container">
+                <div class="form-section">
+                    <h2>Reset User Password</h2>
+                    <input type="text" id="reset-email" placeholder="User Email" required><br>
+                    <button onclick="resetPassword()">Reset Password</button>
+                </div>
+                <div class="form-section">
+                    <h2>Disable User Account</h2>
+                    <input type="text" id="disable-email" placeholder="User Email" required><br>
+                    <button onclick="disableAccount()">Disable Account</button>
+                </div>
+                <div class="form-section">
+                    <h2>Add Notification</h2>
+                    <input type="text" id="notification-message" placeholder="Notification Message" required><br>
+                    <button onclick="addNotification()">Add Notification</button>
+                </div>
+                <div class="form-section">
+                    <h2>Assign Default Nicknames</h2>
+                    <button onclick="assignDefaultNicknames()">Assign Default Nicknames</button>
+                </div>
+                <div class="form-section">
+                    <h2>Assign Badge</h2>
+                    <input type="text" id="badge-email" placeholder="User Email" required><br>
+                    <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
+                    <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
+                </div>
+                <div class="form-section">
+                    <h2>Reported Posts</h2>
+                    <div id="reported-posts-container"></div>
+                </div>
+                <div class="form-section">
+                    <h2>Update User Permissions</h2>
+                    <input type="text" id="permissions-email" placeholder="User Email" required><br>
+                    <label><input type="checkbox" id="can-post"> Can Post</label><br>
+                    <label><input type="checkbox" id="can-message"> Can Message</label><br>
+                    <button onclick="updateUserPermissions()">Update Permissions</button>
+                </div>
+                <button onclick="window.location.href = 'index.html';">home </button>
+            </div>
+        </header>
+    </div>
+
+<style>
+body {
+    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box; /* Include padding in width/height */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links li::after {
+    content: "•";
+    color: #d2d2d7;
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.footer-links li:last-child::after {
+    content: "";
+}
+
+.footer-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #0066cc;
+}
+
+.footer-copyright {
+    margin-bottom: 5px;
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+.footer-country {
+    color: #6e6e73;
+    font-size: 0.7em;
+}
+
+@media (max-width: 600px) {
+    .footer {
+        padding: 15px;
+        font-size: 0.6em;
+    }
+
+    .footer-links {
+        gap: 10px;
+    }
+
+    .footer-links li::after {
+        display: none;
+    }
+
+    .footer-links li {
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+}
+</style>
+</html>
