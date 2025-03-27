@@ -233,9 +233,7 @@
                         const hasAcknowledged = doc.data().hasAcknowledgedRestrictions;
                         const restrictions = doc.data().restrictions || {}; //get restrictions
                         if (restrictions.posting || restrictions.messaging) { //check for restrictions
-                            if (!hasAcknowledged) {
-                                displayRestrictionNotice(restrictions);
-                            }
+                            displayRestrictionNotice(restrictions);
                             document.body.innerHTML = htmlContent;
                             document.getElementById('login').style.display = 'none';
                             document.getElementById('profile').style.display = 'none';
