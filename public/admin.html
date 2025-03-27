@@ -1,5 +1,7 @@
+<!-- filepath: /workspaces/toastreal/public/admin.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,23 +100,13 @@
 
         // Update user permissions (Client-side only -  Directly update Firestore)
         function updateUserPermissions() {
-    const email = document.getElementById('permissions-email').value;
-    const canPost = document.getElementById('can-post').checked;
-    const canMessage = document.getElementById('can-message').checked;
-    const userNote = document.getElementById('user-note').value;
+            const email = document.getElementById('permissions-email').value;
+            const canPost = document.getElementById('can-post').checked;
+            const canMessage = document.getElementById('can-message').checked;
+            const userNote = document.getElementById('user-note').value;
 
-    // First, get the user's document ID based on their email.
-    db.collection('users').where('email', '==', email).get()
-        .then((querySnapshot) => {
-            if (querySnapshot.empty) {
-                displayMessage('User not found', 'error');
-                return;
-            }
-            // Get the first document's ID.  In a real app, you might have to handle multiple results.
-            const userDocId = querySnapshot.docs[0].id;
-
-            // Now, update the user's document.
-            db.collection('users').doc(userDocId).update({
+            // Use the email as the document ID
+            db.collection('users').doc(email).update({
                 restrictions: {
                     posting: !canPost,
                     messaging: !canMessage,
@@ -123,13 +115,9 @@
             }).then(() => {
                 displayMessage('User permissions updated successfully', 'success');
             }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
+                displayMessage('Error updating user: ' + error.message, 'error');
             });
-        })
-        .catch((error) => {
-            displayMessage('Error finding user: ' + error.message, 'error');
-        });
-}
+        }
 
         //  Reset Password (Client-side, requires user to be logged in)
         function resetPassword() {
@@ -170,24 +158,13 @@
 
         function assignBadge(badgeType) {
             const email = document.getElementById('badge-email').value;
-             db.collection('users').where('email', '==', email).get()
-                .then((querySnapshot) => {
-                    if (querySnapshot.empty) {
-                        displayMessage('User not found', 'error');
-                        return;
-                    }
-                    const userDocId = querySnapshot.docs[0].id;
-                    db.collection('users').doc(userDocId).update({
-                        badge: badgeType
-                    }).then(() => {
-                        displayMessage(`${badgeType} badge assigned`, 'success');
-                    }).catch(error => {
-                         displayMessage('Error: ' + error.message, 'error');
-                    });
-                })
-                .catch((error) => {
-                    displayMessage('Error finding user: ' + error.message, 'error');
-                });
+            db.collection('users').doc(email).update({
+                badge: badgeType
+            }).then(() => {
+                displayMessage(`${badgeType} badge assigned`, 'success');
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
         }
 
     </script>
@@ -213,7 +190,7 @@
                 <input type="text" id="notification-message" placeholder="Notification Message" required><br>
                 <button onclick="addNotification()">Add Notification</button>
             </div>
-             <div class="form-section">
+            <div class="form-section">
                 <h2>Assign Default Nicknames</h2>
                 <button onclick="assignDefaultNicknames()">Assign Default Nicknames</button>
             </div>
@@ -242,90 +219,93 @@
 </div>
 
 <style>
-body {
-    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
-}
+    body {
+        margin-bottom: 60px;
+        /* Add margin at the bottom for fixed footer */
+    }
 
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    font-size: 0.8em;
-    line-height: 1.5;
-    backdrop-filter: blur(10px);
-    box-sizing: border-box; /* Include padding in width/height */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.footer-links li {
-    display: inline;
-}
-
-.footer-links li::after {
-    content: "•";
-    color: #d2d2d7;
-    margin-left: 8px;
-    padding-left: 8px;
-}
-
-.footer-links li:last-child::after {
-    content: "";
-}
-
-.footer-links a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-.footer-links a:hover {
-    text-decoration: underline;
-    color: #0066cc;
-}
-
-.footer-copyright {
-    margin-bottom: 5px;
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-.footer-country {
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-@media (max-width: 600px) {
     .footer {
-        padding: 15px;
-        font-size: 0.6em;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        font-size: 0.8em;
+        line-height: 1.5;
+        backdrop-filter: blur(10px);
+        box-sizing: border-box;
+        /* Include padding in width/height */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .footer-links {
-        gap: 10px;
-    }
-
-    .footer-links li::after {
-        display: none;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
     }
 
     .footer-links li {
-        margin-right: 4px;
-        margin-left: 4px;
+        display: inline;
     }
-}
+
+    .footer-links li::after {
+        content: "•";
+        color: #d2d2d7;
+        margin-left: 8px;
+        padding-left: 8px;
+    }
+
+    .footer-links li:last-child::after {
+        content: "";
+    }
+
+    .footer-links a {
+        color: #0066cc;
+        text-decoration: none;
+    }
+
+    .footer-links a:hover {
+        text-decoration: underline;
+        color: #0066cc;
+    }
+
+    .footer-copyright {
+        margin-bottom: 5px;
+        color: #6e6e73;
+        font-size: 0.7em;
+    }
+
+    .footer-country {
+        color: #6e6e73;
+        font-size: 0.7em;
+    }
+
+    @media (max-width: 600px) {
+        .footer {
+            padding: 15px;
+            font-size: 0.6em;
+        }
+
+        .footer-links {
+            gap: 10px;
+        }
+
+        .footer-links li::after {
+            display: none;
+        }
+
+        .footer-links li {
+            margin-right: 4px;
+            margin-left: 4px;
+        }
+    }
 </style>
+
 </html>
