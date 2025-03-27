@@ -16,7 +16,7 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc", // Replace with your actual API key
             authDomain: "toastrealxyz.firebaseapp.com",
             projectId: "toastrealxyz",
             storageBucket: "toastrealxyz.appspot.com",
@@ -109,7 +109,15 @@
 
         // Check if user is logged in
         firebase.auth().onAuthStateChanged(user => {
+            const profileButton = document.getElementById('profile');
+            const loginButton = document.getElementById('login');
+            const logoutButton = document.getElementById('logout-button');
+
             if (user) {
+                // User is signed in.
+                profileButton.style.display = 'block';
+                loginButton.style.display = 'none';
+                logoutButton.style.display = 'block';
                 db.collection('users').doc(user.email).get().then(doc => {
                     if (doc.exists) {
                         const restrictions = doc.data().restrictions || {};
@@ -124,6 +132,11 @@
                 }).catch(error => {
                     console.error('Error checking user restrictions:', error);
                 });
+            } else {
+                // User is signed out.
+                profileButton.style.display = 'none';
+                loginButton.style.display = 'block';
+                logoutButton.style.display = 'none';
             }
         });
 
@@ -134,6 +147,14 @@
             }).catch((error) => {
                 alert('Error: ' + error.message);
             });
+        }
+
+        function signin() {
+            window.location.href = 'accounts.html';
+        }
+
+        function profile(){
+            window.location.href = 'profile.html'
         }
     </script>
 </head>
@@ -159,7 +180,7 @@
             <h3>have fun!</h3>
             <div class="container">
                 <button id="profile" onclick="profile()" style="display: none;">profile</button>
-                <button id="login" onclick="signin()" style="display: none;">log in</button>
+                <button id="login" onclick="signin()" style="display: block;">log in</button>
                 <button onclick="window.location.href = 'post.html';">social</button>
                 <button onclick="window.location.href = 'news.html';">news</button>
                 <button onclick="window.location.href = 'users.html';">friends</button>
