@@ -70,24 +70,30 @@
                     <input type="checkbox" id="restriction-acknowledged"> I've read the restriction.
                 </label>
                 <br>
-                <button id="acknowledge-button" disabled>Acknowledge</button>
+                <button id="acknowledge-button">Acknowledge</button>
             `;
 
             document.body.appendChild(noticeDiv);
 
-            const acknowledgeCheckbox = document.getElementById('restriction-acknowledged');
             const acknowledgeButton = document.getElementById('acknowledge-button');
 
-            acknowledgeCheckbox.addEventListener('change', function () {
-                acknowledgeButton.disabled = !this.checked;
-            });
-
             acknowledgeButton.addEventListener('click', function () {
-                noticeDiv.remove();
-                // Re-enable the page
-                document.body.style.overflow = 'auto';
-                document.body.style.pointerEvents = 'auto';
-                restrictionNoticeShown = false; // Reset the flag here!
+                // Update the user's document in Firestore
+                firebase.auth().currentUser.getIdToken().then(idToken => { // Get the ID token
+                    const userRef = db.collection('users').doc(firebase.auth().currentUser.email);
+                    userRef.update({ hasAcknowledgedRestrictions: true })
+                        .then(() => {
+                            noticeDiv.remove();
+                            // Re-enable the page
+                            document.body.style.overflow = 'auto';
+                            document.body.style.pointerEvents = 'auto';
+                            restrictionNoticeShown = false; // Reset the flag
+                        })
+                        .catch(error => {
+                            console.error("Error updating user document: ", error);
+                            showNotification('Error acknowledging restriction. Please try again.', 'error');
+                        });
+                });
             });
 
             // Disable the page
@@ -224,22 +230,26 @@
             if (user) {
                 db.collection('users').doc(user.email).get().then(doc => {
                     if (doc.exists) {
-                        const restrictions = doc.data().restrictions || {};
-                        if (restrictions.posting || restrictions.messaging) {
-                            displayRestrictionNotice(restrictions);
-                            document.body.innerHTML = htmlContent; // Set the HTML content
+                        const hasAcknowledged = doc.data().hasAcknowledgedRestrictions;
+                        const restrictions = doc.data().restrictions || {}; //get restrictions
+                        if (restrictions.posting || restrictions.messaging) { //check for restrictions
+                            if (!hasAcknowledged) {
+                                displayRestrictionNotice(restrictions);
+                            }
+                            document.body.innerHTML = htmlContent;
                             document.getElementById('login').style.display = 'none';
                             document.getElementById('profile').style.display = 'none';
                             document.getElementById('logout-button').style.display = 'none';
                             loadNotifications();
-
-                        } else {
-                            document.body.innerHTML = htmlContent; // Set the HTML content
+                        }
+                        else{
+                            document.body.innerHTML = htmlContent;
                             document.getElementById('login').style.display = 'none';
                             document.getElementById('profile').style.display = 'block';
                             document.getElementById('logout-button').style.display = 'block';
                             loadNotifications();
                         }
+                       
                     } else {
                         document.body.innerHTML = htmlContent; // Set the HTML content
                         document.getElementById('login').style.display = 'none';
@@ -248,7 +258,7 @@
                         loadNotifications();
                     }
                 }).catch(error => {
-                    console.error('Error checking user restrictions:', error);
+                    console.error('Error checking user data:', error);
                 });
             } else {
                 document.body.innerHTML = htmlContent; // Set the HTML content
