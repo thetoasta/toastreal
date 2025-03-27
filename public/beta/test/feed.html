@@ -7,7 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -227,6 +228,91 @@
         #post-button:hover {
             background-color: rgba(91, 24, 127, 0.9);
         }
+
+        .post-header h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .post-header a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .post-header a:hover {
+            color: #1da1f2;
+        }
+
+        .badge {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .menu {
+            position: relative;
+            display: inline-block;
+            margin-left: auto;
+        }
+
+        .menu-button {
+            background-color: transparent;
+            color: #fff;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #15202b;
+            border: 1px solid #2f3336;
+            border-radius: 5px;
+            padding: 5px 0;
+            z-index: 1;
+        }
+
+        .menu-content button {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            text-align: left;
+            background-color: transparent;
+            color: #fff;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-content button:hover {
+            background-color: #1da1f2;
+        }
+
+        .like-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .like-button {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        #like-count {
+            color: #fff;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -319,7 +405,7 @@
             if (noPostsMessage) {
                 noPostsMessage.style.display = 'none';
             }
-             return postElement;
+            return postElement;
         };
 
         // Function to fetch and display all posts
@@ -366,20 +452,22 @@
                         const postElement = document.createElement('div');
                         postElement.className = 'post';
                         postElement.innerHTML = `
-                            <h3><a href="users.html?user=${post.username}">${nickname}</a> ${badgeImg}</h3>
-                            <p>${post.content}</p>
-                            <small>${formattedDate}</small>
-                            <div class="menu">
-                                <button class="menu-button" onclick="toggleMenu('${postId}')">⋮</button>
-                                <div class="menu-content" id="menu-${postId}">
-                                    ${auth.currentUser && auth.currentUser.email === post.username ? `
-                                        <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
-                                        <button onclick="deletePost('${postId}')">Delete</button>
-                                    ` : `
-                                        <button onclick="reportPost('${postId}')">Report</button>
-                                    `}
+                            <div class="post-header">
+                                <h3><a href="users.html?user=${post.username}">${nickname}</a> ${badgeImg}</h3>
+                                <div class="menu">
+                                    <button class="menu-button" onclick="toggleMenu('${postId}')">⋮</button>
+                                    <div class="menu-content" id="menu-${postId}">
+                                        ${auth.currentUser && auth.currentUser.email === post.username ? `
+                                            <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
+                                            <button onclick="deletePost('${postId}')">Delete</button>
+                                        ` : `
+                                            <button onclick="reportPost('${postId}')">Report</button>
+                                        `}
+                                    </div>
                                 </div>
                             </div>
+                            <p>${post.content}</p>
+                            <small>${formattedDate}</small>
                             <div class="like-container">
                                 <img src="images/icon.png" alt="Like" class="like-button" onclick="likePost('${postId}')">
                                 <span id="like-count-${postId}">${post.likes || 0}</span>
@@ -394,7 +482,6 @@
                                 postsContainer.appendChild(postElement);
                             }
                             renderedPosts[postId] = postElement;
-
                             // Show notification if the tab is not active
                             if (document.hidden) {
                                 showBrowserNotification('new post from toast social! 🚀', `${nickname} said: ${post.content}`);
@@ -435,7 +522,8 @@
                 nickname: authorName,
                 content: postContent,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Store as server timestamp
-                username: auth.currentUser.email
+                username: auth.currentUser.email,
+                likes: 0
             };
 
             db.collection('posts')
@@ -452,6 +540,73 @@
 
         // Initial fetch of posts
         loadPosts();
+
+        function toggleMenu(postId) {
+            const menu = document.getElementById(`menu-${postId}`);
+            if (menu.style.display === "none") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        function editPost(postId, currentContent) {
+            const newContent = prompt("Edit your post:", currentContent);
+            if (newContent !== null && newContent.trim() !== "") {
+                db.collection("posts").doc(postId).update({
+                    content: newContent
+                }).then(() => {
+                    console.log("Post updated successfully!");
+                    loadPosts();
+                }).catch((error) => {
+                    console.error("Error updating post: ", error);
+                    alert("Failed to edit post. Please try again.");
+                });
+            }
+        }
+
+        function deletePost(postId) {
+            if (confirm("Are you sure you want to delete this post?")) {
+                db.collection("posts").doc(postId).delete().then(() => {
+                    console.log("Post deleted successfully!");
+                    loadPosts();
+                }).catch((error) => {
+                    console.error("Error deleting post: ", error);
+                    alert("Failed to delete post. Please try again.");
+                });
+            }
+        }
+
+        function reportPost(postId) {
+            alert("Post reported.  This feature is under development.");
+            // Implement report functionality here (e.g., add to a reports collection in Firestore)
+        }
+
+        function likePost(postId) {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please sign in to like this post.");
+                return;
+            }
+
+            const postRef = db.collection("posts").doc(postId);
+
+            db.runTransaction(async (transaction) => {
+                const postDoc = await transaction.get(postRef);
+                if (!postDoc.exists) {
+                    throw "Post does not exist!";
+                }
+
+                const currentLikes = postDoc.data().likes || 0;
+                transaction.update(postRef, { likes: currentLikes + 1 });
+            }).then(() => {
+                console.log("Post liked successfully!");
+                loadPosts();
+            }).catch((error) => {
+                console.error("Error liking post: ", error);
+                alert("Failed to like post. Please try again.");
+            });
+        }
     </script>
 </body>
 </html>
