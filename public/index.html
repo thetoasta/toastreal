@@ -7,13 +7,135 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <script src="notifications.js"></script>
     <script type="module" src="beta/genai.js"></script>
     <script>
+        const htmlContent = `
+            <header class="v2">
+                <nav>
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="post.html">posts</a></li>
+                        <li class="nav-item"><a href="profile.html">profile</a></li>
+                        <li class="nav-item"><a href="users.html">friends</a></li>
+                        <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                        <li class="nav-item"><a href="group.html">group chats</a></li>
+                        <li class="nav-item"><a href="news.html">news</a></li>
+                        <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+                    </ul>
+                </nav>
+            </header>
+            <div class="container">
+                <header>
+                    <h1><strong>toast social</strong></h1>
+                    <h2><strong>welcome! 🔥</strong></h2>
+                    <h3>have fun!</h3>
+                    <div class="container">
+                        <button id="profile" onclick="profile()" style="display: none;">profile</button>
+                        <button id="login" onclick="signin()" style="display: none;">log in</button>
+                        <button onclick="window.location.href = 'post.html';">social</button>
+                        <button onclick="window.location.href = 'news.html';">news</button>
+                        <button onclick="window.location.href = 'users.html';">friends</button>
+                        <button onclick="window.location.href = 'friendrequests.html';">friend requests</button>
+                        <button onclick="window.location.href = 'group.html';">group chats</button>
+                        <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
+                    </div>
+                </header>
+                <div id="notifications-container"></div>
+            </div>
+            
+            <style>
+            body {
+                margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
+            }
+
+            .footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: #fff;
+                padding: 20px;
+                text-align: center;
+                font-size: 0.8em;
+                line-height: 1.5;
+                backdrop-filter: blur(10px);
+                box-sizing: border-box; /* Include padding in width/height */
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .footer-links {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 15px;
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .footer-links li {
+                display: inline;
+            }
+
+            .footer-links li::after {
+                content: "•";
+                color: #d2d2d7;
+                margin-left: 8px;
+                padding-left: 8px;
+            }
+
+            .footer-links li:last-child::after {
+                content: "";
+            }
+
+            .footer-links a {
+                color: #0066cc;
+                text-decoration: none;
+            }
+
+            .footer-links a:hover {
+                text-decoration: underline;
+                color: #0066cc;
+            }
+
+            .footer-copyright {
+                margin-bottom: 5px;
+                color: #6e6e73;
+                font-size: 0.7em;
+            }
+
+            .footer-country {
+                color: #6e6e73;
+                font-size: 0.7em;
+            }
+
+            @media (max-width: 600px) {
+                .footer {
+                    padding: 15px;
+                    font-size: 0.6em;
+                }
+
+                .footer-links {
+                    gap: 10px;
+                }
+
+                .footer-links li::after {
+                    display: none;
+                }
+
+                .footer-links li {
+                    margin-right: 4px;
+                    margin-left: 4px;
+                }
+            }
+            </style>
+        `;
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
@@ -105,28 +227,38 @@
                         const restrictions = doc.data().restrictions || {};
                         if (restrictions.posting || restrictions.messaging) {
                             displayRestrictionNotice(restrictions);
+                            document.body.innerHTML = htmlContent; // Set the HTML content
                             document.getElementById('login').style.display = 'none';
                             document.getElementById('profile').style.display = 'none';
                             document.getElementById('logout-button').style.display = 'none';
+                           loadNotifications();
+
                         } else {
+                            document.body.innerHTML = htmlContent; // Set the HTML content
                             document.getElementById('login').style.display = 'none';
                             document.getElementById('profile').style.display = 'block';
                             document.getElementById('logout-button').style.display = 'block';
+                            loadNotifications();
                         }
                     } else {
+                        document.body.innerHTML = htmlContent; // Set the HTML content
                         document.getElementById('login').style.display = 'none';
                         document.getElementById('profile').style.display = 'block';
                         document.getElementById('logout-button').style.display = 'block';
+                        loadNotifications();
                     }
                 }).catch(error => {
                     console.error('Error checking user restrictions:', error);
                 });
             } else {
+                document.body.innerHTML = htmlContent; // Set the HTML content
                 document.getElementById('login').style.display = 'block';
                 document.getElementById('profile').style.display = 'none';
                 document.getElementById('logout-button').style.display = 'none';
+                loadNotifications();
             }
         });
+
         // Log out user
         function logout() {
             firebase.auth().signOut().then(() => {
@@ -148,139 +280,27 @@
         function loadNotifications() {
             db.collection('notifications').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const notificationsContainer = document.getElementById('notifications-container');
-                notificationsContainer.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const notification = doc.data();
-                    const notificationElement = document.createElement('div');
-                    notificationElement.className = 'notification';
-                    notificationElement.innerText = notification.message;
-                    notificationsContainer.appendChild(notificationElement);
-                });
+                if(notificationsContainer){
+                    notificationsContainer.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const notification = doc.data();
+                        const notificationElement = document.createElement('div');
+                        notificationElement.className = 'notification';
+                        notificationElement.innerText = notification.message;
+                        notificationsContainer.appendChild(notificationElement);
+                    });
+                }
             });
         }
 
         // Load notifications on page load
-        window.onload = loadNotifications;
+        window.onload = function(){
+            loadNotifications();
+        }
+
     </script>
 </head>
 <body>
-    <header class="v2">
-        <nav>
-            <ul class="nav-list">
-                <li class="nav-item"><a href="post.html">posts</a></li>
-                <li class="nav-item"><a href="profile.html">profile</a></li>
-                <li class="nav-item"><a href="users.html">friends</a></li>
-                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
-                <li class="nav-item"><a href="group.html">group chats</a></li>
-                <li class="nav-item"><a href="news.html">news</a></li>
-                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <header>
-            <h1><strong>toast social</strong></h1>
-            <h2><strong>welcome! 🔥</strong></h2>
-            <h3>have fun!</h3>
-            <div class="container">
-                <button id="profile" onclick="profile()" style="display: none;">profile</button>
-                <button id="login" onclick="signin()" style="display: none;">log in</button>
-                <button onclick="window.location.href = 'post.html';">social</button>
-                <button onclick="window.location.href = 'news.html';">news</button>
-                <button onclick="window.location.href = 'users.html';">friends</button>
-                <button onclick="window.location.href = 'friendrequests.html';">friend requests</button>
-                <button onclick="window.location.href = 'group.html';">group chats</button>
-                <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
-            </div>
-        </header>
-        <div id="notifications-container"></div>
-    </div>
     
-<style>
-body {
-    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
-}
-
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    font-size: 0.8em;
-    line-height: 1.5;
-    backdrop-filter: blur(10px);
-    box-sizing: border-box; /* Include padding in width/height */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.footer-links li {
-    display: inline;
-}
-
-.footer-links li::after {
-    content: "•";
-    color: #d2d2d7;
-    margin-left: 8px;
-    padding-left: 8px;
-}
-
-.footer-links li:last-child::after {
-    content: "";
-}
-
-.footer-links a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-.footer-links a:hover {
-    text-decoration: underline;
-    color: #0066cc;
-}
-
-.footer-copyright {
-    margin-bottom: 5px;
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-.footer-country {
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-@media (max-width: 600px) {
-    .footer {
-        padding: 15px;
-        font-size: 0.6em;
-    }
-
-    .footer-links {
-        gap: 10px;
-    }
-
-    .footer-links li::after {
-        display: none;
-    }
-
-    .footer-links li {
-        margin-right: 4px;
-        margin-left: 4px;
-    }
-}
-</style>
+</body>
 </html>
