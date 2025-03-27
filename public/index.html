@@ -51,7 +51,7 @@
                 z-index: 1000;
             `;
 
-            let message = 'You are restricted from using this site.';
+            let message = 'You have restrictions on your account. Please read the following:';
             let blockedFeatures = [];
             if (restrictions.posting) blockedFeatures.push('posting');
             if (restrictions.messaging) blockedFeatures.push('messaging');
@@ -67,9 +67,10 @@
                 ${message}
                 <br><br>
                 <label>
-                    <input type="checkbox" id="restriction-acknowledged"> I've read and understood the restrictions.
+                    <input type="checkbox" id="restriction-acknowledged"> I've read these limitations and understand them.
                 </label>
                 <br>
+                <button onclick="window.location.href = 'https://https://www.notion.so/toastsocial/1c31def6da0e802eb517d19e379ee431?v=1c31def6da0e802e81ca000cbd70a59c&pvs=4';">This wasn't me</button>
                 <button id="acknowledge-button" disabled>Acknowledge</button>
             `;
 
