@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+        crossorigin="anonymous"></script>
     <title>Admin Panel</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
@@ -29,18 +28,18 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Admin credentials
+        // Admin credentials  (It's best to store these server-side)
         const adminEmail = "nolanp678@gmail.com";
         const adminEmail2 = "theodore.crowellmcgo@student.dedham.k12.ma.us";
-    
+
 
         // Check if user is logged in and is admin
         firebase.auth().onAuthStateChanged(user => {
-            if (user && user.email === adminEmail, adminEmail2) {
+            if (user && (user.email === adminEmail || user.email === adminEmail2)) {
                 document.getElementById('admin-panel').style.display = 'block';
                 loadReportedPosts();
             } else {
-                window.location.href = 'accounts.html';
+                window.location.href = 'accounts.html'; // Or redirect to a login page
             }
         });
 
@@ -57,7 +56,7 @@
                         <p><strong>Reported By:</strong> ${reportedPost.reportedBy}</p>
                         <p><strong>Post Content:</strong> ${reportedPost.postContent}</p>
                         <p><strong>Post Username:</strong> ${reportedPost.postUsername}</p>
-                        <button onclick="deleteReportedPost('${reportedPost.postId}')">Delete Post</button>
+                        <button onclick="deleteReportedPost('${doc.id}')">Delete Post</button>
                         <button onclick="removeBadge('${reportedPost.postUsername}')">Remove Checkmark</button>
                     `;
                     reportedPostsContainer.appendChild(reportedPostElement);
@@ -97,71 +96,150 @@
             messageBox.style.display = 'block';
         }
 
-        // Update user permissions
+        // Update user permissions (Client-side only -  Directly update Firestore)
         function updateUserPermissions() {
-            const email = document.getElementById('permissions-email').value;
-            const canPost = document.getElementById('can-post').checked;
-            const canMessage = document.getElementById('can-message').checked;
+    const email = document.getElementById('permissions-email').value;
+    const canPost = document.getElementById('can-post').checked;
+    const canMessage = document.getElementById('can-message').checked;
+    const userNote = document.getElementById('user-note').value;
 
-            db.collection('users').doc(email).set({
+    // First, get the user's document ID based on their email.
+    db.collection('users').where('email', '==', email).get()
+        .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                displayMessage('User not found', 'error');
+                return;
+            }
+            // Get the first document's ID.  In a real app, you might have to handle multiple results.
+            const userDocId = querySnapshot.docs[0].id;
+
+            // Now, update the user's document.
+            db.collection('users').doc(userDocId).update({
                 restrictions: {
                     posting: !canPost,
-                    messaging: !canMessage
+                    messaging: !canMessage,
+                    note: userNote  // Add the user note
                 }
-            }, { merge: true }).then(() => {
+            }).then(() => {
                 displayMessage('User permissions updated successfully', 'success');
             }).catch(error => {
                 displayMessage('Error: ' + error.message, 'error');
             });
+        })
+        .catch((error) => {
+            displayMessage('Error finding user: ' + error.message, 'error');
+        });
+}
+
+        //  Reset Password (Client-side, requires user to be logged in)
+        function resetPassword() {
+            const email = document.getElementById('reset-email').value;
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    displayMessage('Password reset email sent!', 'success');
+                })
+                .catch((error) => {
+                    displayMessage('Error: ' + error.message, 'error');
+                });
         }
+
+        //  Disable Account (Client-side -  Can't be done directly.  Requires Admin SDK)
+        function disableAccount() {
+            const email = document.getElementById('disable-email').value;
+            displayMessage("Disabling account requires Admin SDK and server-side implementation.", "error");
+            console.error("Disabling account requires Admin SDK and server-side implementation.");
+        }
+
+        //  Add Notification (Client-side -  Store in Firestore)
+        function addNotification() {
+            const message = document.getElementById('notification-message').value;
+            db.collection('notifications').add({  //  Change 'notifications' to your desired collection
+                message: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                displayMessage('Notification added successfully', 'success');
+            }).catch(error => {
+                displayMessage('Error: ' + error.message, 'error');
+            });
+        }
+
+        function assignDefaultNicknames() {
+            displayMessage("Assigning default nicknames requires Admin SDK and server-side implementation.", "error");
+            console.error("Assigning default nicknames requires Admin SDK and server-side implementation.");
+        }
+
+        function assignBadge(badgeType) {
+            const email = document.getElementById('badge-email').value;
+             db.collection('users').where('email', '==', email).get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        displayMessage('User not found', 'error');
+                        return;
+                    }
+                    const userDocId = querySnapshot.docs[0].id;
+                    db.collection('users').doc(userDocId).update({
+                        badge: badgeType
+                    }).then(() => {
+                        displayMessage(`${badgeType} badge assigned`, 'success');
+                    }).catch(error => {
+                         displayMessage('Error: ' + error.message, 'error');
+                    });
+                })
+                .catch((error) => {
+                    displayMessage('Error finding user: ' + error.message, 'error');
+                });
+        }
+
     </script>
 </head>
 
-    <div class="container" id="admin-panel" style="display: none;">
-        <header>
-            <h1><strong>Admin Panel</strong></h1>
-            <div id="message-box" style="display: none;"></div>
-            <div class="form-container">
-                <div class="form-section">
-                    <h2>Reset User Password</h2>
-                    <input type="text" id="reset-email" placeholder="User Email" required><br>
-                    <button onclick="resetPassword()">Reset Password</button>
-                </div>
-                <div class="form-section">
-                    <h2>Disable User Account</h2>
-                    <input type="text" id="disable-email" placeholder="User Email" required><br>
-                    <button onclick="disableAccount()">Disable Account</button>
-                </div>
-                <div class="form-section">
-                    <h2>Add Notification</h2>
-                    <input type="text" id="notification-message" placeholder="Notification Message" required><br>
-                    <button onclick="addNotification()">Add Notification</button>
-                </div>
-                <div class="form-section">
-                    <h2>Assign Default Nicknames</h2>
-                    <button onclick="assignDefaultNicknames()">Assign Default Nicknames</button>
-                </div>
-                <div class="form-section">
-                    <h2>Assign Badge</h2>
-                    <input type="text" id="badge-email" placeholder="User Email" required><br>
-                    <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
-                    <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
-                </div>
-                <div class="form-section">
-                    <h2>Reported Posts</h2>
-                    <div id="reported-posts-container"></div>
-                </div>
-                <div class="form-section">
-                    <h2>Update User Permissions</h2>
-                    <input type="text" id="permissions-email" placeholder="User Email" required><br>
-                    <label><input type="checkbox" id="can-post"> Can Post</label><br>
-                    <label><input type="checkbox" id="can-message"> Can Message</label><br>
-                    <button onclick="updateUserPermissions()">Update Permissions</button>
-                </div>
-                <button onclick="window.location.href = 'index.html';">home </button>
+<div class="container" id="admin-panel" style="display: none;">
+    <header>
+        <h1><strong>Admin Panel</strong></h1>
+        <div id="message-box" style="display: none;"></div>
+        <div class="form-container">
+            <div class="form-section">
+                <h2>Reset User Password</h2>
+                <input type="text" id="reset-email" placeholder="User Email" required><br>
+                <button onclick="resetPassword()">Reset Password</button>
             </div>
-        </header>
-    </div>
+            <div class="form-section">
+                <h2>Disable User Account</h2>
+                <input type="text" id="disable-email" placeholder="User Email" required><br>
+                <button onclick="disableAccount()">Disable Account</button>
+            </div>
+            <div class="form-section">
+                <h2>Add Notification</h2>
+                <input type="text" id="notification-message" placeholder="Notification Message" required><br>
+                <button onclick="addNotification()">Add Notification</button>
+            </div>
+             <div class="form-section">
+                <h2>Assign Default Nicknames</h2>
+                <button onclick="assignDefaultNicknames()">Assign Default Nicknames</button>
+            </div>
+            <div class="form-section">
+                <h2>Assign Badge</h2>
+                <input type="text" id="badge-email" placeholder="User Email" required><br>
+                <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
+                <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
+            </div>
+            <div class="form-section">
+                <h2>Reported Posts</h2>
+                <div id="reported-posts-container"></div>
+            </div>
+            <div class="form-section">
+                <h2>Update User Permissions</h2>
+                <input type="text" id="permissions-email" placeholder="User Email" required><br>
+                <label><input type="checkbox" id="can-post"> Can Post</label><br>
+                <label><input type="checkbox" id="can-message"> Can Message</label><br>
+                <label>Note:</label><br>
+                <input type="text" id="user-note" placeholder="Add a note about this user"><br>
+                <button onclick="updateUserPermissions()">Update Permissions</button>
+            </div>
+            <button onclick="window.location.href = 'index.html';">home </button>
+        </div>
+    </header>
+</div>
 
 <style>
 body {

@@ -27,20 +27,93 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
+    
+        // Function to display restriction notice
+        function displayRestrictionNotice(restrictions) {
+            const noticeDiv = document.createElement('div');
+            noticeDiv.id = 'restriction-notice';
+            noticeDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                z-index: 1000;
+            `;
+    
+            let message = 'You are restricted from using this site.';
+            if (restrictions.note) {
+                message += `<br><br>Reason: ${restrictions.note}`;
+            }
+    
+            noticeDiv.innerHTML = `
+                ${message}
+                <br><br>
+                <label>
+                    <input type="checkbox" id="restriction-acknowledged"> I've read the restriction.
+                </label>
+                <br>
+                <button id="acknowledge-button" disabled>Acknowledge</button>
+            `;
+    
+            document.body.appendChild(noticeDiv);
+    
+            const acknowledgeCheckbox = document.getElementById('restriction-acknowledged');
+            const acknowledgeButton = document.getElementById('acknowledge-button');
+    
+            acknowledgeCheckbox.addEventListener('change', function() {
+                acknowledgeButton.disabled = !this.checked;
+            });
+    
+            acknowledgeButton.addEventListener('click', function() {
+                noticeDiv.remove();
+                // Re-enable the page
+                document.body.style.overflow = 'auto';
+                document.body.style.pointerEvents = 'auto';
+            });
+    
+            // Disable the page
+            document.body.style.overflow = 'hidden';
+            document.body.style.pointerEvents = 'none';
+    
+            // Re-enable the restriction notice
+            noticeDiv.style.pointerEvents = 'auto';
+        }
+    
         // Check if user is logged in
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('profile').style.display = 'block';
-                document.getElementById('logout-button').style.display = 'block';
+                db.collection('users').doc(user.email).get().then(doc => {
+                    if (doc.exists) {
+                        const restrictions = doc.data().restrictions || {};
+                        if (restrictions.posting || restrictions.messaging) {
+                            displayRestrictionNotice(restrictions);
+                            document.getElementById('login').style.display = 'none';
+                            document.getElementById('profile').style.display = 'none';
+                            document.getElementById('logout-button').style.display = 'none';
+                        } else {
+                            document.getElementById('login').style.display = 'none';
+                            document.getElementById('profile').style.display = 'block';
+                            document.getElementById('logout-button').style.display = 'block';
+                        }
+                    } else {
+                        document.getElementById('login').style.display = 'none';
+                        document.getElementById('profile').style.display = 'block';
+                        document.getElementById('logout-button').style.display = 'block';
+                    }
+                }).catch(error => {
+                    console.error('Error checking user restrictions:', error);
+                });
             } else {
                 document.getElementById('login').style.display = 'block';
                 document.getElementById('profile').style.display = 'none';
                 document.getElementById('logout-button').style.display = 'none';
             }
         });
-
         // Log out user
         function logout() {
             firebase.auth().signOut().then(() => {
