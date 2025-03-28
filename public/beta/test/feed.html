@@ -229,12 +229,14 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
+            display: none; /* Initially hide the form */
         }
 
         #notification-form h2 {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 15px;
+            color: #fff;
         }
 
         #notification-form label {
@@ -282,6 +284,9 @@
         #notification-form button:hover {
             background-color: #0c8ed9;
         }
+        .show-form {
+          display: block;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -296,7 +301,6 @@
             appId: "1:774884910313:web:e11002887adf1055acfc78",
             measurementId: "G-3H38LZB2BX"
         };
-
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -391,49 +395,50 @@
             const notifications = await getDirectNotifications(userId);
             if (notifications.length === 0) {
                 container.innerHTML = '<p>No new notifications.</p>';
-                return;
+                //return;  Remove this return, so the form is always displayed
+            } else {
+
+                container.innerHTML = '<h2>Direct Messages</h2>'; // heading for direct messages.
+
+                notifications.forEach(notification => {
+                    const notificationDiv = document.createElement('div');
+                    notificationDiv.className = 'notification-item';
+                    if (!notification.read) {
+                        notificationDiv.style.backgroundColor = 'rgba(29, 161, 242, 0.1)'; // highlight unread
+                    }
+
+                    const senderNameSpan = document.createElement('h3');
+                    senderNameSpan.textContent = notification.senderName;
+
+                    const messageSpan = document.createElement('p');
+                    messageSpan.textContent = notification.message;
+
+                    const timestampSpan = document.createElement('span');
+                    timestampSpan.className = 'notification-time';
+                    // Use a library like date-fns to format the timestamp, or do it manually
+                    const formattedTime = notification.timestamp
+                        ? new Date(notification.timestamp.toDate()).toLocaleString()
+                        : 'Unknown Time';
+                    timestampSpan.textContent = formattedTime;
+
+                    notificationDiv.appendChild(senderNameSpan);
+                    notificationDiv.appendChild(messageSpan);
+                    notificationDiv.appendChild(timestampSpan);
+
+                    //add mark as read button.
+                    const markReadButton = document.createElement('button');
+                    markReadButton.textContent = 'Mark as Read';
+                    markReadButton.className = 'mark-read-button';  // You can add a CSS class
+                    markReadButton.onclick = async () => {
+                        await markNotificationAsRead(notification.id);
+                        // Remove the notification from the DOM or change its style
+                        notificationDiv.style.backgroundColor = 'transparent'; //remove highlight
+                        markReadButton.style.display = 'none';
+                    };
+                    notificationDiv.appendChild(markReadButton);
+                    container.appendChild(notificationDiv);
+                });
             }
-
-            container.innerHTML = '<h2>Direct Messages</h2>'; // heading for direct messages.
-
-            notifications.forEach(notification => {
-                const notificationDiv = document.createElement('div');
-                notificationDiv.className = 'notification-item';
-                if (!notification.read) {
-                    notificationDiv.style.backgroundColor = 'rgba(29, 161, 242, 0.1)'; // highlight unread
-                }
-
-                const senderNameSpan = document.createElement('h3');
-                senderNameSpan.textContent = notification.senderName;
-
-                const messageSpan = document.createElement('p');
-                messageSpan.textContent = notification.message;
-
-                const timestampSpan = document.createElement('span');
-                timestampSpan.className = 'notification-time';
-                // Use a library like date-fns to format the timestamp, or do it manually
-                const formattedTime = notification.timestamp
-                    ? new Date(notification.timestamp.toDate()).toLocaleString()
-                    : 'Unknown Time';
-                timestampSpan.textContent = formattedTime;
-
-                notificationDiv.appendChild(senderNameSpan);
-                notificationDiv.appendChild(messageSpan);
-                notificationDiv.appendChild(timestampSpan);
-
-                //add mark as read button.
-                const markReadButton = document.createElement('button');
-                markReadButton.textContent = 'Mark as Read';
-                markReadButton.className = 'mark-read-button';  // You can add a CSS class
-                markReadButton.onclick = async () => {
-                    await markNotificationAsRead(notification.id);
-                    // Remove the notification from the DOM or change its style
-                    notificationDiv.style.backgroundColor = 'transparent'; //remove highlight
-                    markReadButton.style.display = 'none';
-                };
-                notificationDiv.appendChild(markReadButton);
-                container.appendChild(notificationDiv);
-            });
 
             // Add the form for testing
             const formDiv = document.createElement('div');
@@ -461,6 +466,9 @@
                 await addDirectNotification(userId, senderName, message);
                 alert('Notification sent! Check the Firestore database and refresh the notifications.'); //basic confirmation
             });
+
+            //show form
+            document.getElementById('notification-form').classList.add('show-form');
         });
     </script>
 </head>
