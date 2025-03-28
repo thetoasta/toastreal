@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X Feed</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <title>Notifications</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Google Sans', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #000;
@@ -38,127 +35,6 @@
             font-size: 1.875rem;
             font-weight: 700;
             color: #fff;
-        }
-
-        #post-form {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            border-bottom: 1px solid #2f3336;
-        }
-
-        #post-form textarea {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            resize: none;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            border-bottom: 2px solid #2f3336;
-            outline: none;
-            background-color: transparent;
-            color: #e1e8ed;
-        }
-
-        #post-form textarea:focus {
-            border-bottom: 2px solid #1da1f2;
-        }
-
-        #post-form button {
-            background-color: #1da1f2;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-            font-weight: 500;
-            align-self: flex-end;
-        }
-
-        #post-form button:hover {
-            background-color: #0c8ed9;
-        }
-
-        #posts {
-            margin-top: 0;
-        }
-
-        .post {
-            background: transparent;
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: none;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #2f3336;
-            line-height: 1.5;
-            font-size: 1rem;
-            display: flex;
-            flex-direction: column;
-            color: #fff;
-        }
-
-        .post:last-child {
-            border-bottom: none;
-        }
-
-        .post-header {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .post-author {
-            font-weight: 700;
-            margin-right: 5px;
-            color: #fff;
-            display: inline-block;
-        }
-
-        .post-author::after {
-            content: " · ";
-            color: #657786;
-            margin: 0 3px;
-        }
-
-        .post-date {
-            color: #657786;
-            font-size: 0.875rem;
-            display: inline-block;
-            font-weight: 400;
-        }
-
-        .post-content {
-            margin-top: 0;
-            margin-left: 0;
-            word-wrap: break-word;
-            color: #fff;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            margin-right: 10px;
-            object-fit: cover;
-            flex-shrink: 0;
-            display: none;
-        }
-
-        .post-header {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-        }
-
-        .post-content-container {
-            margin-left: 0;
-            flex: 1;
         }
 
         #sidebar {
@@ -228,92 +104,365 @@
         #post-button:hover {
             background-color: rgba(91, 24, 127, 0.9);
         }
-
-        .post-header h3 {
-            color: #fff;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
-
-        .post-header a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .post-header a:hover {
+        .active {
             color: #1da1f2;
+            background-color: rgba(29, 161, 242, 0.1);
+            border-radius: 25px;
+        }
+        .notifications-content {
+            color: #fff;
+            padding: 20px;
         }
 
-        .badge {
-            width: 20px;
-            height: 20px;
-            margin-left: 5px;
-            vertical-align: middle;
+        .notification-section {
+            margin-bottom: 20px;
         }
 
-        .menu {
-            position: relative;
-            display: inline-block;
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #2f3336;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .notification-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: #fff;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #657786;
             margin-left: auto;
         }
 
-        .menu-button {
-            background-color: transparent;
-            color: #fff;
+        .notification-content {
+            font-size: 0.9rem;
+            color: #e1e8ed;
+            margin-left: 0;
+            flex: 1;
+        }
+
+        .notification-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .follow-button {
+            background-color: #1da1f2;
+            color: white;
+            padding: 8px 16px;
             border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.3s ease;
+            margin-left: auto;
+        }
+
+        .follow-button:hover {
+            background-color: #0c8ed9;
+        }
+        .notification-content-container{
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+        .top-section{
+          display: flex;
+          width: 100%;
+          align-items: flex-start;
+        }
+        .accept-button {
+            background-color: #1da1f2;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.3s ease;
+            margin-left: auto;
+        }
+
+        .accept-button:hover {
+            background-color: #0c8ed9;
+        }
+        .decline-button {
+            background-color: #657786;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .decline-button:hover {
+            background-color: #38444d;
+        }
+
+        #notification-form {
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        #notification-form h2 {
             font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0;
+            font-weight: 600;
+            margin-bottom: 15px;
         }
 
-        .menu-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: #15202b;
-            border: 1px solid #2f3336;
-            border-radius: 5px;
-            padding: 5px 0;
-            z-index: 1;
-        }
-
-        .menu-content button {
+        #notification-form label {
             display: block;
-            width: 100%;
-            padding: 10px 15px;
-            text-align: left;
-            background-color: transparent;
+            margin-bottom: 5px;
             color: #fff;
-            border: none;
+            font-size: 0.9rem;
+        }
+
+        #notification-form input[type="text"],
+        #notification-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #2f3336;
+            border-radius: 25px;
+            background-color: #15202b;
+            color: #e1e8ed;
             font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        #notification-form input[type="text"]:focus,
+        #notification-form textarea:focus {
+            border-color: #1da1f2;
+            box-shadow: 0 0 5px rgba(29, 161, 242, 0.3);
+        }
+
+        #notification-form textarea {
+            resize: vertical;
+            height: 80px;
+        }
+
+        #notification-form button {
+            background-color: #1da1f2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
             cursor: pointer;
+            font-size: 1rem;
             transition: background-color 0.3s ease;
         }
 
-        .menu-content button:hover {
-            background-color: #1da1f2;
-        }
-
-        .like-container {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .like-button {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-
-        #like-count {
-            color: #fff;
-            font-size: 1rem;
+        #notification-form button:hover {
+            background-color: #0c8ed9;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Function to add a direct notification to Firestore
+        async function addDirectNotification(userId, senderName, message) {
+            try {
+                // Ensure the user ID is valid and not empty
+                if (!userId || typeof userId !== 'string') {
+                    console.error("User ID is invalid:", userId);
+                    return; // Stop processing, or you might want to throw an error
+                }
+
+                const notificationRef = db.collection("directnotifications").doc(); // Use doc() without an ID
+
+                await notificationRef.set({
+                    userId: userId, //  ID of the user receiving the notification
+                    senderName: senderName,  // Name of the sender
+                    message: message, //  Message content
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false, // Add a 'read' field, default to false
+                    notificationId: notificationRef.id, // Store the document ID as a field
+                });
+
+                console.log("Direct notification added with ID: ", notificationRef.id);
+            } catch (error) {
+                console.error("Error adding direct notification:", error);
+                //  Consider showing a user-friendly message
+            }
+        }
+
+
+
+        // Function to get direct notifications for a specific user
+        async function getDirectNotifications(userId) {
+            try {
+                if (!userId) {
+                    console.error("User ID is invalid or missing when fetching notifications.");
+                    return [];
+                }
+                const notificationsRef = db.collection("directnotifications");
+                const querySnapshot = await notificationsRef
+                    .where("userId", "==", userId)
+                    .orderBy("timestamp", "desc")
+                    .get();
+
+
+                const notifications = [];
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    notifications.push({
+                        id: doc.id,
+                        senderName: data.senderName,
+                        message: data.message,
+                        timestamp: data.timestamp,
+                        read: data.read,
+                    });
+                });
+                return notifications;
+            } catch (error) {
+                console.error("Error getting direct notifications:", error);
+                return [];
+            }
+        }
+
+        // Function to mark a notification as read
+        async function markNotificationAsRead(notificationId) {
+            try {
+                if (!notificationId) {
+                    console.error("Notification ID is invalid or missing.");
+                    return;
+                }
+                const notificationRef = db.collection("directnotifications").doc(notificationId);
+                await notificationRef.update({ read: true });
+                console.log("Notification marked as read:", notificationId);
+            } catch (error) {
+                console.error("Error marking notification as read:", error);
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.querySelector('.notifications-content');
+            const userId = 'user123';  // Replace with the actual user ID.  ***IMPORTANT***
+
+            // Add a sample notification (for testing)
+            //  Make sure to only run this ONCE, or you'll get duplicates.  Best to remove it
+            //  after you've confirmed it works.
+            // await addDirectNotification(userId, 'John Doe', 'sent you a message');
+
+
+            const notifications = await getDirectNotifications(userId);
+            if (notifications.length === 0) {
+                container.innerHTML = '<p>No new notifications.</p>';
+                return;
+            }
+
+            container.innerHTML = '<h2>Direct Messages</h2>'; // heading for direct messages.
+
+            notifications.forEach(notification => {
+                const notificationDiv = document.createElement('div');
+                notificationDiv.className = 'notification-item';
+                if (!notification.read) {
+                    notificationDiv.style.backgroundColor = 'rgba(29, 161, 242, 0.1)'; // highlight unread
+                }
+
+                const senderNameSpan = document.createElement('h3');
+                senderNameSpan.textContent = notification.senderName;
+
+                const messageSpan = document.createElement('p');
+                messageSpan.textContent = notification.message;
+
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = 'notification-time';
+                // Use a library like date-fns to format the timestamp, or do it manually
+                const formattedTime = notification.timestamp
+                    ? new Date(notification.timestamp.toDate()).toLocaleString()
+                    : 'Unknown Time';
+                timestampSpan.textContent = formattedTime;
+
+                notificationDiv.appendChild(senderNameSpan);
+                notificationDiv.appendChild(messageSpan);
+                notificationDiv.appendChild(timestampSpan);
+
+                //add mark as read button.
+                const markReadButton = document.createElement('button');
+                markReadButton.textContent = 'Mark as Read';
+                markReadButton.className = 'mark-read-button';  // You can add a CSS class
+                markReadButton.onclick = async () => {
+                    await markNotificationAsRead(notification.id);
+                    // Remove the notification from the DOM or change its style
+                    notificationDiv.style.backgroundColor = 'transparent'; //remove highlight
+                    markReadButton.style.display = 'none';
+                };
+                notificationDiv.appendChild(markReadButton);
+                container.appendChild(notificationDiv);
+            });
+
+            // Add the form for testing
+            const formDiv = document.createElement('div');
+            formDiv.id = 'notification-form';
+            formDiv.innerHTML = `
+                <h2>Send Test Notification</h2>
+                <label for="user-id">User ID:</label>
+                <input type="text" id="user-id" value="user123">
+                <label for="sender-name">Sender Name:</label>
+                <input type="text" id="sender-name" value="Test Sender">
+                <label for="message">Message:</label>
+                <textarea id="message">This is a test notification message.</textarea>
+                <button id="send-test-notification">Send Notification</button>
+            `;
+            container.appendChild(formDiv);
+
+            // Event listener for the form submission
+            document.getElementById('send-test-notification').addEventListener('click', async (event) => {
+                event.preventDefault(); // Prevent page reload
+
+                const userId = document.getElementById('user-id').value;
+                const senderName = document.getElementById('sender-name').value;
+                const message = document.getElementById('message').value;
+
+                await addDirectNotification(userId, senderName, message);
+                alert('Notification sent! Check the Firestore database and refresh the notifications.'); //basic confirmation
+            });
+        });
+    </script>
 </head>
 <body>
     <div id="sidebar">
@@ -325,9 +474,10 @@
             <i class="fas fa-search"></i>
             <span>Explore</span>
         </button>
-        <button onclick="window.location.href='notifications.html'">
+        <button class="active" onclick="window.location.href='notifications.html'">
             <i class="fas fa-bell"></i>
             <span>Notifications</span>
+            <span style="background-color:#1da1f2; color:white; border-radius:50%; padding: 0px 6px; font-size:0.7rem; margin-left: 2px;">16</span>
         </button>
         <button onclick="window.location.href='messages.html'">
             <i class="fas fa-envelope"></i>
@@ -337,276 +487,18 @@
             <i class="fas fa-user"></i>
             <span>Profile</span>
         </button>
-        <button id="post-button" onclick="document.querySelector('#post-form textarea').focus()">
+        <button id="post-button" onclick="window.location.href='index.html#post-form'">
             <i class="fas fa-plus-circle"></i>
             <span>Post</span>
         </button>
     </div>
     <div class="container">
         <header>
-            <h1>X Feed</h1>
+            <h1>Notifications</h1>
         </header>
-        <form id="post-form">
-            <textarea id="post-content" placeholder="What's happening?"></textarea>
-            <button type="submit">Post</button>
-        </form>
-        <div id="posts">
-            <p class="no-posts">No posts yet.</p>
+        <div class="notifications-content">
+            //  Notifications will be displayed here by JavaScript
         </div>
     </div>
-    <script>
-        // Firebase configuration (replace with your own)
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Replace with your actual API key
-            authDomain: "toastrealxyz.firebaseapp.com",
-            projectId: "toastrealxyz",
-            storageBucket: "toastrealxyz.appspot.com",
-            messagingSenderId: "774884910313",
-            appId: "1:774884910313:web:e11002887adf1055acfc78",
-            measurementId: "G-3H38LZB2BX"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        const postForm = document.getElementById('post-form');
-        const postContentInput = document.getElementById('post-content');
-        const postsContainer = document.getElementById('posts');
-        let unsubscribePosts;
-        let renderedPosts = {};
-
-        // Function to display a single post
-        const displayPost = (postData, postId) => {
-            const postElement = document.createElement('div');
-            postElement.classList.add('post');
-
-            const postHeader = document.createElement('div');
-            postHeader.classList.add('post-header');
-
-            const postContentContainer = document.createElement('div');
-            postContentContainer.classList.add('post-content-container');
-            // Format the timestamp
-            const formattedDate = postData.timestamp ? new Date(postData.timestamp.toDate()).toLocaleString() : '';
-            postHeader.innerHTML = `<span class="post-author">${postData.nickname}</span><span class="post-date">${formattedDate}</span>`;
-
-            const postContent = document.createElement('p');
-            postContent.classList.add('post-content');
-            postContent.textContent = postData.content;
-
-            postContentContainer.appendChild(postHeader);
-            postContentContainer.appendChild(postContent);
-
-
-            postElement.appendChild(postContentContainer);
-            postsContainer.appendChild(postElement);
-
-
-            const noPostsMessage = postsContainer.querySelector('.no-posts');
-            if (noPostsMessage) {
-                noPostsMessage.style.display = 'none';
-            }
-            return postElement;
-        };
-
-        // Function to fetch and display all posts
-        function loadPosts() {
-            if (unsubscribePosts) {
-                unsubscribePosts();
-            }
-            unsubscribePosts = db.collection("posts").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-                const postsContainer = document.getElementById('posts');
-                snapshot.docChanges().forEach(change => {
-                    const doc = change.doc;
-                    const post = doc.data();
-                    const postId = doc.id;
-                    console.log("Posts Load Called");
-
-                    db.collection('users').doc(post.username).get().then(userDoc => {
-                        const nickname = userDoc.exists ? userDoc.data().nickname : post.username;
-                        const badge = userDoc.exists && userDoc.data().badge ? userDoc.data().badge : null;
-                        const badgeImg = badge ? `<img src="images/${badge}.png" alt="${badge}" class="badge">` : '';
-
-                        let formattedDate = 'Invalid Date';
-                        if (post.timestamp && typeof post.timestamp.toDate === 'function') {
-                            try {
-                                formattedDate = new Date(post.timestamp.toDate()).toLocaleString();
-                            } catch (error) {
-                                console.error('Error formatting date:', error);
-                            }
-                        } else if (typeof post.timestamp === 'number') {
-                            try {
-                                formattedDate = new Date(post.timestamp).toLocaleString();
-                            } catch (error) {
-                                console.error('Error formatting number date:', error);
-                            }
-                        } else if (typeof post.timestamp === 'string') {
-                            try {
-                                formattedDate = new Date(post.timestamp).toLocaleString();
-                            } catch (error) {
-                                console.error('Error formatting string date:', error);
-                            }
-                        }
-
-                        console.log("Posts Load Complete");
-
-                        const postElement = document.createElement('div');
-                        postElement.className = 'post';
-                        postElement.innerHTML = `
-                            <div class="post-header">
-                                <h3><a href="users.html?user=${post.username}">${nickname}</a> ${badgeImg}</h3>
-                                <div class="menu">
-                                    <button class="menu-button" onclick="toggleMenu('${postId}')">⋮</button>
-                                    <div class="menu-content" id="menu-${postId}">
-                                        ${auth.currentUser && auth.currentUser.email === post.username ? `
-                                            <button onclick="editPost('${postId}', '${post.content}')">Edit</button>
-                                            <button onclick="deletePost('${postId}')">Delete</button>
-                                        ` : `
-                                            <button onclick="reportPost('${postId}')">Report</button>
-                                        `}
-                                    </div>
-                                </div>
-                            </div>
-                            <p>${post.content}</p>
-                            <small>${formattedDate}</small>
-                            <div class="like-container">
-                                <img src="images/icon.png" alt="Like" class="like-button" onclick="likePost('${postId}')">
-                                <span id="like-count-${postId}">${post.likes || 0}</span>
-                            </div>
-                        `;
-
-                        if (change.type === 'added') {
-                            // Add new post
-                            if (postsContainer.firstChild) {
-                                postsContainer.insertBefore(postElement, postsContainer.firstChild);
-                            } else {
-                                postsContainer.appendChild(postElement);
-                            }
-                            renderedPosts[postId] = postElement;
-                            // Show notification if the tab is not active
-                            if (document.hidden) {
-                                showBrowserNotification('new post from toast social! 🚀', `${nickname} said: ${post.content}`);
-                            }
-                        } else if (change.type === 'modified') {
-                            // Update existing post
-                            if (renderedPosts[postId]) {
-                                postsContainer.replaceChild(postElement, renderedPosts[postId]);
-                                renderedPosts[postId] = postElement;
-                            }
-                        } else if (change.type === 'removed') {
-                            // Remove deleted post
-                            if (renderedPosts[postId]) {
-                                postsContainer.removeChild(renderedPosts[postId]);
-                                delete renderedPosts[postId];
-                            }
-                        }
-                    });
-                });
-            });
-        }
-
-
-        // Event listener for the post form
-        postForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const postContent = postContentInput.value.trim();
-
-            if (postContent === '') {
-                alert('Please enter some text to post.');
-                return;
-            }
-
-            // Get the current user's name
-            const authorName = "Nolan"; // Hardcoded
-
-            const postData = {
-                nickname: authorName,
-                content: postContent,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Store as server timestamp
-                username: auth.currentUser.email,
-                likes: 0
-            };
-
-            db.collection('posts')
-                .add(postData)
-                .then(() => {
-                    postContentInput.value = '';
-                    //fetchPosts();
-                })
-                .catch((error) => {
-                    console.error('Error adding post:', error);
-                    alert('Failed to post. Please try again later.');
-                });
-        });
-
-        // Initial fetch of posts
-        loadPosts();
-
-        function toggleMenu(postId) {
-            const menu = document.getElementById(`menu-${postId}`);
-            if (menu.style.display === "none") {
-                menu.style.display = "block";
-            } else {
-                menu.style.display = "none";
-            }
-        }
-
-        function editPost(postId, currentContent) {
-            const newContent = prompt("Edit your post:", currentContent);
-            if (newContent !== null && newContent.trim() !== "") {
-                db.collection("posts").doc(postId).update({
-                    content: newContent
-                }).then(() => {
-                    console.log("Post updated successfully!");
-                    loadPosts();
-                }).catch((error) => {
-                    console.error("Error updating post: ", error);
-                    alert("Failed to edit post. Please try again.");
-                });
-            }
-        }
-
-        function deletePost(postId) {
-            if (confirm("Are you sure you want to delete this post?")) {
-                db.collection("posts").doc(postId).delete().then(() => {
-                    console.log("Post deleted successfully!");
-                    loadPosts();
-                }).catch((error) => {
-                    console.error("Error deleting post: ", error);
-                    alert("Failed to delete post. Please try again.");
-                });
-            }
-        }
-
-        function reportPost(postId) {
-            alert("Post reported.  This feature is under development.");
-            // Implement report functionality here (e.g., add to a reports collection in Firestore)
-        }
-
-        function likePost(postId) {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Please sign in to like this post.");
-                return;
-            }
-
-            const postRef = db.collection("posts").doc(postId);
-
-            db.runTransaction(async (transaction) => {
-                const postDoc = await transaction.get(postRef);
-                if (!postDoc.exists) {
-                    throw "Post does not exist!";
-                }
-
-                const currentLikes = postDoc.data().likes || 0;
-                transaction.update(postRef, { likes: currentLikes + 1 });
-            }).then(() => {
-                console.log("Post liked successfully!");
-                loadPosts();
-            }).catch((error) => {
-                console.error("Error liking post: ", error);
-                alert("Failed to like post. Please try again.");
-            });
-        }
-    </script>
 </body>
 </html>
