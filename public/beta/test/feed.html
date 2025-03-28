@@ -296,7 +296,7 @@
             apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
             authDomain: "toastrealxyz.firebaseapp.com",
             projectId: "toastrealxyz",
-            storageBucket: "toastrealxyz.appspot.com",
+            storageBucket: "toastrealxyz",
             messagingSenderId: "774884910313",
             appId: "1:774884910313:web:e11002887adf1055acfc78",
             measurementId: "G-3H38LZB2BX"
@@ -308,63 +308,65 @@
 
         // Function to add a direct notification to Firestore
         async function addDirectNotification(userEmail, senderName, message) {
-    try {
-        if (!userEmail || typeof userEmail !== 'string') {
-            console.error("Invalid user email:", userEmail);
-            return;
+            try {
+                if (!userEmail || typeof userEmail !== 'string') {
+                    console.error("Invalid user email:", userEmail);
+                    return;
+                }
+
+                const notificationRef = db.collection("directnotifications").doc();
+
+                await notificationRef.set({
+                    userEmail: userEmail,
+                    senderName: senderName,
+                    message: message,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false,
+                    notificationId: notificationRef.id,
+                });
+
+                console.log("Notification added successfully:", notificationRef.id);
+            } catch (error) {
+                console.error("Error adding direct notification:", error);
+            }
         }
 
-        const notificationRef = db.collection("directnotifications").doc();
-
-        await notificationRef.set({
-            userEmail: userEmail,
-            senderName: senderName,
-            message: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            read: false,
-            notificationId: notificationRef.id,
-        });
-
-        console.log("Notification added successfully:", notificationRef.id);
-    } catch (error) {
-        console.error("Error adding direct notification:", error);
-    }
-}
         // Function to get direct notifications for a specific user
         async function getDirectNotifications(userEmail) {
-    try {
-        if (!userEmail) {
-            console.error("User email is invalid or missing when fetching notifications.");
-            return [];
+            try {
+                if (!userEmail) {
+                    console.error("User email is invalid or missing when fetching notifications.");
+                    return [];
+                }
+
+                console.log("Fetching notifications for userEmail:", userEmail);
+
+                const notificationsRef = db.collection("directnotifications");
+                const querySnapshot = await notificationsRef
+                    .where("userEmail", "==", userEmail)
+                    .orderBy("timestamp", "desc")
+                    .get();
+
+                const notifications = [];
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    notifications.push({
+                        id: doc.id,
+                        senderName: data.senderName,
+                        message: data.message,
+                        timestamp: data.timestamp,
+                        read: data.read,
+                    });
+                });
+
+                console.log("Fetched notifications:", notifications);
+                return notifications;
+            } catch (error) {
+                console.error("Error getting direct notifications:", error);
+                return [];
+            }
         }
 
-        console.log("Fetching notifications for userEmail:", userEmail);
-
-        const notificationsRef = db.collection("directnotifications");
-        const querySnapshot = await notificationsRef
-            .where("userEmail", "==", userEmail)
-            .orderBy("timestamp", "desc")
-            .get();
-
-        const notifications = [];
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            notifications.push({
-                id: doc.id,
-                senderName: data.senderName,
-                message: data.message,
-                timestamp: data.timestamp,
-                read: data.read,
-            });
-        });
-
-        console.log("Fetched notifications:", notifications);
-        return notifications;
-    } catch (error) {
-        console.error("Error getting direct notifications:", error);
-        return [];
-    }
-}
         // Function to mark a notification as read
         async function markNotificationAsRead(notificationId) {
             try {
