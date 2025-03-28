@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width-width, initial-scale=1.0">
     <title>Notifications</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -229,7 +229,7 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            display: none; /* Initially hide the form */
+            /* display: none;  */ /* Initially hide the form */
         }
 
         #notification-form h2 {
@@ -301,23 +301,24 @@
             appId: "1:774884910313:web:e11002887adf1055acfc78",
             measurementId: "G-3H38LZB2BX"
         };
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // Function to add a direct notification to Firestore
-        async function addDirectNotification(userId, senderName, message) {
+        async function addDirectNotification(userEmail, senderName, message) {
             try {
-                // Ensure the user ID is valid and not empty
-                if (!userId || typeof userId !== 'string') {
-                    console.error("User ID is invalid:", userId);
+                // Ensure the user email is valid and not empty
+                if (!userEmail || typeof userEmail !== 'string') {
+                    console.error("User email is invalid:", userEmail);
                     return; // Stop processing, or you might want to throw an error
                 }
 
                 const notificationRef = db.collection("directnotifications").doc(); // Use doc() without an ID
 
                 await notificationRef.set({
-                    userId: userId, //  ID of the user receiving the notification
+                    userEmail: userEmail, //  Email of the user receiving the notification
                     senderName: senderName,  // Name of the sender
                     message: message, //  Message content
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -332,21 +333,18 @@
             }
         }
 
-
-
         // Function to get direct notifications for a specific user
-        async function getDirectNotifications(userId) {
+        async function getDirectNotifications(userEmail) {
             try {
-                if (!userId) {
-                    console.error("User ID is invalid or missing when fetching notifications.");
+                if (!userEmail) {
+                    console.error("User email is invalid or missing when fetching notifications.");
                     return [];
                 }
                 const notificationsRef = db.collection("directnotifications");
                 const querySnapshot = await notificationsRef
-                    .where("userId", "==", userId)
+                    .where("userEmail", "==", userEmail)
                     .orderBy("timestamp", "desc")
                     .get();
-
 
                 const notifications = [];
                 querySnapshot.forEach(doc => {
@@ -381,23 +379,20 @@
             }
         }
 
-
         document.addEventListener('DOMContentLoaded', async () => {
             const container = document.querySelector('.notifications-content');
-            const userId = 'user123';  // Replace with the actual user ID.  ***IMPORTANT***
+            const userEmail = 'test@example.com';  // Replace with the actual user email.  ***IMPORTANT***
 
             // Add a sample notification (for testing)
             //  Make sure to only run this ONCE, or you'll get duplicates.  Best to remove it
             //  after you've confirmed it works.
-            // await addDirectNotification(userId, 'John Doe', 'sent you a message');
+            // await addDirectNotification(userEmail, 'John Doe', 'sent you a message');
 
-
-            const notifications = await getDirectNotifications(userId);
+            const notifications = await getDirectNotifications(userEmail);
             if (notifications.length === 0) {
                 container.innerHTML = '<p>No new notifications.</p>';
                 //return;  Remove this return, so the form is always displayed
             } else {
-
                 container.innerHTML = '<h2>Direct Messages</h2>'; // heading for direct messages.
 
                 notifications.forEach(notification => {
@@ -440,13 +435,13 @@
                 });
             }
 
-            // Add the form for testing
+            // Add the form for testing -  MODIFIED TO SHOW BY DEFAULT
             const formDiv = document.createElement('div');
             formDiv.id = 'notification-form';
             formDiv.innerHTML = `
                 <h2>Send Test Notification</h2>
-                <label for="user-id">User ID:</label>
-                <input type="text" id="user-id" value="user123">
+                <label for="user-email">User Email:</label>
+                <input type="text" id="user-email" value="test@example.com">
                 <label for="sender-name">Sender Name:</label>
                 <input type="text" id="sender-name" value="Test Sender">
                 <label for="message">Message:</label>
@@ -454,21 +449,18 @@
                 <button id="send-test-notification">Send Notification</button>
             `;
             container.appendChild(formDiv);
-
+            formDiv.style.display = 'block';
             // Event listener for the form submission
             document.getElementById('send-test-notification').addEventListener('click', async (event) => {
                 event.preventDefault(); // Prevent page reload
 
-                const userId = document.getElementById('user-id').value;
+                const userEmail = document.getElementById('user-email').value;
                 const senderName = document.getElementById('sender-name').value;
                 const message = document.getElementById('message').value;
 
-                await addDirectNotification(userId, senderName, message);
+                await addDirectNotification(userEmail, senderName, message);
                 alert('Notification sent! Check the Firestore database and refresh the notifications.'); //basic confirmation
             });
-
-            //show form
-            document.getElementById('notification-form').classList.add('show-form');
         });
     </script>
 </head>
