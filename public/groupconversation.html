@@ -99,8 +99,10 @@
             const messageElement = document.createElement('div');
             messageElement.className = 'message';
             messageElement.innerHTML = `
-                <p><strong>${senderName}</strong>: ${messageData.text}</p>
-                <small>${new Date(messageData.timestamp.toDate()).toLocaleString()}</small>
+                <div class="message-content">
+                    <p><strong class="sender-name">${senderName}</strong>: <span class="message-text">${messageData.text}</span></p>
+                    <small class="timestamp">${new Date(messageData.timestamp.toDate()).toLocaleString()}</small>
+                </div>
                  <div class="menu">
                     <button class="menu-button" onclick="toggleMenu('${messageId}')">⋮</button>
                     <div class="menu-content" id="menu-${messageId}">
@@ -236,7 +238,24 @@ header.v2 nav ul.nav-list li.nav-item a:hover {
             padding: 10px 0;
             display: flex; /* Use flexbox to align items */
             justify-content: space-between; /* Space between text and button */
-            align-items: center; /* Vertically center items */
+            align-items: flex-start; /* Align items to the start (top in column direction) */
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-right: auto; /* Push the menu to the right */
+        }
+
+        .sender-name {
+            font-weight: bold;
+            margin-right: 5px; /* Add some space between sender and text */
+        }
+
+        .timestamp {
+            font-size: 0.7em;
+            color: #888;
         }
         .delete-button {
             background-color: #f44336;
@@ -260,6 +279,8 @@ header.v2 nav ul.nav-list li.nav-item a:hover {
             border: none;
             font-size: 20px;
             cursor: pointer;
+            padding: 0; /* Remove padding to only show the icon */
+            line-height: 1; /* Adjust line height to vertically center the icon */
         }
 
         .menu-content {
@@ -268,6 +289,7 @@ header.v2 nav ul.nav-list li.nav-item a:hover {
             background-color: white;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
+            right: 0; /* Position the menu to the right of the button */
         }
 
         .menu-content button {
