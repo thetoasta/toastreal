@@ -101,16 +101,16 @@
             messageElement.innerHTML = `
                 <p><strong>${senderName}</strong>: ${messageData.text}</p>
                 <small>${new Date(messageData.timestamp.toDate()).toLocaleString()}</small>
+                 <div class="menu">
+                    <button class="menu-button" onclick="toggleMenu('${messageId}')">⋮</button>
+                    <div class="menu-content" id="menu-${messageId}">
+                        ${currentUserEmail === messageData.sender ? `
+                            <button onclick="deleteMessage('${messageId}')">Delete</button>
+                        ` : ``}
+                    </div>
+                </div>
             `;
 
-            // Add delete button only for the sender of the message.
-            if (currentUserEmail === messageData.sender) {
-                const deleteButton = document.createElement('button');
-                deleteButton.innerText = 'Delete';
-                deleteButton.className = 'delete-button'; //Added a class for styling
-                deleteButton.onclick = () => deleteMessage(messageId);
-                messageElement.appendChild(deleteButton);
-            }
             messagesContainer.appendChild(messageElement);
         }
 
@@ -171,6 +171,10 @@
             }).catch((error) => {
                 showNotification('Error: ' + error.message, 'error');
             });
+        }
+        function toggleMenu(messageId) {
+            const menu = document.getElementById(`menu-${messageId}`);
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
     </script>
     <style>
@@ -246,6 +250,42 @@ header.v2 nav ul.nav-list li.nav-item a:hover {
         .delete-button:hover {
             background-color: #d32f2f;
         }
+        .menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .menu-content button {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            border: none;
+            background: none;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .menu-content button:hover {
+            background-color: #ddd;
+        }
+
     </style>
 </head>
 <body>
