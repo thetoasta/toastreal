@@ -28,86 +28,154 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+        let shit = 1; // say how many times i've shit
+        let easteregg01 = "upcoming";
+        let restrictionNoticeShown = false; // Flag for restriction notice
+        let globalNoticeShown = false;      // Flag for global notice
 
-        let restrictionNoticeShown = false; // Flag to track if the notice has been displayed
+        // --- Styling for Notices (can be shared or separate CSS) ---
+        const noticeBaseStyle = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.85); /* Slightly darker */
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 90%;
+            width: 400px; /* Adjust as needed */
+        `;
 
-        // Function to display restriction notice
+        // --- Function to disable/enable page interaction ---
+        function setPageInteraction(enabled) {
+             document.body.style.overflow = enabled ? 'auto' : 'hidden';
+             // Temporarily disable pointer events on body, enable on notice later
+             document.body.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+
+        // --- Function to display RESTRICTION notice ---
         function displayRestrictionNotice(restrictions) {
-            if (restrictionNoticeShown) return; // Prevent multiple notices
-            restrictionNoticeShown = true; // Set the flag
+            if (restrictionNoticeShown || globalNoticeShown) return; // Prevent overlapping notices
+            restrictionNoticeShown = true;
+            setPageInteraction(false); // Disable page
 
             const noticeDiv = document.createElement('div');
             noticeDiv.id = 'restriction-notice';
-            noticeDiv.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-                z-index: 1000;
-            `;
+            noticeDiv.style.cssText = noticeBaseStyle; // Use base style
 
-            let message = 'You have restrictions on your account. Please read the following:';
+            let message = '<h2>Account Restriction</h2>You have restrictions on your account:';
             let blockedFeatures = [];
             if (restrictions.posting) blockedFeatures.push('posting');
             if (restrictions.messaging) blockedFeatures.push('messaging');
 
             if (blockedFeatures.length > 0) {
-                message += `<br><br>You are blocked from: ${blockedFeatures.join(', ')}.`;
+                message += `<br><br><strong>Blocked Features:</strong> ${blockedFeatures.join(', ')}.`;
             }
             if (restrictions.note) {
-                message += `<br><br>Reason: ${restrictions.note}`;
+                message += `<br><br><strong>Reason:</strong> ${restrictions.note}`;
             }
 
             noticeDiv.innerHTML = `
                 ${message}
                 <br><br>
-                <label>
-                    <input type="checkbox" id="restriction-acknowledged"> I've read these limitations and understand them.
+                <label style="display: block; margin: 10px 0;">
+                    <input type="checkbox" id="restriction-acknowledged"> I have read and understand these limitations.
                 </label>
                 <br>
-                <button onclick="window.location.href = 'https://https://www.notion.so/toastsocial/1c31def6da0e802eb517d19e379ee431?v=1c31def6da0e802e81ca000cbd70a59c&pvs=4';">This wasn't me</button>
-                <button id="acknowledge-button" disabled>Acknowledge</button>
+                <button onclick="window.location.href = 'https://www.notion.so/toastsocial/1c31def6da0e802eb517d19e379ee431?v=1c31def6da0e802e81ca000cbd70a59c&pvs=4';">This wasn't me / Appeal</button>
+                <button id="restriction-acknowledge-button" disabled>Acknowledge</button>
             `;
 
             document.body.appendChild(noticeDiv);
+            noticeDiv.style.pointerEvents = 'auto'; // Make notice interactive
 
             const acknowledgeCheckbox = document.getElementById('restriction-acknowledged');
-            const acknowledgeButton = document.getElementById('acknowledge-button');
+            const acknowledgeButton = document.getElementById('restriction-acknowledge-button');
 
             acknowledgeCheckbox.addEventListener('change', function () {
                 acknowledgeButton.disabled = !this.checked;
             });
 
             acknowledgeButton.addEventListener('click', function () {
+                acknowledgeButton.disabled = true; // Prevent double click
+                acknowledgeButton.textContent = 'Acknowledging...';
                 const userRef = db.collection('users').doc(firebase.auth().currentUser.email);
                 userRef.update({ hasAcknowledgedRestrictions: true })
                     .then(() => {
                         noticeDiv.remove();
-                        // Re-enable the page
-                        document.body.style.overflow = 'auto';
-                        document.body.style.pointerEvents = 'auto';
-                        restrictionNoticeShown = false; // Reset the flag
+                        setPageInteraction(true); // Re-enable page
+                        restrictionNoticeShown = false;
                     })
                     .catch(error => {
-                        console.error("Error updating user document: ", error);
+                        console.error("Error updating user document for restriction ack: ", error);
                         alert('Error acknowledging restriction. Please try again.');
+                        acknowledgeButton.disabled = false; // Re-enable button on error
+                         acknowledgeButton.textContent = 'Acknowledge';
                     });
             });
-
-            // Disable the page
-            document.body.style.overflow = 'hidden';
-            document.body.style.pointerEvents = 'none';
-
-            // Re-enable the restriction notice
-            noticeDiv.style.pointerEvents = 'auto';
         }
 
-        // Check if user is logged in
+        // --- Function to display GLOBAL notice ---
+        function displayGlobalNotice(noticeData) {
+            if (restrictionNoticeShown || globalNoticeShown) return; // Prevent overlapping notices
+            globalNoticeShown = true;
+            setPageInteraction(false); // Disable page
+
+            const noticeDiv = document.createElement('div');
+            noticeDiv.id = 'global-notice';
+            noticeDiv.style.cssText = noticeBaseStyle; // Use base style
+            noticeDiv.style.backgroundColor = 'rgba(30, 30, 80, 0.9)'; // Different color?
+
+            noticeDiv.innerHTML = `
+                <h2>Site Notice</h2>
+                <p>${noticeData.message}</p> <br>
+                <button id="global-acknowledge-button">Got it!</button>
+            `;
+
+            document.body.appendChild(noticeDiv);
+            noticeDiv.style.pointerEvents = 'auto'; // Make notice interactive
+
+            const acknowledgeButton = document.getElementById('global-acknowledge-button');
+
+            acknowledgeButton.addEventListener('click', function () {
+                acknowledgeButton.disabled = true; // Prevent double click
+                acknowledgeButton.textContent = 'Processing...';
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.error("User not logged in during global notice acknowledgement.");
+                    alert("Error: You seem to be logged out. Please refresh.");
+                    noticeDiv.remove();
+                    setPageInteraction(true);
+                    globalNoticeShown = false;
+                    return;
+                }
+                const userRef = db.collection('users').doc(user.email);
+                const noticeId = noticeData.noticeId; // Get the ID from the notice data
+
+                // Update the acknowledgedNotices map using dot notation for nested fields
+                userRef.update({
+                    [`acknowledgedNotices.${noticeId}`]: true
+                 })
+                    .then(() => {
+                        noticeDiv.remove();
+                        setPageInteraction(true); // Re-enable page
+                        globalNoticeShown = false;
+                    })
+                    .catch(error => {
+                        console.error("Error updating user document for global notice ack: ", error);
+                        alert('Error acknowledging notice. Please try again.');
+                        acknowledgeButton.disabled = false; // Re-enable button on error
+                        acknowledgeButton.textContent = 'Got it!';
+                    });
+            });
+        }
+
+
+        // --- Check Auth State and Handle Notices ---
         firebase.auth().onAuthStateChanged(user => {
             const profileButton = document.getElementById('profile');
             const loginButton = document.getElementById('login');
@@ -118,25 +186,52 @@
                 profileButton.style.display = 'block';
                 loginButton.style.display = 'none';
                 logoutButton.style.display = 'block';
-                db.collection('users').doc(user.email).get().then(doc => {
-                    if (doc.exists) {
-                        const restrictions = doc.data().restrictions || {};
-                        const hasAcknowledged = doc.data().hasAcknowledgedRestrictions || false;
 
-                        if (restrictions.posting || restrictions.messaging) {
-                            if (!hasAcknowledged) {
-                                displayRestrictionNotice(restrictions);
+                const userRef = db.collection('users').doc(user.email);
+                const globalNoticeRef = db.collection('site_config').doc('global_notice');
+
+                // 1. Fetch User Data (for restrictions and acknowledgements)
+                userRef.get().then(userDoc => {
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    const restrictions = userData.restrictions || {};
+                    const hasAcknowledgedRestrictions = userData.hasAcknowledgedRestrictions || false;
+                    const acknowledgedNotices = userData.acknowledgedNotices || {}; // Get acknowledged notices
+
+                    // 2. Check for Restrictions FIRST
+                    if ((restrictions.posting || restrictions.messaging) && !hasAcknowledgedRestrictions) {
+                        displayRestrictionNotice(restrictions);
+                    } else {
+                         // 3. If no restriction notice shown, check for Global Notice
+                        globalNoticeRef.get().then(noticeDoc => {
+                            if (noticeDoc.exists) {
+                                const noticeData = noticeDoc.data();
+                                // Check if active AND if this specific noticeId has NOT been acknowledged by user
+                                if (noticeData.active && noticeData.noticeId && !acknowledgedNotices[noticeData.noticeId]) {
+                                    displayGlobalNotice(noticeData); // Pass the whole notice data object
+                                }
                             }
-                        }
+                        }).catch(error => {
+                             console.error('Error fetching global notice:', error);
+                        });
                     }
+
                 }).catch(error => {
-                    console.error('Error checking user restrictions:', error);
+                    console.error('Error fetching user data:', error);
                 });
+
             } else {
                 // User is signed out.
                 profileButton.style.display = 'none';
                 loginButton.style.display = 'block';
                 logoutButton.style.display = 'none';
+                // Make sure notices are hidden if user logs out
+                const restrictionNotice = document.getElementById('restriction-notice');
+                const globalNotice = document.getElementById('global-notice');
+                if (restrictionNotice) restrictionNotice.remove();
+                if (globalNotice) globalNotice.remove();
+                restrictionNoticeShown = false;
+                globalNoticeShown = false;
+                setPageInteraction(true); // Ensure page is usable
             }
         });
 
@@ -159,7 +254,7 @@
     </script>
 </head>
 <body>
-     <header class="v2">
+    <header class="v2">
         <nav>
             <ul class="nav-list">
                 <li class="nav-item"><a href="index.html">home</a></li>
@@ -191,6 +286,6 @@
             </div>
         </header>
         <div id="notifications-container"></div>
-    </div>
+        </div>
 </body>
 </html>

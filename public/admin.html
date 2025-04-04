@@ -12,10 +12,170 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <style>
+        /* Basic styling for the admin panel sections */
+        body {
+            margin-bottom: 100px; /* Increased margin for footer */
+            font-family: 'Google Sans', sans-serif; /* Consistent font */
+        }
+        .container {
+            max-width: 900px; /* Adjust as needed */
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #f9f9f9; /* Light background for the panel */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+            gap: 20px; /* Spacing between sections */
+        }
+        .form-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .form-section h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="email"], /* Added for consistency */
+        textarea {
+            width: calc(100% - 22px); /* Full width minus padding/border */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        textarea {
+            min-height: 80px; /* Make textarea taller */
+            resize: vertical; /* Allow vertical resizing */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px; /* Spacing between buttons */
+            margin-bottom: 5px; /* Spacing below buttons */
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled { /* Style for disabled buttons */
+             background-color: #ccc;
+             cursor: not-allowed;
+        }
+        label {
+            display: block; /* Make labels block elements */
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        #message-box {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        #message-box.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        #message-box.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .reported-post {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #fefefe;
+        }
+        .reported-post p {
+            margin: 5px 0;
+            word-break: break-word; /* Prevent long text overflow */
+        }
+        #current-notice-display {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #495057;
+        }
+         #current-notice-display strong {
+             display: block;
+             margin-bottom: 5px;
+         }
+         #current-notice-display span {
+             font-style: italic;
+             word-break: break-all; /* Break long IDs */
+         }
+         #current-notice-display p {
+             margin-top: 5px;
+             margin-bottom: 0;
+             white-space: pre-wrap; /* Preserve line breaks in message */
+             word-break: break-word;
+         }
+
+        /* Footer Styles (copied from previous HTML) */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8em;
+            line-height: 1.5;
+            backdrop-filter: blur(10px);
+            box-sizing: border-box; /* Include padding in width/height */
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100; /* Ensure footer is above content */
+        }
+        .footer-links { list-style: none; padding: 0; margin-bottom: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; }
+        .footer-links li { display: inline; }
+        .footer-links li::after { content: "•"; color: #d2d2d7; margin-left: 8px; padding-left: 8px; }
+        .footer-links li:last-child::after { content: ""; }
+        .footer-links a { color: #0066cc; text-decoration: none; }
+        .footer-links a:hover { text-decoration: underline; color: #0066cc; }
+        .footer-copyright { margin-bottom: 5px; color: #6e6e73; font-size: 0.7em; }
+        .footer-country { color: #6e6e73; font-size: 0.7em; }
+        @media (max-width: 600px) {
+            .footer { padding: 15px; font-size: 0.6em; }
+            .footer-links { gap: 10px; }
+            .footer-links li::after { display: none; }
+            .footer-links li { margin-right: 4px; margin-left: 4px; }
+        }
+    </style>
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc", // Use your actual API key
             authDomain: "toastrealxyz.firebaseapp.com",
             projectId: "toastrealxyz",
             storageBucket: "toastrealxyz.appspot.com",
@@ -28,280 +188,390 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Admin credentials  (It's best to store these server-side)
-        const adminEmail = "nolanp678@gmail.com";
-        const adminEmail2 = "theodore.crowellmcgo@student.dedham.k12.ma.us";
-
+        // Admin credentials (Keep secure, ideally check server-side with custom claims)
+        const adminEmails = ["nolanp678@gmail.com", "theodore.crowellmcgo@student.dedham.k12.ma.us"];
 
         // Check if user is logged in and is admin
         firebase.auth().onAuthStateChanged(user => {
-            if (user && (user.email === adminEmail || user.email === adminEmail2)) {
+            if (user && adminEmails.includes(user.email)) {
+                // User is an admin
                 document.getElementById('admin-panel').style.display = 'block';
                 loadReportedPosts();
+                loadCurrentGlobalNotice(); // Load the current notice on panel load
             } else {
-                window.location.href = 'accounts.html'; // Or redirect to a login page
+                // Not an admin or not logged in, redirect
+                console.log("Access denied. User not admin or not logged in.");
+                window.location.href = 'accounts.html'; // Redirect to login/home
             }
         });
+
+        // --- Global Notice Functions ---
+
+        const globalNoticeRef = db.collection('site_config').doc('global_notice');
+
+        // Load and display the current global notice details
+        function loadCurrentGlobalNotice() {
+            const displayArea = document.getElementById('current-notice-display');
+            globalNoticeRef.get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    displayArea.innerHTML = `
+                        <strong>Current Global Notice Status:</strong>
+                        Status: ${data.active ? '🟢 Active' : '🔴 Inactive'} <br>
+                        Notice ID: <span>${data.noticeId || 'N/A'}</span>
+                        <p>${data.message || 'No message set.'}</p>
+                    `;
+                    // Optionally pre-fill the textarea with the current message
+                    // document.getElementById('global-notice-message').value = data.message || '';
+                } else {
+                    displayArea.innerHTML = 'No global notice has been set up yet.';
+                }
+            }).catch(error => {
+                console.error("Error loading global notice:", error);
+                displayArea.innerHTML = 'Error loading current notice.';
+                displayMessage('Error loading current notice: ' + error.message, 'error');
+            });
+        }
+
+        // Update or create the global notice
+        function updateGlobalNotice() {
+            const message = document.getElementById('global-notice-message').value.trim();
+            const updateButton = document.getElementById('update-notice-button');
+
+            if (!message) {
+                displayMessage('Notice message cannot be empty.', 'error');
+                return;
+            }
+
+            updateButton.disabled = true; // Disable button during operation
+            updateButton.textContent = 'Publishing...';
+
+            // Generate a new unique ID for the notice to ensure users see it again
+            const newNoticeId = `notice-${Date.now()}`;
+
+            globalNoticeRef.set({ // Use set to overwrite or create
+                message: message,
+                active: true,       // Always set to active when publishing
+                noticeId: newNoticeId, // Use the new ID
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp() // Track update time
+            }).then(() => {
+                displayMessage('Global notice published successfully!', 'success');
+                loadCurrentGlobalNotice(); // Refresh the display
+                document.getElementById('global-notice-message').value = ''; // Clear textarea
+            }).catch(error => {
+                displayMessage('Error publishing notice: ' + error.message, 'error');
+                console.error("Error updating global notice:", error);
+            }).finally(() => {
+                 updateButton.disabled = false; // Re-enable button
+                 updateButton.textContent = 'Publish / Update Notice';
+            });
+        }
+
+        // Deactivate the global notice
+        function deactivateGlobalNotice() {
+             const deactivateButton = document.getElementById('deactivate-notice-button');
+             deactivateButton.disabled = true; // Disable button during operation
+             deactivateButton.textContent = 'Deactivating...';
+
+            globalNoticeRef.update({ // Use update to change only specific fields
+                active: false,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                displayMessage('Global notice deactivated.', 'success');
+                loadCurrentGlobalNotice(); // Refresh the display
+            }).catch(error => {
+                // Handle cases where the document might not exist yet
+                if (error.code === 'not-found') {
+                     displayMessage('No active notice found to deactivate.', 'error');
+                } else {
+                    displayMessage('Error deactivating notice: ' + error.message, 'error');
+                    console.error("Error deactivating global notice:", error);
+                }
+            }).finally(() => {
+                 deactivateButton.disabled = false; // Re-enable button
+                 deactivateButton.textContent = 'Deactivate Current Notice';
+            });
+        }
+
+
+        // --- Existing Admin Functions ---
 
         // Load reported posts
         function loadReportedPosts() {
             db.collection('reportedPosts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const reportedPostsContainer = document.getElementById('reported-posts-container');
-                reportedPostsContainer.innerHTML = '';
+                reportedPostsContainer.innerHTML = ''; // Clear previous list
+                if (snapshot.empty) {
+                     reportedPostsContainer.innerHTML = '<p>No reported posts found.</p>';
+                     return;
+                }
                 snapshot.forEach(doc => {
                     const reportedPost = doc.data();
+                    const postElementId = `reported-${doc.id}`; // Unique ID for the element
                     const reportedPostElement = document.createElement('div');
                     reportedPostElement.className = 'reported-post';
+                    reportedPostElement.id = postElementId;
+                    // Basic check if data exists
+                    const reportedBy = reportedPost.reportedBy || 'Unknown';
+                    const postContent = reportedPost.postContent || '[Content not available]';
+                    const postUsername = reportedPost.postUsername || 'Unknown User';
+                    const postId = reportedPost.postId || doc.id; // Use postId field if available, else doc id
+
                     reportedPostElement.innerHTML = `
-                        <p><strong>Reported By:</strong> ${reportedPost.reportedBy}</p>
-                        <p><strong>Post Content:</strong> ${reportedPost.postContent}</p>
-                        <p><strong>Post Username:</strong> ${reportedPost.postUsername}</p>
-                        <button onclick="deleteReportedPost('${doc.id}')">Delete Post</button>
-                        <button onclick="removeBadge('${reportedPost.postUsername}')">Remove Checkmark</button>
+                        <p><strong>Reported By:</strong> ${reportedBy}</p>
+                        <p><strong>Post Content:</strong> ${postContent}</p>
+                        <p><strong>Posted By Email:</strong> ${postUsername}</p> <p><strong>Original Post ID:</strong> ${postId}</p>
+                        <button onclick="deleteOriginalPost('${postId}', '${postUsername}', '${postElementId}')">Delete Original Post</button>
+                        <button onclick="dismissReport('${doc.id}', '${postElementId}')">Dismiss Report Only</button>
+                        <button onclick="removeBadge('${postUsername}')">Remove Checkmark</button>
                     `;
                     reportedPostsContainer.appendChild(reportedPostElement);
                 });
+            }, error => {
+                 console.error("Error loading reported posts: ", error);
+                 reportedPostsContainer.innerHTML = '<p>Error loading reported posts.</p>';
+                 displayMessage('Error loading reported posts: ' + error.message, 'error');
             });
         }
 
-        // Delete reported post
-        function deleteReportedPost(postId) {
-            db.collection('posts').doc(postId).delete().then(() => {
-                db.collection('reportedPosts').doc(postId).delete().then(() => {
-                    displayMessage('Post deleted successfully', 'success');
-                }).catch(error => {
-                    displayMessage('Error: ' + error.message, 'error');
-                });
+        // Dismiss only the report document
+        function dismissReport(reportId, elementId) {
+             if (!confirm('Are you sure you want to dismiss this report without deleting the post?')) return;
+             db.collection('reportedPosts').doc(reportId).delete().then(() => {
+                displayMessage('Report dismissed successfully', 'success');
+                const element = document.getElementById(elementId);
+                if (element) element.remove(); // Remove from UI immediately
             }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
+                displayMessage('Error dismissing report: ' + error.message, 'error');
             });
         }
+
+        // Delete the original post AND the report
+        function deleteOriginalPost(originalPostId, postUserEmail, reportElementId) {
+             if (!confirm(`Are you sure you want to delete the post by ${postUserEmail}? This action cannot be undone.`)) return;
+
+             // 1. Delete the original post from the 'posts' collection
+             db.collection('posts').doc(originalPostId).delete().then(() => {
+                 console.log(`Original post ${originalPostId} deleted.`);
+                 // 2. Delete all reports associated with this original post ID
+                 db.collection('reportedPosts').where('postId', '==', originalPostId).get().then(snapshot => {
+                     const batch = db.batch();
+                     snapshot.forEach(doc => {
+                         batch.delete(doc.ref);
+                     });
+                     return batch.commit();
+                 }).then(() => {
+                     displayMessage('Post and associated reports deleted successfully', 'success');
+                     // Optionally remove the specific report element that triggered the action
+                     const element = document.getElementById(reportElementId);
+                     if (element) element.remove();
+                     // Note: loadReportedPosts will refresh eventually, but immediate removal is better UX
+                 }).catch(error => {
+                      displayMessage('Post deleted, but error removing reports: ' + error.message, 'error');
+                      console.error("Error deleting reports: ", error);
+                 });
+             }).catch(error => {
+                 displayMessage('Error deleting original post: ' + error.message, 'error');
+                 console.error("Error deleting post: ", error);
+             });
+        }
+
 
         // Remove badge
-        function removeBadge(username) {
+        function removeBadge(username) { // Assuming username is the user's email here
+            if (!username || username === 'Unknown User') {
+                 displayMessage('Cannot remove badge for unknown user.', 'error');
+                 return;
+            }
+            if (!confirm(`Are you sure you want to remove the badge for ${username}?`)) return;
             db.collection('users').doc(username).update({
-                badge: firebase.firestore.FieldValue.delete()
+                badge: firebase.firestore.FieldValue.delete() // Deletes the field
             }).then(() => {
-                displayMessage('Badge removed successfully', 'success');
+                displayMessage(`Badge removed successfully for ${username}`, 'success');
             }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
+                displayMessage(`Error removing badge for ${username}: ` + error.message, 'error');
             });
         }
 
-        // Display message
+        // Display message utility
         function displayMessage(message, type) {
             const messageBox = document.getElementById('message-box');
             messageBox.innerText = message;
-            messageBox.className = type;
+            messageBox.className = type; // 'success' or 'error'
             messageBox.style.display = 'block';
+            // Optional: Hide message after a few seconds
+            setTimeout(() => { messageBox.style.display = 'none'; }, 5000);
         }
 
-        // Update user permissions (Client-side only -  Directly update Firestore)
+        // Update user permissions
         function updateUserPermissions() {
-            const email = document.getElementById('permissions-email').value;
+            const email = document.getElementById('permissions-email').value.trim();
             const canPost = document.getElementById('can-post').checked;
             const canMessage = document.getElementById('can-message').checked;
-            const userNote = document.getElementById('user-note').value;
+            const userNote = document.getElementById('user-note').value.trim();
 
-            //  Update the user's document.
-            db.collection('users').doc(email).update({
+            if (!email) {
+                displayMessage('Please enter a user email.', 'error');
+                return;
+            }
+
+            // Update the user's document. Use set with merge:true to create if not exists
+            // or update existing fields.
+            db.collection('users').doc(email).set({
                 restrictions: {
-                    posting: !canPost,
-                    messaging: !canMessage,
-                    note: userNote
-                }
-            }).then(() => {
-                displayMessage('User permissions updated successfully', 'success');
+                    posting: !canPost,      // Store the restriction (true if they CANNOT post)
+                    messaging: !canMessage, // Store the restriction (true if they CANNOT message)
+                    note: userNote || ''    // Store the note, ensure it's at least an empty string
+                },
+                // Reset acknowledgement flag when permissions change
+                hasAcknowledgedRestrictions: false
+            }, { merge: true }) // Merge ensures other user data isn't overwritten
+            .then(() => {
+                displayMessage(`User permissions updated successfully for ${email}`, 'success');
+                // Clear fields after success
+                document.getElementById('permissions-email').value = '';
+                document.getElementById('can-post').checked = false;
+                document.getElementById('can-message').checked = false;
+                document.getElementById('user-note').value = '';
             }).catch(error => {
-                displayMessage('Error updating user: ' + error.message, 'error');
+                displayMessage(`Error updating user ${email}: ` + error.message, 'error');
             });
-
         }
 
-        //  Reset Password (Client-side, requires user to be logged in)
+        // Reset Password
         function resetPassword() {
-            const email = document.getElementById('reset-email').value;
+            const email = document.getElementById('reset-email').value.trim();
+             if (!email) {
+                displayMessage('Please enter an email to send reset link.', 'error');
+                return;
+            }
             auth.sendPasswordResetEmail(email)
                 .then(() => {
-                    displayMessage('Password reset email sent!', 'success');
+                    displayMessage(`Password reset email sent to ${email}!`, 'success');
+                     document.getElementById('reset-email').value = ''; // Clear field
                 })
                 .catch((error) => {
-                    displayMessage('Error: ' + error.message, 'error');
+                    displayMessage('Error sending reset email: ' + error.message, 'error');
                 });
         }
 
-        //  Disable Account (Client-side -  Can't be done directly.  Requires Admin SDK)
+        // Disable Account (Placeholder - Requires Admin SDK)
         function disableAccount() {
             const email = document.getElementById('disable-email').value;
-            displayMessage("Disabling account requires Admin SDK and server-side implementation.", "error");
-            console.error("Disabling account requires Admin SDK and server-side implementation.");
+            displayMessage("Disabling account requires Admin SDK (server-side function). This button is a placeholder.", "error");
+            console.warn("Client-side cannot disable Firebase Auth accounts directly.");
         }
 
-        //  Add Notification (Client-side -  Store in Firestore)
+        // Add Notification (Placeholder - Requires defining how notifications work)
         function addNotification() {
             const message = document.getElementById('notification-message').value;
-            db.collection('notifications').add({  //  Change 'notifications' to your desired collection
-                message: message,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                displayMessage('Notification added successfully', 'success');
-            }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
-            });
+             displayMessage("Notification system not fully implemented. This button is a placeholder.", "error");
+             console.warn("Define how 'notifications' should work (e.g., target user, global, etc.).");
+            // Example: db.collection('global_notifications').add({...});
         }
 
-        function assignDefaultNicknames() {
-            displayMessage("Assigning default nicknames requires Admin SDK and server-side implementation.", "error");
-            console.error("Assigning default nicknames requires Admin SDK and server-side implementation.");
+        // Assign Default Nicknames (Placeholder - Requires Admin SDK)
+         function assignDefaultNicknames() {
+            displayMessage("Assigning default nicknames requires Admin SDK (server-side function). This button is a placeholder.", "error");
+             console.warn("Batch updating user profiles requires Admin SDK.");
         }
 
+        // Assign Badge
         function assignBadge(badgeType) {
-            const email = document.getElementById('badge-email').value;
-            db.collection('users').doc(email).update({
+            const email = document.getElementById('badge-email').value.trim();
+             if (!email) {
+                displayMessage('Please enter a user email to assign badge.', 'error');
+                return;
+            }
+            db.collection('users').doc(email).set({ // Use set with merge to create/update
                 badge: badgeType
-            }).then(() => {
-                displayMessage(`${badgeType} badge assigned`, 'success');
+            }, { merge: true })
+            .then(() => {
+                displayMessage(`${badgeType} badge assigned to ${email}`, 'success');
+                 document.getElementById('badge-email').value = ''; // Clear field
             }).catch(error => {
-                displayMessage('Error: ' + error.message, 'error');
+                displayMessage(`Error assigning badge to ${email}: ` + error.message, 'error');
             });
         }
 
     </script>
 </head>
-
-<div class="container" id="admin-panel" style="display: none;">
+<body> <div class="container" id="admin-panel" style="display: none;">
     <header>
         <h1><strong>Admin Panel</strong></h1>
-        <div id="message-box" style="display: none;"></div>
-        <div class="form-container">
-            <div class="form-section">
-                <h2>Reset User Password</h2>
-                <input type="text" id="reset-email" placeholder="User Email" required><br>
-                <button onclick="resetPassword()">Reset Password</button>
-            </div>
-            <div class="form-section">
-                <h2>Disable User Account</h2>
-                <input type="text" id="disable-email" placeholder="User Email" required><br>
-                <button onclick="disableAccount()">Disable Account</button>
-            </div>
-            <div class="form-section">
-                <h2>Add Notification</h2>
-                <input type="text" id="notification-message" placeholder="Notification Message" required><br>
-                <button onclick="addNotification()">Add Notification</button>
-            </div>
-             <div class="form-section">
-                <h2>Assign Default Nicknames</h2>
-                <button onclick="assignDefaultNicknames()">Assign Default Nicknames</button>
-            </div>
-            <div class="form-section">
-                <h2>Assign Badge</h2>
-                <input type="text" id="badge-email" placeholder="User Email" required><br>
-                <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
-                <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
-            </div>
-            <div class="form-section">
-                <h2>Reported Posts</h2>
-                <div id="reported-posts-container"></div>
-            </div>
-            <div class="form-section">
-                <h2>Update User Permissions</h2>
-                <input type="text" id="permissions-email" placeholder="User Email" required><br>
-                <label><input type="checkbox" id="can-post"> Can Post</label><br>
-                <label><input type="checkbox" id="can-message"> Can Message</label><br>
-                <label>Note:</label><br>
-                <input type="text" id="user-note" placeholder="Add a note about this user"><br>
-                <button onclick="updateUserPermissions()">Update Permissions</button>
-            </div>
-            <button onclick="window.location.href = 'index.html';">home </button>
+        <div id="message-box" style="display: none;"></div> </header>
+
+    <div class="form-container">
+
+        <div class="form-section">
+            <h2>Global Site Notice</h2>
+            <div id="current-notice-display">Loading current notice...</div>
+            <label for="global-notice-message">Notice Message:</label>
+            <textarea id="global-notice-message" placeholder="Enter the notice text here. Publishing will make it active and require users to acknowledge it."></textarea><br>
+            <button id="update-notice-button" onclick="updateGlobalNotice()">Publish / Update Notice</button>
+            <button id="deactivate-notice-button" onclick="deactivateGlobalNotice()">Deactivate Current Notice</button>
         </div>
-    </header>
-</div>
 
-<style>
-body {
-    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
-}
+        <div class="form-section">
+            <h2>Update User Permissions</h2>
+            <label for="permissions-email">User Email:</label>
+            <input type="email" id="permissions-email" placeholder="User Email" required><br>
+            <label><input type="checkbox" id="can-post" checked> Can Post</label> <label><input type="checkbox" id="can-message" checked> Can Message</label> <label for="user-note">Restriction Note (Optional):</label>
+            <input type="text" id="user-note" placeholder="Reason for restriction (if any)"><br>
+            <button onclick="updateUserPermissions()">Update Permissions</button>
+        </div>
 
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    font-size: 0.8em;
-    line-height: 1.5;
-    backdrop-filter: blur(10px);
-    box-sizing: border-box; /* Include padding in width/height */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
+        <div class="form-section">
+            <h2>Reported Posts</h2>
+            <div id="reported-posts-container">Loading reported posts...</div>
+        </div>
 
-.footer-links {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
+         <div class="form-section">
+            <h2>Assign Badge</h2>
+             <label for="badge-email">User Email:</label>
+            <input type="email" id="badge-email" placeholder="User Email" required><br>
+            <button onclick="assignBadge('bluecheck')">Assign Blue Check</button>
+            <button onclick="assignBadge('goldcheck')">Assign Gold Check</button>
+            <button onclick="removeBadge(document.getElementById('badge-email').value)">Remove Badge</button>
+        </div>
 
-.footer-links li {
-    display: inline;
-}
+        <div class="form-section">
+            <h2>Reset User Password</h2>
+            <label for="reset-email">User Email:</label>
+            <input type="email" id="reset-email" placeholder="User Email" required><br>
+            <button onclick="resetPassword()">Send Reset Email</button>
+        </div>
 
-.footer-links li::after {
-    content: "•";
-    color: #d2d2d7;
-    margin-left: 8px;
-    padding-left: 8px;
-}
+        <div class="form-section">
+            <h2>Disable User Account (Server-Side Needed)</h2>
+             <label for="disable-email">User Email:</label>
+            <input type="email" id="disable-email" placeholder="User Email" required><br>
+            <button onclick="disableAccount()" title="Requires server-side Admin SDK">Disable Account (Placeholder)</button>
+        </div>
+        <div class="form-section">
+            <h2>Add Notification (Placeholder)</h2>
+             <label for="notification-message">Message:</label>
+            <input type="text" id="notification-message" placeholder="Notification Message" required><br>
+            <button onclick="addNotification()" title="Requires implementation definition">Add Notification (Placeholder)</button>
+        </div>
+         <div class="form-section">
+            <h2>Assign Default Nicknames (Server-Side Needed)</h2>
+            <button onclick="assignDefaultNicknames()" title="Requires server-side Admin SDK">Assign Default Nicknames (Placeholder)</button>
+        </div>
 
-.footer-links li:last-child::after {
-    content: "";
-}
+    </div> <div style="text-align: center; margin-top: 20px;"> <button onclick="window.location.href = 'index.html';">Home</button>
+     </div>
 
-.footer-links a {
-    color: #0066cc;
-    text-decoration: none;
-}
+</div> <footer class="footer">
+     <ul class="footer-links">
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms of Use</a></li>
+        <li><a href="/sales">Sales and Refunds</a></li>
+        <li><a href="/legal">Legal</a></li>
+        <li><a href="/sitemap">Site Map</a></li>
+        <li><a href="https://status.toastreal.xyz">status</a></li>
+        <li><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
+    </ul>
+</footer>
 
-.footer-links a:hover {
-    text-decoration: underline;
-    color: #0066cc;
-}
-
-.footer-copyright {
-    margin-bottom: 5px;
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-.footer-country {
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-@media (max-width: 600px) {
-    .footer {
-        padding: 15px;
-        font-size: 0.6em;
-    }
-
-    .footer-links {
-        gap: 10px;
-    }
-
-    .footer-links li::after {
-        display: none;
-    }
-
-    .footer-links li {
-        margin-right: 4px;
-        margin-left: 4px;
-    }
-}
-</style>
-</html>
+</body> </html>
