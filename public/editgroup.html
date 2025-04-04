@@ -3,21 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+        crossorigin="anonymous"></script>
     <title>Edit Group</title>
-    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
-    <script src="notifications.js"></script>
-    <link rel="stylesheet" href="notifications.css">
+    <style>
+        /* --- Base Styles --- */
+        body {
+            margin: 0 0 100px 0; /* Footer spacing */
+            font-family: 'Google Sans', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content-wrapper {
+             flex: 1; /* Allows footer to stick to bottom */
+        }
+
+        /* --- Header v2 --- */
+        header.v2 {
+            background-color: rgba(0, 0, 0, 0.85); /* Slightly more opaque */
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+        }
+        header.v2 nav ul.nav-list {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        header.v2 nav ul.nav-list li.nav-item {
+            margin: 5px 15px; /* Add vertical margin for wrapping */
+            box-sizing: border-box;
+        }
+        header.v2 nav ul.nav-list li.nav-item a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px; /* Slightly smaller */
+            font-weight: 500;
+            transition: color 0.3s ease;
+            box-sizing: border-box;
+            display: block;
+            padding: 5px 0; /* Add some padding */
+        }
+        header.v2 nav ul.nav-list li.nav-item a:hover {
+            color: #ddd; /* Lighter hover */
+        }
+
+        /* --- Main Container --- */
+        .container {
+            max-width: 700px; /* Suitable width for edit form */
+            margin: 30px auto;
+            padding: 25px 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* --- Container Header --- */
+        .container header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .container header h1 {
+            margin: 0;
+            color: #1c1e21;
+            font-weight: 500;
+            font-size: 1.6em;
+        }
+
+        /* --- Form Sections --- */
+        .form-section {
+            margin-bottom: 30px;
+        }
+        .form-section h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+            font-weight: 500;
+        }
+
+        /* --- Input Fields & Labels --- */
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.9em;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 0.95em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]:focus {
+             border-color: #007bff;
+             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+             outline: none;
+        }
+
+        /* --- Buttons --- */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        button:hover:not(:disabled) { /* Only hover effect if not disabled */
+            background-color: #0056b3;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        button:disabled {
+             background-color: #adb5bd;
+             cursor: not-allowed;
+             box-shadow: none;
+        }
+        /* Specific button styles */
+        #logout-button {
+            background-color: #6c757d;
+            padding: 8px 15px; /* Smaller logout */
+        }
+         #logout-button:hover {
+             background-color: #5a6268;
+         }
+        #delete-group-button {
+            background-color: #dc3545; /* Red delete button */
+            display: none; /* Hidden by default, shown for owner */
+        }
+        #delete-group-button:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+
+        /* --- Member List --- */
+        #group-members {
+            margin-bottom: 15px; /* Space above Add Member button */
+        }
+        .member {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 12px 5px; /* More padding */
+        }
+        .member p {
+            margin: 0;
+            font-size: 1em;
+            color: #212529;
+        }
+        .member span.nickname { /* Style for nickname */
+            font-weight: 500;
+        }
+        .member span.email-fallback { /* Style for email fallback */
+             font-size: 0.9em;
+             color: #6c757d;
+             margin-left: 5px;
+        }
+        .member button { /* Remove member button */
+            background-color: #ffc107; /* Amber color */
+            color: #333;
+            padding: 4px 10px;
+            font-size: 0.8em;
+            margin: 0; /* Reset margin */
+        }
+        .member button:hover:not(:disabled) {
+            background-color: #e0a800;
+        }
+
+        /* --- Notification Styles --- */
+        .notification {
+            position: fixed;
+            bottom: 20px; /* Position at bottom */
+            left: 50%;
+            transform: translateX(-50%); /* Center horizontally */
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            z-index: 1000;
+            font-size: 0.95em;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0; /* Start hidden for animation */
+            transition: opacity 0.3s ease, bottom 0.3s ease;
+        }
+        .notification.show {
+             opacity: 1;
+             bottom: 30px; /* Animate upwards */
+        }
+        .notification.success {
+            background-color: #28a745; /* Bootstrap success green */
+        }
+        .notification.error {
+            background-color: #dc3545; /* Bootstrap danger red */
+        }
+
+        /* --- Footer Styles --- */
+        .footer {
+            /* position: fixed; */ /* Removed fixed position */
+            /* bottom: 0; */
+            /* left: 0; */
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #ccc;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.75em;
+            line-height: 1.6;
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin-top: auto; /* Pushes footer to bottom in flex container */
+        }
+        .footer-links { list-style: none; padding: 0; margin-bottom: 10px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 15px; }
+        .footer-links li { display: inline; }
+        .footer-links li::after { content: "|"; color: #777; margin-left: 10px; padding-left: 10px; }
+        .footer-links li:last-child::after { content: ""; }
+        .footer-links a { color: #a0cfff; text-decoration: none; }
+        .footer-links a:hover { text-decoration: underline; color: #fff; }
+        .footer-copyright { margin-bottom: 5px; color: #999; font-size: 0.9em; }
+        .footer-country { color: #999; font-size: 0.9em; }
+
+        /* --- Responsive --- */
+         @media (max-width: 600px) {
+            .container {
+                 margin: 20px 15px;
+                 padding: 20px;
+            }
+             .container header h1 {
+                 font-size: 1.4em;
+             }
+             header.v2 nav ul.nav-list li.nav-item {
+                 margin: 5px 10px;
+             }
+             header.v2 nav ul.nav-list li.nav-item a {
+                 font-size: 14px;
+             }
+             .footer { padding: 10px; font-size: 0.7em; }
+             .footer-links { gap: 8px 10px; }
+             .footer-links li::after { margin-left: 8px; padding-left: 8px; }
+         }
+
+    </style>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc",
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc", // Use your actual API key
             authDomain: "toastrealxyz.firebaseapp.com",
             projectId: "toastrealxyz",
             storageBucket: "toastrealxyz.appspot.com",
@@ -26,298 +287,355 @@
             measurementId: "G-3H38LZB2BX"
         };
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const auth = firebase.auth();
         const db = firebase.firestore();
 
         let groupId = null;
+        let isOwner = false; // Flag to track if current user is the owner
+        let groupOwnerEmail = null; // Store owner's email
+        let currentUserEmail = null; // Store current user's email
 
         // Check if user is logged in
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('logout-button').style.display = 'block';
+                currentUserEmail = user.email; // Store current user's email
+                document.getElementById('logout-button').style.display = 'inline-block'; // Use inline-block
                 loadGroupDetails();
             } else {
+                currentUserEmail = null;
                 document.getElementById('logout-button').style.display = 'none';
-                window.location.href = 'accounts.html';
+                // Avoid redirect loops if already on accounts.html
+                if (window.location.pathname !== '/accounts.html' && window.location.pathname !== '/accounts') {
+                    window.location.href = 'accounts.html';
+                }
             }
         });
 
-        // Load group details
-        function loadGroupDetails() {
+        // Load group details and check ownership
+        async function loadGroupDetails() {
             const urlParams = new URLSearchParams(window.location.search);
             groupId = urlParams.get('group');
             if (!groupId) {
-                showNotification('No group specified.', 'error');
+                showNotification('No group ID specified in URL.', 'error');
+                // Disable all controls if no group ID
+                disableAllControls();
                 return;
             }
 
-            db.collection('groups').doc(groupId).get().then(doc => {
+            const groupRef = db.collection('groups').doc(groupId);
+            const membersContainer = document.getElementById('group-members');
+            membersContainer.innerHTML = '<p>Loading members...</p>'; // Loading state
+
+            try {
+                const doc = await groupRef.get();
                 if (doc.exists) {
                     const groupData = doc.data();
+                    groupOwnerEmail = groupData.createdBy; // Get owner email
+                    isOwner = currentUserEmail === groupOwnerEmail; // Check ownership
+
+                    // Set group name input
                     document.getElementById('group-name').value = groupData.name || '';
-                    const membersContainer = document.getElementById('group-members');
-                    membersContainer.innerHTML = '';
-                    groupData.members.forEach(member => {
-                        const memberElement = document.createElement('div');
-                        memberElement.className = 'member';
-                        memberElement.innerHTML = `
-                            <p>${member}</p>
-                            <button onclick="removeMember('${member}')">Remove</button>
-                        `;
-                        membersContainer.appendChild(memberElement);
-                    });
+
+                    // Update UI based on ownership
+                    updateControlsBasedOnOwnership();
+
+                    // Load members with nicknames
+                    const memberEmails = groupData.members || [];
+                    if (memberEmails.length > 0) {
+                        // Create promises to fetch nickname for each member
+                        const fetchNicknamePromises = memberEmails.map(email =>
+                            db.collection('users').doc(email).get()
+                                .then(userDoc => ({
+                                    email: email, // Keep track of the email
+                                    nickname: userDoc.exists ? userDoc.data().nickname : null // Get nickname if user exists
+                                }))
+                                .catch(error => {
+                                     console.error(`Error fetching user ${email}:`, error);
+                                     return { email: email, nickname: null }; // Return email on error
+                                })
+                        );
+
+                        // Wait for all nickname fetches to complete
+                        const membersWithNicknames = await Promise.all(fetchNicknamePromises);
+
+                        // Display members
+                        membersContainer.innerHTML = ''; // Clear loading state
+                        membersWithNicknames.forEach(member => {
+                            const memberElement = document.createElement('div');
+                            memberElement.className = 'member';
+                            const displayName = member.nickname
+                                ? `<span class="nickname">${member.nickname}</span>` // Display nickname
+                                : `<span class="email-fallback">${member.email}</span>`; // Fallback to email
+
+                            memberElement.innerHTML = `
+                                <p>${displayName}</p>
+                                <button class="remove-member-btn" onclick="removeMember('${member.email}')" ${!isOwner ? 'disabled' : ''}>Remove</button>
+                            `;
+                            membersContainer.appendChild(memberElement);
+                        });
+                    } else {
+                         membersContainer.innerHTML = '<p>No members in this group yet.</p>';
+                    }
+
                 } else {
                     showNotification('Group not found.', 'error');
+                    disableAllControls(); // Disable controls if group not found
                 }
-            }).catch(error => {
-                showNotification('Error: ' + error.message, 'error');
-            });
+            } catch (error) {
+                showNotification('Error loading group details: ' + error.message, 'error');
+                console.error("Error loading group: ", error);
+                disableAllControls(); // Disable controls on error
+            }
         }
 
-        // Update group name
-        function updateGroupName() {
-            const newName = document.getElementById('group-name').value;
-            if (newName) {
-                db.collection('groups').doc(groupId).update({
-                    name: newName
-                }).then(() => {
+        // Enable/disable controls based on ownership
+        function updateControlsBasedOnOwnership() {
+            const updateNameButton = document.getElementById('update-name-button');
+            const addMemberButton = document.getElementById('add-member-button');
+            const deleteGroupButton = document.getElementById('delete-group-button');
+            const groupNameInput = document.getElementById('group-name');
+            const removeMemberButtons = document.querySelectorAll('.remove-member-btn');
+
+            if (updateNameButton) updateNameButton.disabled = !isOwner;
+            if (addMemberButton) addMemberButton.disabled = !isOwner;
+            if (groupNameInput) groupNameInput.disabled = !isOwner; // Disable input too
+
+            removeMemberButtons.forEach(button => button.disabled = !isOwner);
+
+            if (deleteGroupButton) {
+                 deleteGroupButton.style.display = isOwner ? 'inline-block' : 'none'; // Show only for owner
+            }
+        }
+
+        // Helper to disable all controls (e.g., if group not found or error)
+        function disableAllControls() {
+            isOwner = false; // Ensure isOwner flag is false
+            updateControlsBasedOnOwnership(); // Call the function to disable everything
+            const membersContainer = document.getElementById('group-members');
+            if (membersContainer) membersContainer.innerHTML = ''; // Clear members area
+        }
+
+
+        // Update group name (Owner only)
+        async function updateGroupName() {
+            if (!isOwner) {
+                showNotification('Only the group owner can rename the group.', 'error');
+                return;
+            }
+            const newName = document.getElementById('group-name').value.trim();
+            const button = event.target;
+            button.disabled = true;
+
+            if (newName && groupId) {
+                try {
+                    await db.collection('groups').doc(groupId).update({ name: newName });
                     showNotification('Group name updated successfully!', 'success');
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
+                } catch (error) {
+                    showNotification('Error updating group name: ' + error.message, 'error');
+                    console.error("Error updating name: ", error);
+                } finally {
+                     button.disabled = false; // Re-enable button (owner check still applies)
+                }
+            } else if (!newName) {
+                 showNotification('Group name cannot be empty.', 'error');
+                 button.disabled = false;
+            } else {
+                 button.disabled = false; // Should not happen if groupId is set
             }
         }
 
-        // Add member
-        function addMember() {
-            const email = prompt('Enter the email of the person you want to add:');
-            if (email) {
-                db.collection('groups').doc(groupId).update({
-                    members: firebase.firestore.FieldValue.arrayUnion(email)
-                }).then(() => {
-                    showNotification('Member added successfully!', 'success');
-                    loadGroupDetails();
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
+        // Add member (Owner only)
+        async function addMember() {
+            if (!isOwner) {
+                showNotification('Only the group owner can add members.', 'error');
+                return;
+            }
+            const email = prompt('Enter the EMAIL of the person you want to add:');
+            const button = event.target;
+            button.disabled = true;
+
+            if (email && groupId) {
+                const trimmedEmail = email.trim();
+                // Optional: Check if user exists before adding
+                try {
+                    const userDoc = await db.collection('users').doc(trimmedEmail).get();
+                    if (!userDoc.exists) {
+                        showNotification(`User with email ${trimmedEmail} not found.`, 'error');
+                        button.disabled = false;
+                        return;
+                    }
+
+                    // User exists, add to group
+                    await db.collection('groups').doc(groupId).update({
+                        members: firebase.firestore.FieldValue.arrayUnion(trimmedEmail)
+                    });
+                    showNotification(`User ${userDoc.data().nickname || trimmedEmail} added successfully!`, 'success');
+                    loadGroupDetails(); // Reload to show new member with nickname
+                } catch (error) {
+                    showNotification('Error adding member: ' + error.message, 'error');
+                    console.error("Error adding member: ", error);
+                } finally {
+                    button.disabled = false; // Re-enable (owner check still applies)
+                }
+            } else {
+                 button.disabled = false; // Re-enable if prompt was cancelled
             }
         }
 
-        // Remove member
-        function removeMember(email) {
-            if (confirm(`Are you sure you want to remove ${email} from the group?`)) {
-                db.collection('groups').doc(groupId).update({
-                    members: firebase.firestore.FieldValue.arrayRemove(email)
-                }).then(() => {
+        // Remove member (Owner only)
+        async function removeMember(emailToRemove) {
+            if (!isOwner) {
+                showNotification('Only the group owner can remove members.', 'error');
+                return;
+            }
+            if (emailToRemove === currentUserEmail) {
+                 showNotification('Group owner cannot remove themselves.', 'error');
+                 return;
+            }
+
+            const button = event.target;
+            button.disabled = true;
+
+            // Fetch nickname for confirmation message
+            let confirmMessage = `Are you sure you want to remove ${emailToRemove} from the group?`;
+            try {
+                 const userDoc = await db.collection('users').doc(emailToRemove).get();
+                 if (userDoc.exists && userDoc.data().nickname) {
+                     confirmMessage = `Are you sure you want to remove ${userDoc.data().nickname} (${emailToRemove}) from the group?`;
+                 }
+            } catch (error) {
+                 console.warn("Could not fetch nickname for removal confirmation:", error);
+            }
+
+
+            if (confirm(confirmMessage)) {
+                try {
+                    await db.collection('groups').doc(groupId).update({
+                        members: firebase.firestore.FieldValue.arrayRemove(emailToRemove)
+                    });
                     showNotification('Member removed successfully!', 'success');
-                    loadGroupDetails();
-                }).catch(error => {
-                    showNotification('Error: ' + error.message, 'error');
-                });
+                    loadGroupDetails(); // Reload list
+                } catch (error) {
+                    showNotification('Error removing member: ' + error.message, 'error');
+                    console.error("Error removing member: ", error);
+                     button.disabled = false; // Re-enable only on error after confirmation
+                }
+                // Note: Button remains disabled on success because the element will be removed by loadGroupDetails()
+            } else {
+                 button.disabled = false; // Re-enable if cancelled
             }
         }
+
+        // Delete group (Owner only)
+        async function deleteGroup() {
+            if (!isOwner) {
+                showNotification('Only the group owner can delete the group.', 'error');
+                return;
+            }
+            const button = event.target;
+
+
+            if (confirm('🚨 ARE YOU SURE? 🚨\n\nDeleting this group is permanent and cannot be undone.')) {
+                 button.disabled = true;
+                 button.textContent = 'Deleting...';
+                try {
+                    await db.collection('groups').doc(groupId).delete();
+                    showNotification('Group deleted successfully!', 'success');
+                    // Redirect after a short delay to allow notification to be seen
+                    setTimeout(() => {
+                         window.location.href = 'group.html'; // Redirect to group list page
+                    }, 1500);
+                } catch (error) {
+                    showNotification('Error deleting group: ' + error.message, 'error');
+                    console.error("Error deleting group: ", error);
+                    button.disabled = false; // Re-enable on error
+                    button.textContent = 'Delete Group';
+                }
+            }
+        }
+
 
         // Log out user
         function logout() {
             auth.signOut().then(() => {
-                window.location.href = 'accounts.html';
+                // Redirect is handled by onAuthStateChanged
             }).catch((error) => {
-                showNotification('Error: ' + error.message, 'error');
+                showNotification('Error logging out: ' + error.message, 'error');
             });
         }
 
-        // Show notification
+        // Show notification function (inline)
+        let notificationTimeout;
         function showNotification(message, type) {
+             const existingNotification = document.querySelector('.notification');
+             if (existingNotification) {
+                 existingNotification.remove(); // Remove existing one first
+                 clearTimeout(notificationTimeout); // Clear its removal timer
+             }
+
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.innerText = message;
+            // Use textContent to prevent XSS issues with message content
+            notification.textContent = message;
             document.body.appendChild(notification);
+
+            // Trigger animation
             setTimeout(() => {
-                notification.remove();
+                 notification.classList.add('show');
+            }, 10); // Small delay to allow element rendering
+
+            // Auto-remove after 3 seconds
+            notificationTimeout = setTimeout(() => {
+                notification.classList.remove('show');
+                 // Remove element after fade out transition
+                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
     </script>
-    <style>
-header.v2 {
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 10px 20px;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 100;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box; /* Added box-sizing */
-}
-
-header.v2 nav ul.nav-list {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
-    width: 100%; /* Added width 100% */
-    box-sizing: border-box; /* Added box-sizing */
-}
-
-header.v2 nav ul.nav-list li.nav-item {
-    margin: 0 15px;
-    box-sizing: border-box; /* Added box-sizing */
-}
-
-header.v2 nav ul.nav-list li.nav-item a {
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.3s ease;
-    box-sizing: border-box; /* Added box-sizing */
-    display: block; /* added display block */
-}
-
-header.v2 nav ul.nav-list li.nav-item a:hover {
-    color: #cccccc;
-}
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            z-index: 1000;
-        }
-        .notification.success {
-            background-color: green;
-        }
-        .notification.error {
-            background-color: red;
-        }
-        .member {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
-    </style>
 </head>
 <body>
-    <header class="v2">
-        <nav>
-            <ul class="nav-list">
-                <li class="nav-item"><a href="index.html">home</a></li>
-                <li class="nav-item"><a href="post.html">posts</a></li>
-                <li class="nav-item"><a href="profile.html">profile</a></li>
-                <li class="nav-item"><a href="users.html">friends</a></li>
-                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
-                <li class="nav-item"><a href="group.html">group chats</a></li>
-                <li class="nav-item"><a href="news.html">news</a></li>
-                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
-                <li class="nav-item"><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <header>
-            <h1><strong>Edit Group</strong></h1>
-            <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+    <div class="content-wrapper">
+        <header class="v2">
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="index.html">home</a></li>
+                    <li class="nav-item"><a href="post.html">posts</a></li>
+                    <li class="nav-item"><a href="profile.html">profile</a></li>
+                    <li class="nav-item"><a href="users.html">friends</a></li>
+                    <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                    <li class="nav-item"><a href="group.html">group chats</a></li>
+                    <li class="nav-item"><a href="news.html">news</a></li>
+                    <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+                    <li class="nav-item"><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
+                </ul>
+            </nav>
         </header>
-        <div class="form-container">
-            <div class="form-section">
-                <h2>Group Name</h2>
-                <input type="text" id="group-name" placeholder="Group Name" required><br>
-                <button onclick="updateGroupName()">Update Group Name</button>
-            </div>
-            <div class="form-section">
-                <h2>Group Members</h2>
-                <div id="group-members"></div>
-                <button onclick="addMember()">Add Member</button>
+
+        <div class="container">
+            <header>
+                <h1><strong>Edit Group</strong></h1>
+                <button id="logout-button" onclick="logout()" style="display: none;">Logout</button>
+            </header>
+
+            <div class="form-container"> <div class="form-section">
+                    <h2>Group Name</h2>
+                    <label for="group-name" class="sr-only">Group Name</label> <input type="text" id="group-name" placeholder="Group Name" required disabled><br> <button id="update-name-button" onclick="updateGroupName()" disabled>Update Group Name</button> </div>
+
+                <div class="form-section">
+                    <h2>Group Members</h2>
+                    <div id="group-members"><p>Loading members...</p></div>
+                    <button id="add-member-button" onclick="addMember()" disabled>Add Member</button> </div>
+
+                <div class="form-section">
+                     <h2>Danger Zone</h2>
+                     <button id="delete-group-button" onclick="deleteGroup()">Delete Group</button> <p style="font-size: 0.85em; color: #6c757d;">Only the group owner can perform these actions.</p>
+                </div>
             </div>
         </div>
-    </div>
+    </div> <footer class="footer">
 
-<style>
-body {
-    margin-bottom: 60px; /* Add margin at the bottom for fixed footer */
-}
-
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    font-size: 0.8em;
-    line-height: 1.5;
-    backdrop-filter: blur(10px);
-    box-sizing: border-box; /* Include padding in width/height */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.footer-links li {
-    display: inline;
-}
-
-.footer-links li::after {
-    content: "•";
-    color: #d2d2d7;
-    margin-left: 8px;
-    padding-left: 8px;
-}
-
-.footer-links li:last-child::after {
-    content: "";
-}
-
-.footer-links a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-.footer-links a:hover {
-    text-decoration: underline;
-    color: #0066cc;
-}
-
-.footer-copyright {
-    margin-bottom: 5px;
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-.footer-country {
-    color: #6e6e73;
-    font-size: 0.7em;
-}
-
-@media (max-width: 600px) {
-    .footer {
-        padding: 15px;
-        font-size: 0.6em;
-    }
-
-    .footer-links {
-        gap: 10px;
-    }
-
-    .footer-links li::after {
-        display: none;
-    }
-
-    .footer-links li {
-        margin-right: 4px;
-        margin-left: 4px;
-    }
-}
-</style>
+</body>
 </html>
