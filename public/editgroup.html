@@ -474,7 +474,7 @@ async function leaveGroup() {
     button.disabled = true;
 
     if (email && groupId) {
-        const trimmedEmail = email.trim();
+        const trimmedEmail = email();
         try {
             // Check if the user exists in the "users" collection
             const userDoc = await db.collection('users').doc(trimmedEmail).get();
