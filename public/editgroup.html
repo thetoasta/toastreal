@@ -632,17 +632,17 @@ async function leaveGroup() {
 
             <div class="form-container"> <div class="form-section">
                     <h2>Group Name</h2>
-                    <label for="group-name" class="sr-only">Group Name</label> <input type="text" id="group-name" placeholder="Group Name" required disabled><br> <button id="update-name-button" onclick="updateGroupName()" disabled>Update Group Name</button> </div>
+                    <label for="group-name" class="sr-only">Group Name</label> <input type="text" id="group-name" placeholder="Group Name" required disabled><br> <button id="update-name-button" onclick="updateGroupName(event)" disabled>Update Group Name</button> </div>
 
                 <div class="form-section">
                     <h2>Group Members</h2>
                     <div id="group-members"><p>Loading members...</p></div>
-                    <button id="add-member-button" onclick="addMember()" disabled>Add Member</button> </div>
+                    <button id="add-member-button" onclick="addMember(event)" disabled>Add Member</button> </div>
 
                 <div class="form-section">
                      <h2>Danger Zone</h2>
-                     <button id="delete-group-button" onclick="deleteGroup()">Delete Group</button> <p style="font-size: 0.85em; color: #6c757d;">Think twice before using these actions.</p>
-                     <button id="leave-group-button" onclick="leaveGroup()">Leave Group</button>
+                     <button id="delete-group-button" onclick="deleteGroup(event)">Delete Group</button> <p style="font-size: 0.85em; color: #6c757d;">Think twice before using these actions.</p>
+                     <button id="leave-group-button" onclick="leaveGroup(event)">Leave Group</button>
                 </div>
                 
             </div>
