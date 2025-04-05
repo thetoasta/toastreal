@@ -465,18 +465,13 @@ async function leaveGroup() {
 
         // Add member (Owner only)
         async function addMember(event) {
-    if (!isOwner) {
-        showNotification('Only the group owner can add members.', 'error');
-        return;
-    }
-    const email = prompt('Enter the EMAIL of the person you want to add:');
-    const button = event.target;
+    const button = event.target; // This will now work
     button.disabled = true;
 
+    const email = prompt('Enter the EMAIL of the person you want to add:');
     if (email && groupId) {
-        const trimmedEmail = email();
+        const trimmedEmail = email.trim();
         try {
-            // Check if the user exists in the "users" collection
             const userDoc = await db.collection('users').doc(trimmedEmail).get();
             if (!userDoc.exists) {
                 showNotification(`User with email ${trimmedEmail} not found.`, 'error');
@@ -484,20 +479,19 @@ async function leaveGroup() {
                 return;
             }
 
-            // Add the user to the group
             await db.collection('groups').doc(groupId).update({
                 members: firebase.firestore.FieldValue.arrayUnion(trimmedEmail)
             });
             showNotification(`User ${userDoc.data().nickname || trimmedEmail} added successfully!`, 'success');
-            loadGroupDetails(); // Reload group details to reflect changes
+            loadGroupDetails();
         } catch (error) {
             showNotification('Error adding member: ' + error.message, 'error');
             console.error("Error adding member: ", error);
         } finally {
-            button.disabled = false; // Re-enable the button
+            button.disabled = false;
         }
     } else {
-        button.disabled = false; // Re-enable if prompt was canceled
+        button.disabled = false;
     }
 }
 
