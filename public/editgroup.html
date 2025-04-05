@@ -327,81 +327,70 @@
 
         // Load group details and check ownership
         async function loadGroupDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            groupId = urlParams.get('group');
-            if (!groupId) {
-                showNotification('No group ID specified in URL.', 'error');
-                // Disable all controls if no group ID
-                disableAllControls();
-                return;
+    const urlParams = new URLSearchParams(window.location.search);
+    groupId = urlParams.get('group');
+    if (!groupId) {
+        showNotification('No group ID specified in URL.', 'error');
+        disableAllControls();
+        return;
+    }
+
+    const groupRef = db.collection('groups').doc(groupId);
+    const membersContainer = document.getElementById('group-members');
+    membersContainer.innerHTML = '<p>Loading members...</p>';
+
+    try {
+        const doc = await groupRef.get();
+        if (doc.exists) {
+            const groupData = doc.data();
+            groupOwnerEmail = groupData.createdBy;
+            isOwner = currentUserEmail === groupOwnerEmail;
+
+            document.getElementById('group-name').value = groupData.name || '';
+            updateControlsBasedOnOwnership();
+
+            const memberEmails = groupData.members || [];
+            if (memberEmails.length > 0) {
+                const fetchNicknamePromises = memberEmails.map(email =>
+                    db.collection('users').doc(email).get()
+                        .then(userDoc => ({
+                            email: email,
+                            nickname: userDoc.exists ? userDoc.data().nickname : null
+                        }))
+                        .catch(error => {
+                            console.error(`Error fetching user ${email}:`, error);
+                            return { email: email, nickname: null };
+                        })
+                );
+
+                const membersWithNicknames = await Promise.all(fetchNicknamePromises);
+                membersContainer.innerHTML = '';
+                membersWithNicknames.forEach(member => {
+                    const memberElement = document.createElement('div');
+                    memberElement.className = 'member';
+                    const displayName = member.nickname
+                        ? `<span class="nickname">${member.nickname}</span>`
+                        : `<span class="email-fallback">${member.email}</span>`;
+
+                    memberElement.innerHTML = `
+                        <p>${displayName}</p>
+                        <button class="remove-member-btn" onclick="removeMember('${member.email}')" ${!isOwner ? 'disabled' : ''}>Remove</button>
+                    `;
+                    membersContainer.appendChild(memberElement);
+                });
+            } else {
+                membersContainer.innerHTML = '<p>No members in this group yet.</p>';
             }
-
-            const groupRef = db.collection('groups').doc(groupId);
-            const membersContainer = document.getElementById('group-members');
-            membersContainer.innerHTML = '<p>Loading members...</p>'; // Loading state
-
-            try {
-                const doc = await groupRef.get();
-                if (doc.exists) {
-                    const groupData = doc.data();
-                    groupOwnerEmail = groupData.createdBy; // Get owner email
-                    isOwner = currentUserEmail === groupOwnerEmail; // Check ownership
-
-                    // Set group name input
-                    document.getElementById('group-name').value = groupData.name || '';
-
-                    // Update UI based on ownership
-                    updateControlsBasedOnOwnership();
-
-                    // Load members with nicknames
-                    const memberEmails = groupData.members || [];
-                    if (memberEmails.length > 0) {
-                        // Create promises to fetch nickname for each member
-                        const fetchNicknamePromises = memberEmails.map(email =>
-                            db.collection('users').doc(email).get()
-                                .then(userDoc => ({
-                                    email: email, // Keep track of the email
-                                    nickname: userDoc.exists ? userDoc.data().nickname : null // Get nickname if user exists
-                                }))
-                                .catch(error => {
-                                     console.error(`Error fetching user ${email}:`, error);
-                                     return { email: email, nickname: null }; // Return email on error
-                                })
-                        );
-
-                        // Wait for all nickname fetches to complete
-                        const membersWithNicknames = await Promise.all(fetchNicknamePromises);
-
-                        // Display members
-                        membersContainer.innerHTML = ''; // Clear loading state
-                        membersWithNicknames.forEach(member => {
-                            const memberElement = document.createElement('div');
-                            memberElement.className = 'member';
-                            const displayName = member.nickname
-                                ? `<span class="nickname">${member.nickname}</span>` // Display nickname
-                                : `<span class="email-fallback">${member.email}</span>`; // Fallback to email
-
-                            memberElement.innerHTML = `
-                                <p>${displayName}</p>
-                                <button class="remove-member-btn" onclick="removeMember('${member.email}')" ${!isOwner ? 'disabled' : ''}>Remove</button>
-                            `;
-                            membersContainer.appendChild(memberElement);
-                        });
-                    } else {
-                         membersContainer.innerHTML = '<p>No members in this group yet.</p>';
-                    }
-
-                } else {
-                    showNotification('Group not found.', 'error');
-                    disableAllControls(); // Disable controls if group not found
-                }
-            } catch (error) {
-                showNotification('Error loading group details: ' + error.message, 'error');
-                console.error("Error loading group: ", error);
-                disableAllControls(); // Disable controls on error
-            }
+        } else {
+            showNotification('Group not found.', 'error');
+            disableAllControls();
         }
-
+    } catch (error) {
+        showNotification('Error loading group details: ' + error.message, 'error');
+        console.error("Error loading group: ", error);
+        disableAllControls();
+    }
+}
         // Enable/disable controls based on ownership
         function updateControlsBasedOnOwnership() {
     const updateNameButton = document.getElementById('update-name-button');
@@ -447,70 +436,70 @@ async function leaveGroup() {
 
 
         // Update group name (Owner only)
-        async function updateGroupName() {
-            if (!isOwner) {
-                showNotification('Only the group owner can rename the group.', 'error');
-                return;
-            }
-            const newName = document.getElementById('group-name').value.trim();
-            const button = event.target;
-            button.disabled = true;
+        async function updateGroupName(event) {
+    if (!isOwner) {
+        showNotification('Only the group owner can rename the group.', 'error');
+        return;
+    }
+    const newName = document.getElementById('group-name').value.trim();
+    const button = event.target;
+    button.disabled = true;
 
-            if (newName && groupId) {
-                try {
-                    await db.collection('groups').doc(groupId).update({ name: newName });
-                    showNotification('Group name updated successfully!', 'success');
-                } catch (error) {
-                    showNotification('Error updating group name: ' + error.message, 'error');
-                    console.error("Error updating name: ", error);
-                } finally {
-                     button.disabled = false; // Re-enable button (owner check still applies)
-                }
-            } else if (!newName) {
-                 showNotification('Group name cannot be empty.', 'error');
-                 button.disabled = false;
-            } else {
-                 button.disabled = false; // Should not happen if groupId is set
-            }
+    if (newName && groupId) {
+        try {
+            await db.collection('groups').doc(groupId).update({ name: newName });
+            showNotification('Group name updated successfully!', 'success');
+        } catch (error) {
+            showNotification('Error updating group name: ' + error.message, 'error');
+            console.error("Error updating name: ", error);
+        } finally {
+            button.disabled = false; // Re-enable the button
         }
+    } else if (!newName) {
+        showNotification('Group name cannot be empty.', 'error');
+        button.disabled = false;
+    } else {
+        button.disabled = false; // Should not happen if groupId is set
+    }
+}
 
         // Add member (Owner only)
-        async function addMember() {
-            if (!isOwner) {
-                showNotification('Only the group owner can add members.', 'error');
+        async function addMember(event) {
+    if (!isOwner) {
+        showNotification('Only the group owner can add members.', 'error');
+        return;
+    }
+    const email = prompt('Enter the EMAIL of the person you want to add:');
+    const button = event.target;
+    button.disabled = true;
+
+    if (email && groupId) {
+        const trimmedEmail = email.trim();
+        try {
+            // Check if the user exists in the "users" collection
+            const userDoc = await db.collection('users').doc(trimmedEmail).get();
+            if (!userDoc.exists) {
+                showNotification(`User with email ${trimmedEmail} not found.`, 'error');
+                button.disabled = false;
                 return;
             }
-            const email = prompt('Enter the EMAIL of the person you want to add:');
-            const button = event.target;
-            button.disabled = true;
 
-            if (email && groupId) {
-                const trimmedEmail = email.trim();
-                // Optional: Check if user exists before adding
-                try {
-                    const userDoc = await db.collection('users').doc(trimmedEmail).get();
-                    if (!userDoc.exists) {
-                        showNotification(`User with email ${trimmedEmail} not found.`, 'error');
-                        button.disabled = false;
-                        return;
-                    }
-
-                    // User exists, add to group
-                    await db.collection('groups').doc(groupId).update({
-                        members: firebase.firestore.FieldValue.arrayUnion(trimmedEmail)
-                    });
-                    showNotification(`User ${userDoc.data().nickname || trimmedEmail} added successfully!`, 'success');
-                    loadGroupDetails(); // Reload to show new member with nickname
-                } catch (error) {
-                    showNotification('Error adding member: ' + error.message, 'error');
-                    console.error("Error adding member: ", error);
-                } finally {
-                    button.disabled = false; // Re-enable (owner check still applies)
-                }
-            } else {
-                 button.disabled = false; // Re-enable if prompt was cancelled
-            }
+            // Add the user to the group
+            await db.collection('groups').doc(groupId).update({
+                members: firebase.firestore.FieldValue.arrayUnion(trimmedEmail)
+            });
+            showNotification(`User ${userDoc.data().nickname || trimmedEmail} added successfully!`, 'success');
+            loadGroupDetails(); // Reload group details to reflect changes
+        } catch (error) {
+            showNotification('Error adding member: ' + error.message, 'error');
+            console.error("Error adding member: ", error);
+        } finally {
+            button.disabled = false; // Re-enable the button
         }
+    } else {
+        button.disabled = false; // Re-enable if prompt was canceled
+    }
+}
 
         // Remove member (Owner only)
         async function removeMember(emailToRemove) {
@@ -658,7 +647,7 @@ async function leaveGroup() {
 
                 <div class="form-section">
                      <h2>Danger Zone</h2>
-                     <button id="delete-group-button" onclick="deleteGroup()">Delete Group</button> <p style="font-size: 0.85em; color: #6c757d;">Only the group owner can perform these actions.</p>
+                     <button id="delete-group-button" onclick="deleteGroup()">Delete Group</button> <p style="font-size: 0.85em; color: #6c757d;">Think twice before using these actions.</p>
                      <button id="leave-group-button" onclick="leaveGroup()">Leave Group</button>
                 </div>
                 
