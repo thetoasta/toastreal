@@ -16,7 +16,8 @@
         body {
             margin: 0 0 100px 0; /* Footer spacing */
             font-family: 'Google Sans', sans-serif;
-            background-color: #f0f2f5;
+            background: url('images/background.png') no-repeat center center fixed;
+            background-size: cover;
             color: #333;
             display: flex;
             flex-direction: column;
@@ -184,6 +185,16 @@
             font-size: 1em;
             color: #212529;
         }
+
+        #leave-group-button {
+    background-color: #ffc107; /* Amber color */
+    color: #333;
+    margin-top: 10px;
+}
+#leave-group-button:hover:not(:disabled) {
+    background-color: #e0a800;
+}
+
         .member span.nickname { /* Style for nickname */
             font-weight: 500;
         }
@@ -393,23 +404,39 @@
 
         // Enable/disable controls based on ownership
         function updateControlsBasedOnOwnership() {
-            const updateNameButton = document.getElementById('update-name-button');
-            const addMemberButton = document.getElementById('add-member-button');
-            const deleteGroupButton = document.getElementById('delete-group-button');
-            const groupNameInput = document.getElementById('group-name');
-            const removeMemberButtons = document.querySelectorAll('.remove-member-btn');
+    const updateNameButton = document.getElementById('update-name-button');
+    const addMemberButton = document.getElementById('add-member-button');
+    const deleteGroupButton = document.getElementById('delete-group-button');
+    const groupNameInput = document.getElementById('group-name');
+    const removeMemberButtons = document.querySelectorAll('.remove-member-btn');
 
-            if (updateNameButton) updateNameButton.disabled = !isOwner;
-            if (addMemberButton) addMemberButton.disabled = !isOwner;
-            if (groupNameInput) groupNameInput.disabled = !isOwner; // Disable input too
+    if (updateNameButton) updateNameButton.disabled = !isOwner;
+    if (addMemberButton) addMemberButton.disabled = !isOwner;
+    if (groupNameInput) groupNameInput.disabled = !isOwner;
 
-            removeMemberButtons.forEach(button => button.disabled = !isOwner);
+    removeMemberButtons.forEach(button => {
+        button.style.display = isOwner ? 'inline-block' : 'none';
+    });
 
-            if (deleteGroupButton) {
-                 deleteGroupButton.style.display = isOwner ? 'inline-block' : 'none'; // Show only for owner
-            }
-        }
-
+    if (deleteGroupButton) {
+        deleteGroupButton.style.display = isOwner ? 'inline-block' : 'none';
+    }
+}
+async function leaveGroup() {
+    if (!groupId || !currentUserEmail) return;
+    try {
+        await db.collection('groups').doc(groupId).update({
+            members: firebase.firestore.FieldValue.arrayRemove(currentUserEmail)
+        });
+        showNotification('You have left the group.', 'success');
+        setTimeout(() => {
+            window.location.href = 'group.html'; // Redirect to group list
+        }, 1500);
+    } catch (error) {
+        showNotification('Error leaving group: ' + error.message, 'error');
+        console.error("Error leaving group: ", error);
+    }
+}
         // Helper to disable all controls (e.g., if group not found or error)
         function disableAllControls() {
             isOwner = false; // Ensure isOwner flag is false
@@ -632,7 +659,9 @@
                 <div class="form-section">
                      <h2>Danger Zone</h2>
                      <button id="delete-group-button" onclick="deleteGroup()">Delete Group</button> <p style="font-size: 0.85em; color: #6c757d;">Only the group owner can perform these actions.</p>
+                     <button id="leave-group-button" onclick="leaveGroup()">Leave Group</button>
                 </div>
+                
             </div>
         </div>
     </div> <footer class="footer">
