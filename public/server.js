@@ -27,13 +27,13 @@ app.use((req, res, next) => {
 
         if (fs.existsSync(htmlFilePath)) {
             console.log(`Serving original .html file: ${htmlFilePath}`);
-            next(); // Serve the original .html file
+            next();
         } else if (fs.existsSync(newHtmlFilePath)) {
             console.log(`Redirecting to: ${newUrl}`);
             res.redirect(301, newUrl);
         } else {
             console.log("file not found");
-            next(); // Pass to the next middleware (404 handler)
+            next();
         }
     } else {
         next();
@@ -63,7 +63,25 @@ app.get('/admin', (req, res) => {
 app.use(express.static('public'));
 
 app.post('/send-notification', (req, res) => {
-    // ... (your notification code)
+    const { token, title, body } = req.body;
+
+    const message = {
+        notification: {
+            title: title,
+            body: body
+        },
+        token: token
+    };
+
+    messaging.send(message)
+        .then(response => {
+            console.log('Successfully sent message:', response);
+            res.status(200).send('Notification sent successfully');
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            res.status(500).send('Error sending notification');
+        });
 });
 
 app.get('*', (req, res) => {
