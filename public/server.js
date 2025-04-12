@@ -1,7 +1,6 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const messaging = require('./firebaseAdmin');
 const fs = require('fs');
 const path = require('path');
 const app = express();
