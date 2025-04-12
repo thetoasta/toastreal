@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
+        crossorigin="anonymous"></script>
+    <title>Toast Clicker</title>
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico"> <style>
+        /* --- Base Styles --- */
+        :root {
+            --toast-brown: #DEB887; /* BurlyWood */
+            --toast-crust: #A0522D; /* Sienna */
+            --background-light: #f8f9fa;
+            --text-dark: #212529;
+            --primary-blue: #007bff;
+            --primary-blue-dark: #0056b3;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+            --warning-yellow: #ffc107;
+            --secondary-grey: #6c757d;
+        }
+
+        body {
+            margin: 0 0 100px 0; /* Footer spacing */
+            font-family: 'Google Sans', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        .content-wrapper {
+             flex: 1;
+        }
+
+        /* --- Header v2 --- */
+        header.v2 {
+            background-color: rgba(0, 0, 0, 0.85);
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+        }
+        header.v2 nav ul.nav-list { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
+        header.v2 nav ul.nav-list li.nav-item { margin: 5px 15px; box-sizing: border-box; }
+        header.v2 nav ul.nav-list li.nav-item a { color: white; text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.3s ease; box-sizing: border-box; display: block; padding: 5px 0; }
+        header.v2 nav ul.nav-list li.nav-item a:hover { color: #ddd; }
+
+        /* --- Main Game Container --- */
+        .game-container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 30px;
+        }
+        @media (max-width: 768px) {
+            .game-container {
+                 grid-template-columns: 1fr; /* Single column on smaller screens */
+                 max-width: 500px;
+                 padding: 20px;
+            }
+        }
+
+        /* --- Clicker Area --- */
+        .clicker-area {
+            text-align: center;
+            padding: 20px;
+            border-right: 1px solid #eee; /* Separator line */
+            position: relative; /* Needed for absolute positioning of click effect */
+        }
+         @media (max-width: 768px) {
+            .clicker-area {
+                 border-right: none;
+                 border-bottom: 1px solid #eee; /* Separator below on small screens */
+                 padding-bottom: 30px;
+            }
+         }
+
+        #toast-count-display {
+            font-size: 2.5em;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--toast-crust);
+        }
+        #tps-display {
+            font-size: 1em;
+            color: #6c757d;
+            margin-bottom: 25px;
+        }
+        #clickable-toast {
+            font-size: 10em; /* Large toast emoji */
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.1s ease-out;
+            user-select: none; /* Prevent text selection */
+            filter: drop-shadow(3px 5px 4px rgba(0,0,0,0.2));
+        }
+        #clickable-toast:active {
+            transform: scale(0.95); /* Click feedback */
+        }
+        /* Click effect */
+        .click-effect {
+             position: absolute;
+             font-size: 1.5em;
+             font-weight: bold;
+             color: var(--toast-crust);
+             opacity: 1;
+             transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+             pointer-events: none; /* Don't interfere with clicks */
+             user-select: none;
+             z-index: 110; /* Above toast */
+             left: 50%; /* Start positioning from center */
+             top: 50%;
+             transform: translate(-50%, -50%); /* Center precisely */
+        }
+
+
+        /* --- Upgrades Area --- */
+        .upgrades-area {
+            padding: 10px;
+        }
+        .upgrades-area h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .upgrade {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping inside upgrade box */
+        }
+        .upgrade-info {
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+        .upgrade-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        .upgrade-info p {
+            margin: 2px 0;
+            font-size: 0.85em;
+            color: #555;
+        }
+        .upgrade-info .cost {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+        .upgrade-info .owned {
+            font-style: italic;
+            color: #6c757d;
+        }
+        .upgrade button {
+            background-color: var(--success-green);
+            padding: 8px 15px;
+            font-size: 0.85em;
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+        .upgrade button:hover:not(:disabled) {
+            background-color: #218838;
+        }
+        .upgrade button:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        /* --- Options Area --- */
+        .options-area {
+            grid-column: 1 / -1; /* Span both columns */
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+         .options-area button {
+             background-color: var(--secondary-grey);
+             font-size: 0.8em;
+             padding: 6px 12px;
+         }
+         .options-area button:hover:not(:disabled) {
+              background-color: #5a6268;
+         }
+         #reset-button {
+              background-color: var(--danger-red);
+         }
+         #reset-button:hover:not(:disabled) {
+               background-color: #c82333;
+         }
+
+
+        /* --- Notification Styles (Reused) --- */
+        .notification {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 6px; color: white; z-index: 1000; font-size: 0.95em; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.3s ease, bottom 0.3s ease; pointer-events: none;
+        }
+        .notification.show { opacity: 1; bottom: 30px; }
+        .notification.success { background-color: var(--success-green); }
+        .notification.error { background-color: var(--danger-red); }
+
+        /* --- Footer Styles (Reused) --- */
+        .footer { width: 100%; background-color: rgba(0, 0, 0, 0.8); color: #ccc; padding: 15px 20px; text-align: center; font-size: 0.75em; line-height: 1.6; backdrop-filter: blur(10px); box-sizing: border-box; border-top: 1px solid rgba(255, 255, 255, 0.15); margin-top: auto; }
+        .footer-links { list-style: none; padding: 0; margin-bottom: 10px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 15px; }
+        .footer-links li { display: inline; }
+        .footer-links li::after { content: "|"; color: #777; margin-left: 10px; padding-left: 10px; }
+        .footer-links li:last-child::after { content: ""; }
+        .footer-links a { color: #a0cfff; text-decoration: none; }
+        .footer-links a:hover { text-decoration: underline; color: #fff; }
+        .footer-copyright { margin-bottom: 5px; color: #999; font-size: 0.9em; }
+        .footer-country { color: #999; font-size: 0.9em; }
+         @media (max-width: 600px) {
+             .footer { padding: 10px; font-size: 0.7em; }
+             .footer-links { gap: 8px 10px; }
+             .footer-links li::after { margin-left: 8px; padding-left: 8px; }
+         }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <header class="v2">
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="index.html">home</a></li>
+                    <li class="nav-item"><a href="post.html">posts</a></li>
+                    <li class="nav-item"><a href="profile.html">profile</a></li>
+                    <li class="nav-item"><a href="users.html">friends</a></li>
+                    <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                    <li class="nav-item"><a href="group.html">group chats</a></li>
+                    <li class="nav-item"><a href="news.html">news</a></li>
+                    <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+                    <li class="nav-item"><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="game-container">
+            <div class="clicker-area">
+                <div id="toast-count-display">0</div>
+                <div id="tps-display">0 toasts per second</div>
+                <div id="clickable-toast" onclick="toastClicked(event)">🍞</div>
+            </div>
+
+            <div class="upgrades-area">
+                <h2>Upgrades</h2>
+                <div id="upgrades-list">
+                    </div>
+            </div>
+
+             <div class="options-area">
+                  <button onclick="saveGameState()">Save Game</button>
+                  <button id="reset-button" onclick="clearSave()">Reset Game</button>
+             </div>
+        </div>
+    </div> <footer class="footer">
+         <ul class="footer-links">
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/terms">Terms of Use</a></li>
+            <li><a href="/sales">Sales and Refunds</a></li>
+            <li><a href="/legal">Legal</a></li>
+            <li><a href="/sitemap">Site Map</a></li>
+            <li><a href="https://status.toastreal.xyz">status</a></li>
+            <li><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
+        </ul>
+        <p class="footer-copyright">Copyright © 2024 toast Inc. All rights reserved.</p>
+        <p class="footer-country">United States</p>
+    </footer>
+
+    <script>
+        // --- Game State ---
+        let toastCount = 0;
+        let toastsPerClick = 1;
+        let toastsPerSecond = 0;
+        const SAVE_KEY = 'toastClickerSave'; // Key for localStorage
+
+        // --- Upgrades Definition ---
+        // Structure: id: { name, baseCost, cost, count, tps, tpc }
+        // IMPORTANT: When adding new upgrades later, ensure loadGameState handles them gracefully
+        // (e.g., initializes them if they don't exist in the save file).
+        const upgrades = {
+            'toaster': { name: 'Toaster', description: '+0.1 TPS', baseCost: 15, cost: 15, count: 0, tps: 0.1, tpc: 0 },
+            'extra_click': { name: 'Butter Knife', description: '+1 Toast per Click', baseCost: 50, cost: 50, count: 0, tps: 0, tpc: 1 },
+            'bakery': { name: 'Bakery', description: '+1 TPS', baseCost: 100, cost: 100, count: 0, tps: 1, tpc: 0 },
+            'factory': { name: 'Toast Factory', description: '+5 TPS', baseCost: 500, cost: 500, count: 0, tps: 5, tpc: 0 }
+        };
+
+        // --- DOM Elements ---
+        const toastCountDisplay = document.getElementById('toast-count-display');
+        const tpsDisplay = document.getElementById('tps-display');
+        const clickableToast = document.getElementById('clickable-toast');
+        const upgradesList = document.getElementById('upgrades-list');
+
+        // --- Initialization ---
+        function initializeGame() {
+            loadGameState(); // Load saved state first
+            renderUpgrades(); // Then render based on loaded/default state
+            updateDisplay(); // Update display with loaded/default values
+            setInterval(gameLoop, 100); // Run game loop 10 times per second
+            setInterval(updateDisplayLoop, 100); // Update display frequently
+            setInterval(saveGameState, 30000); // Auto-save every 30 seconds
+            window.addEventListener('beforeunload', saveGameState); // Save when closing tab/browser
+        }
+
+        // --- Game Loop ---
+        function gameLoop() {
+            toastCount += toastsPerSecond * 0.1; // Add toasts generated per second (adjusted for interval)
+            checkPurchaseableUpgrades(); // Check if upgrades can be bought
+        }
+
+        // --- Display Update Loop ---
+        function updateDisplayLoop() {
+             updateDisplay();
+        }
+
+        // --- Core Click Function ---
+        function toastClicked(event) {
+            toastCount += toastsPerClick;
+            updateDisplay();
+            createClickEffect(event);
+        }
+
+        // --- Visual Click Effect ---
+        function createClickEffect(event) {
+             const effect = document.createElement('div');
+             effect.className = 'click-effect';
+             effect.textContent = `+${formatNumber(toastsPerClick)}`;
+             const rect = clickableToast.getBoundingClientRect();
+             // Calculate position relative to the clicker area for better consistency
+             const containerRect = clickableToast.parentElement.getBoundingClientRect();
+             const x = event.clientX - containerRect.left;
+             const y = event.clientY - containerRect.top;
+
+             effect.style.left = `${x}px`;
+             effect.style.top = `${y}px`; // Position at click
+
+             clickableToast.parentElement.appendChild(effect);
+
+             requestAnimationFrame(() => {
+                 effect.style.transform = `translate(-50%, -150%)`; // Move up from center
+                 effect.style.opacity = '0';
+             });
+
+             setTimeout(() => { effect.remove(); }, 500);
+        }
+
+
+        // --- Upgrade Functions ---
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades[upgradeId];
+            if (toastCount >= upgrade.cost) {
+                toastCount -= upgrade.cost;
+                upgrade.count++;
+                toastsPerSecond += upgrade.tps;
+                toastsPerClick += upgrade.tpc;
+                upgrade.cost = Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count)); // Recalculate cost
+
+                updateDisplay();
+                renderUpgrades(); // Re-render to show new cost/count
+                showNotification(`${upgrade.name} purchased!`, 'success');
+            } else {
+                showNotification('Not enough toasts!', 'error');
+            }
+        }
+
+        function checkPurchaseableUpgrades() {
+             for (const id in upgrades) {
+                 const upgrade = upgrades[id];
+                 const button = document.getElementById(`upgrade-btn-${id}`);
+                 if (button) {
+                     button.disabled = toastCount < upgrade.cost;
+                 }
+             }
+        }
+
+
+        // --- Rendering Functions ---
+        function renderUpgrades() {
+            upgradesList.innerHTML = ''; // Clear existing upgrades
+            for (const id in upgrades) {
+                const upgrade = upgrades[id];
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = 'upgrade';
+                upgradeElement.innerHTML = `
+                    <div class="upgrade-info">
+                        <h3>${upgrade.name}</h3>
+                        <p>${upgrade.description}</p>
+                        <p>Cost: <span class="cost">${formatNumber(upgrade.cost)}</span> 🍞</p>
+                        <p class="owned">Owned: ${upgrade.count}</p>
+                    </div>
+                    <button id="upgrade-btn-${id}" onclick="buyUpgrade('${id}')" ${toastCount < upgrade.cost ? 'disabled' : ''}>Buy</button>
+                `;
+                upgradesList.appendChild(upgradeElement);
+            }
+        }
+
+        function updateDisplay() {
+            toastCountDisplay.textContent = formatNumber(Math.floor(toastCount));
+            tpsDisplay.textContent = `${formatNumber(toastsPerSecond, 1)} toasts per second`;
+            document.title = `${formatNumber(Math.floor(toastCount))} Toasts - Toast Clicker`;
+        }
+
+        // --- Utility Functions ---
+        function formatNumber(num, precision = 0) {
+             if (num === Infinity) return 'Infinity';
+             if (isNaN(num)) return '0';
+             // Add logic for K, M, B etc. if needed for very large numbers
+             if (num >= 1e9) {
+                 return (num / 1e9).toFixed(2) + ' B';
+             }
+             if (num >= 1e6) {
+                 return (num / 1e6).toFixed(2) + ' M';
+             }
+             if (num >= 1e3) {
+                 return (num / 1e3).toFixed(2) + ' K';
+             }
+            return num.toLocaleString(undefined, {
+                minimumFractionDigits: precision,
+                maximumFractionDigits: precision
+            });
+        }
+
+        // --- Notification Function ---
+        let notificationTimeout;
+        function showNotification(message, type) {
+             const existingNotification = document.querySelector('.notification');
+             if (existingNotification) {
+                 existingNotification.remove();
+                 clearTimeout(notificationTimeout);
+             }
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => { notification.classList.add('show'); }, 10);
+            notificationTimeout = setTimeout(() => {
+                notification.classList.remove('show');
+                 setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Saving/Loading using localStorage ---
+        function saveGameState() {
+            // Create a simplified save object to avoid saving complex state like functions
+            const simplifiedUpgrades = {};
+            for (const id in upgrades) {
+                simplifiedUpgrades[id] = { count: upgrades[id].count }; // Only save the count
+            }
+
+            const gameState = {
+                toastCount: toastCount,
+                // TPC and TPS are derived from upgrades, no need to save them directly
+                savedUpgrades: simplifiedUpgrades // Save the simplified upgrade counts
+            };
+            try {
+                 localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+                 console.log("Game Saved");
+            } catch (e) {
+                 console.error("Error saving game:", e);
+                 showNotification("Error saving game. Storage might be full.", "error");
+            }
+        }
+
+        function loadGameState() {
+            const savedState = localStorage.getItem(SAVE_KEY);
+            if (savedState) {
+                try {
+                    const gameState = JSON.parse(savedState);
+                    toastCount = gameState.toastCount || 0;
+
+                    // Load upgrade counts and recalculate costs/effects
+                    if (gameState.savedUpgrades) {
+                        for (const id in upgrades) {
+                            // Check if the saved data has this upgrade and it has a count property
+                            if (gameState.savedUpgrades[id] && typeof gameState.savedUpgrades[id].count === 'number') {
+                                upgrades[id].count = gameState.savedUpgrades[id].count;
+                            } else {
+                                // If upgrade is missing in save or count is invalid, reset it
+                                upgrades[id].count = 0;
+                            }
+                            // Recalculate cost based on loaded count
+                            upgrades[id].cost = Math.ceil(upgrades[id].baseCost * Math.pow(1.15, upgrades[id].count));
+                        }
+                    } else {
+                         // If no upgrades in save, reset all counts
+                         for (const id in upgrades) {
+                              upgrades[id].count = 0;
+                              upgrades[id].cost = upgrades[id].baseCost;
+                         }
+                    }
+                    // Important: Recalculate TPS/TPC based on loaded upgrade counts
+                    recalculateStatsFromUpgrades();
+                    console.log("Game Loaded");
+                    showNotification("Game loaded successfully!", "success");
+                } catch (e) {
+                    console.error("Error loading saved game:", e);
+                    showNotification("Error loading save data. Resetting game.", "error");
+                    // Clear potentially corrupted save data and reset
+                    localStorage.removeItem(SAVE_KEY);
+                    resetGameVariables(); // Reset variables to default
+                }
+            } else {
+                 // No save file found, ensure game starts fresh
+                 resetGameVariables();
+            }
+        }
+
+        function recalculateStatsFromUpgrades() {
+             toastsPerSecond = 0;
+             toastsPerClick = 1; // Start with base click value
+             for (const id in upgrades) {
+                 const upgrade = upgrades[id];
+                 if (upgrade.count > 0) { // Only apply if owned
+                    toastsPerSecond += upgrade.tps * upgrade.count;
+                    toastsPerClick += upgrade.tpc * upgrade.count;
+                 }
+             }
+        }
+
+        // Function to reset game variables to defaults
+        function resetGameVariables() {
+             toastCount = 0;
+             toastsPerClick = 1;
+             toastsPerSecond = 0;
+             for (const id in upgrades) {
+                  upgrades[id].count = 0;
+                  upgrades[id].cost = upgrades[id].baseCost;
+             }
+        }
+
+
+        // Function to clear save data and reset the game
+        function clearSave() {
+             if (confirm("🚨 RESET GAME? 🚨\n\nAre you sure you want to delete your saved progress and start over?")) {
+                 localStorage.removeItem(SAVE_KEY);
+                 resetGameVariables(); // Reset game state variables
+                 renderUpgrades(); // Re-render upgrades with default values
+                 updateDisplay(); // Update the display
+                 showNotification("Game Reset!", "success");
+             }
+        }
+
+
+        // --- Start Game ---
+        window.onload = initializeGame;
+
+    </script>
+</body>
+</html>
