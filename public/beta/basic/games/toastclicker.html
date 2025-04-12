@@ -525,6 +525,58 @@
             createClickEffect(event);
         }
 
+        // --- Console Debug Functions ---
+// Expose a 'toast' object to the window for console access
+window.toast = {
+    /**
+     * Adds a specified amount to the current toast count.
+     * @param {number} amount - The number of toasts to add. Can be negative.
+     */
+    add: function(amount) {
+        // Validate input
+        if (typeof amount !== 'number' || isNaN(amount)) {
+            console.error('Error: Invalid amount provided to toast.add(). Please use a number.');
+            return; // Stop execution if input is invalid
+        }
+
+        // Add the amount to the global toastCount
+        toastCount += amount;
+
+        // Ensure toast count doesn't go below zero if you add negative numbers
+        // (Optional, remove if you want negative toasts allowed)
+        if (toastCount < 0) {
+            toastCount = 0;
+        }
+
+        // Update the display immediately to show the new count
+        updateDisplay();
+
+        // Log confirmation to the console
+        console.log(`Added ${amount} toasts. New total: ${formatNumber(Math.floor(toastCount))}`);
+    },
+
+    /**
+     * Sets the toast count to a specific value.
+     * @param {number} amount - The number to set the toast count to.
+     */
+    set: function(amount) {
+        if (typeof amount !== 'number' || isNaN(amount) || amount < 0) {
+             console.error('Error: Invalid amount provided to toast.set(). Please use a non-negative number.');
+             return;
+        }
+        toastCount = amount;
+        updateDisplay();
+        console.log(`Toast count set to ${formatNumber(Math.floor(toastCount))}`);
+    }
+
+    // You could add more debug functions here later, like:
+    // reset: function() { clearSave(); },
+    // getCount: function() { console.log(toastCount); return toastCount; }
+};
+
+// Log a message so you know the debug tools are ready when you open the console
+console.log("Toast Clicker debug tools loaded. Use 'toast.add(number)' or 'toast.set(number)'.");
+
         // --- Visual Click Effect ---
         function createClickEffect(event) {
             const effect = document.createElement('div');
