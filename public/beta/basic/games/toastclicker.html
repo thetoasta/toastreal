@@ -504,7 +504,7 @@ window.toast = {
 let originalToastCount = 0;
 
 function checkCheating() {
-    if (toastCount !== originalToastCount && toastCount !== "CHEATER!") {
+    if (toastCount !== originalToastCount && toastCount == "CHEATER!") {
         console.log("Cheating detected!");
         toastCount = "CHEATER!";
         updateDisplay();
