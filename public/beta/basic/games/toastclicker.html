@@ -12,143 +12,178 @@
         :root {
             --toast-brown: #DEB887; /* BurlyWood */
             --toast-crust: #A0522D; /* Sienna */
-            --background-light: #f8f9fa;
+            --background-light: #f0f2f5; /* Lighter background */
+            --container-bg: #ffffff;
             --text-dark: #212529;
+            --text-light: #6c757d;
             --primary-blue: #007bff;
             --primary-blue-dark: #0056b3;
             --success-green: #28a745;
+            --success-green-dark: #218838;
             --danger-red: #dc3545;
+            --danger-red-dark: #c82333;
             --warning-yellow: #ffc107;
             --secondary-grey: #6c757d;
+            --secondary-grey-dark: #5a6268;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        *, *::before, *::after {
+             box-sizing: border-box;
         }
 
         body {
-            margin: 0 0 100px 0; /* Footer spacing */
+            margin: 0; /* Remove default margin */
             font-family: 'Google Sans', sans-serif;
             background-color: var(--background-light);
             color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
             min-height: 100vh;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 20px; /* Space at the very bottom */
         }
-        .content-wrapper {
-             flex: 1;
-        }
-
-        /* --- Header v2 --- */
-        header.v2 {
-            background-color: rgba(0, 0, 0, 0.85);
-            padding: 10px 20px;
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-            box-sizing: border-box;
-        }
-        header.v2 nav ul.nav-list { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
-        header.v2 nav ul.nav-list li.nav-item { margin: 5px 15px; box-sizing: border-box; }
-        header.v2 nav ul.nav-list li.nav-item a { color: white; text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.3s ease; box-sizing: border-box; display: block; padding: 5px 0; }
-        header.v2 nav ul.nav-list li.nav-item a:hover { color: #ddd; }
 
         /* --- Main Game Container --- */
         .game-container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 20px 30px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            max-width: 950px; /* Slightly wider */
+            margin: 20px auto; /* Less top margin now header is gone */
+            padding: 25px 35px;
+            background-color: var(--container-bg);
+            border-radius: 10px; /* Slightly more rounded */
+            box-shadow: 0 5px 15px var(--shadow-color);
             display: grid;
             grid-template-columns: 1fr 1fr; /* Two columns */
-            gap: 30px;
+            gap: 35px;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 800px) { /* Adjusted breakpoint */
             .game-container {
-                 grid-template-columns: 1fr; /* Single column on smaller screens */
-                 max-width: 500px;
-                 padding: 20px;
+                 grid-template-columns: 1fr; /* Single column */
+                 max-width: 550px;
+                 padding: 20px 25px;
+                 gap: 25px;
             }
         }
+         @media (max-width: 600px) {
+             .game-container {
+                  margin: 15px;
+                  padding: 15px 20px;
+             }
+         }
+
+        /* --- Game Title --- */
+        .game-title {
+             grid-column: 1 / -1; /* Span full width */
+             text-align: center;
+             font-size: 2em;
+             font-weight: 500;
+             color: var(--text-dark);
+             margin-bottom: 0; /* Reduced margin */
+             padding-bottom: 15px;
+             border-bottom: 1px solid var(--border-color);
+        }
+
 
         /* --- Clicker Area --- */
         .clicker-area {
             text-align: center;
-            padding: 20px;
-            border-right: 1px solid #eee; /* Separator line */
-            position: relative; /* Needed for absolute positioning of click effect */
+            padding: 20px 10px; /* Adjusted padding */
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            display: flex; /* Use flexbox for centering */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Center content vertically */
         }
-         @media (max-width: 768px) {
+         @media (max-width: 800px) {
             .clicker-area {
                  border-right: none;
-                 border-bottom: 1px solid #eee; /* Separator below on small screens */
-                 padding-bottom: 30px;
+                 border-bottom: 1px solid var(--border-color);
+                 padding: 15px 10px 30px 10px; /* Adjust padding */
             }
          }
 
         #toast-count-display {
-            font-size: 2.5em;
+            font-size: 2.8em; /* Slightly larger */
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: var(--toast-crust);
+            word-break: break-all; /* Prevent overflow */
         }
         #tps-display {
-            font-size: 1em;
-            color: #6c757d;
-            margin-bottom: 25px;
+            font-size: 1.1em; /* Slightly larger */
+            color: var(--text-light);
+            margin-bottom: 30px;
         }
         #clickable-toast {
-            font-size: 10em; /* Large toast emoji */
+            font-size: 11em; /* Slightly larger toast */
             cursor: pointer;
             display: inline-block;
             transition: transform 0.1s ease-out;
-            user-select: none; /* Prevent text selection */
-            filter: drop-shadow(3px 5px 4px rgba(0,0,0,0.2));
+            user-select: none;
+            filter: drop-shadow(4px 6px 5px rgba(0,0,0,0.2));
+            margin-bottom: 20px; /* Space below toast */
         }
         #clickable-toast:active {
-            transform: scale(0.95); /* Click feedback */
+            transform: scale(0.95);
+            filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.15));
         }
         /* Click effect */
         .click-effect {
              position: absolute;
-             font-size: 1.5em;
+             font-size: 1.6em;
              font-weight: bold;
              color: var(--toast-crust);
              opacity: 1;
-             transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-             pointer-events: none; /* Don't interfere with clicks */
+             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s ease-out; /* Smoother animation */
+             pointer-events: none;
              user-select: none;
-             z-index: 110; /* Above toast */
-             left: 50%; /* Start positioning from center */
+             z-index: 110;
+             left: 50%;
              top: 50%;
-             transform: translate(-50%, -50%); /* Center precisely */
+             transform: translate(-50%, -50%);
         }
 
 
         /* --- Upgrades Area --- */
         .upgrades-area {
-            padding: 10px;
+            padding: 10px 0; /* Reduced padding */
+            max-height: 60vh; /* Limit height */
+            overflow-y: auto; /* Make upgrades scrollable */
+            padding-right: 10px; /* Space for scrollbar */
         }
+         @media (max-width: 800px) {
+             .upgrades-area {
+                  max-height: none; /* Remove height limit on mobile */
+                  overflow-y: visible;
+                  padding-right: 0;
+             }
+         }
         .upgrades-area h2 {
             margin-top: 0;
             margin-bottom: 20px;
             text-align: center;
             font-weight: 500;
             color: #333;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
+            position: sticky; /* Keep heading visible while scrolling */
+            top: 0;
+            background-color: var(--container-bg); /* Match container background */
+            z-index: 10; /* Above upgrade items */
         }
         .upgrade {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
+            background-color: #fdfdff; /* Slightly different background */
+            border: 1px solid var(--border-color);
+            border-radius: 8px; /* More rounded */
+            padding: 15px 20px;
+            margin-bottom: 12px; /* Less margin */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap; /* Allow wrapping inside upgrade box */
+            flex-wrap: wrap;
+            transition: box-shadow 0.2s ease;
+        }
+        .upgrade:hover {
+             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
         .upgrade-info {
             flex-grow: 1;
@@ -156,61 +191,91 @@
         }
         .upgrade-info h3 {
             margin: 0 0 5px 0;
-            font-size: 1.1em;
+            font-size: 1.15em; /* Slightly larger */
             font-weight: 500;
+            color: var(--text-dark);
         }
         .upgrade-info p {
-            margin: 2px 0;
-            font-size: 0.85em;
-            color: #555;
+            margin: 3px 0;
+            font-size: 0.9em; /* Slightly larger description */
+            color: var(--text-light);
         }
         .upgrade-info .cost {
             font-weight: bold;
             color: var(--primary-blue);
         }
         .upgrade-info .owned {
-            font-style: italic;
-            color: #6c757d;
+             font-size: 0.85em;
+            color: var(--text-light);
         }
+
+        /* --- Button Styling --- */
+        button {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px; /* Consistent rounding */
+            cursor: pointer;
+            margin: 5px; /* Universal margin */
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: white; /* Default text color */
+        }
+        button:hover:not(:disabled) {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px); /* Subtle lift */
+        }
+        button:active:not(:disabled) {
+             transform: translateY(0px); /* Push down */
+             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        button:disabled {
+             background-color: #ced4da; /* Lighter disabled grey */
+             color: #6c757d;
+             cursor: not-allowed;
+             box-shadow: none;
+        }
+
+        /* Specific Button Colors */
         .upgrade button {
-            background-color: var(--success-green);
+            background-image: linear-gradient(to bottom, var(--success-green), #239d3d); /* Gradient */
+            flex-shrink: 0;
             padding: 8px 15px;
             font-size: 0.85em;
-            flex-shrink: 0; /* Prevent button from shrinking */
         }
         .upgrade button:hover:not(:disabled) {
-            background-color: #218838;
+            background-image: linear-gradient(to bottom, #30b850, var(--success-green-dark));
         }
-        .upgrade button:disabled {
-            background-color: #adb5bd;
-            cursor: not-allowed;
+
+        .options-area button {
+             background-image: linear-gradient(to bottom, var(--secondary-grey), #5a6268);
+             font-size: 0.8em;
+             padding: 8px 14px; /* Slightly more padding */
         }
+         .options-area button:hover:not(:disabled) {
+              background-image: linear-gradient(to bottom, #7a838b, var(--secondary-grey-dark));
+         }
+
+         #reset-button {
+              background-image: linear-gradient(to bottom, var(--danger-red), #c82333);
+         }
+         #reset-button:hover:not(:disabled) {
+               background-image: linear-gradient(to bottom, #e44d5c, var(--danger-red-dark));
+         }
+
 
         /* --- Options Area --- */
         .options-area {
             grid-column: 1 / -1; /* Span both columns */
             text-align: center;
             padding-top: 20px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--border-color);
             margin-top: 10px;
         }
-         .options-area button {
-             background-color: var(--secondary-grey);
-             font-size: 0.8em;
-             padding: 6px 12px;
-         }
-         .options-area button:hover:not(:disabled) {
-              background-color: #5a6268;
-         }
-         #reset-button {
-              background-color: var(--danger-red);
-         }
-         #reset-button:hover:not(:disabled) {
-               background-color: #c82333;
-         }
 
 
-        /* --- Notification Styles (Reused) --- */
+        /* --- Notification Styles --- */
         .notification {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 6px; color: white; z-index: 1000; font-size: 0.95em; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.3s ease, bottom 0.3s ease; pointer-events: none;
         }
@@ -218,46 +283,17 @@
         .notification.success { background-color: var(--success-green); }
         .notification.error { background-color: var(--danger-red); }
 
-        /* --- Footer Styles (Reused) --- */
-        .footer { width: 100%; background-color: rgba(0, 0, 0, 0.8); color: #ccc; padding: 15px 20px; text-align: center; font-size: 0.75em; line-height: 1.6; backdrop-filter: blur(10px); box-sizing: border-box; border-top: 1px solid rgba(255, 255, 255, 0.15); margin-top: auto; }
-        .footer-links { list-style: none; padding: 0; margin-bottom: 10px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 15px; }
-        .footer-links li { display: inline; }
-        .footer-links li::after { content: "|"; color: #777; margin-left: 10px; padding-left: 10px; }
-        .footer-links li:last-child::after { content: ""; }
-        .footer-links a { color: #a0cfff; text-decoration: none; }
-        .footer-links a:hover { text-decoration: underline; color: #fff; }
-        .footer-copyright { margin-bottom: 5px; color: #999; font-size: 0.9em; }
-        .footer-country { color: #999; font-size: 0.9em; }
-         @media (max-width: 600px) {
-             .footer { padding: 10px; font-size: 0.7em; }
-             .footer-links { gap: 8px 10px; }
-             .footer-links li::after { margin-left: 8px; padding-left: 8px; }
-         }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
-        <header class="v2">
-            <nav>
-                <ul class="nav-list">
-                    <li class="nav-item"><a href="index.html">home</a></li>
-                    <li class="nav-item"><a href="post.html">posts</a></li>
-                    <li class="nav-item"><a href="profile.html">profile</a></li>
-                    <li class="nav-item"><a href="users.html">friends</a></li>
-                    <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
-                    <li class="nav-item"><a href="group.html">group chats</a></li>
-                    <li class="nav-item"><a href="news.html">news</a></li>
-                    <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
-                    <li class="nav-item"><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
-                </ul>
-            </nav>
-        </header>
-
         <div class="game-container">
+            <h1 class="game-title">Toast Clicker</h1>
+
             <div class="clicker-area">
                 <div id="toast-count-display">0</div>
                 <div id="tps-display">0 toasts per second</div>
-                <div id="clickable-toast" onclick="toastClicked(event)">🍞</div>
+                <div id="clickable-toast" onclick="toastClicked(event)" title="Click me!">🍞</div>
             </div>
 
             <div class="upgrades-area">
@@ -271,36 +307,39 @@
                   <button id="reset-button" onclick="clearSave()">Reset Game</button>
              </div>
         </div>
-    </div> <footer class="footer">
-         <ul class="footer-links">
-            <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/terms">Terms of Use</a></li>
-            <li><a href="/sales">Sales and Refunds</a></li>
-            <li><a href="/legal">Legal</a></li>
-            <li><a href="/sitemap">Site Map</a></li>
-            <li><a href="https://status.toastreal.xyz">status</a></li>
-            <li><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
-        </ul>
-        <p class="footer-copyright">Copyright © 2024 toast Inc. All rights reserved.</p>
-        <p class="footer-country">United States</p>
-    </footer>
-
-    <script>
+    </div> <script>
         // --- Game State ---
         let toastCount = 0;
         let toastsPerClick = 1;
         let toastsPerSecond = 0;
-        const SAVE_KEY = 'toastClickerSave'; // Key for localStorage
+        const SAVE_KEY = 'toastClickerSave_v1'; // Changed key slightly in case of structure changes
 
         // --- Upgrades Definition ---
-        // Structure: id: { name, baseCost, cost, count, tps, tpc }
-        // IMPORTANT: When adding new upgrades later, ensure loadGameState handles them gracefully
-        // (e.g., initializes them if they don't exist in the save file).
+        // Structure: id: { name, description, baseCost, cost, count, tps, tpc }
         const upgrades = {
+            // Early Game
             'toaster': { name: 'Toaster', description: '+0.1 TPS', baseCost: 15, cost: 15, count: 0, tps: 0.1, tpc: 0 },
-            'extra_click': { name: 'Butter Knife', description: '+1 Toast per Click', baseCost: 50, cost: 50, count: 0, tps: 0, tpc: 1 },
+            'butter_knife': { name: 'Butter Knife', description: '+1 TPC', baseCost: 50, cost: 50, count: 0, tps: 0, tpc: 1 },
             'bakery': { name: 'Bakery', description: '+1 TPS', baseCost: 100, cost: 100, count: 0, tps: 1, tpc: 0 },
-            'factory': { name: 'Toast Factory', description: '+5 TPS', baseCost: 500, cost: 500, count: 0, tps: 5, tpc: 0 }
+            'better_spread': { name: 'Better Spread', description: '+5 TPC', baseCost: 250, cost: 250, count: 0, tps: 0, tpc: 5 },
+            'factory': { name: 'Toast Factory', description: '+8 TPS', baseCost: 1100, cost: 1100, count: 0, tps: 8, tpc: 0 },
+            // Mid Game (K range)
+            'toast_truck': { name: 'Toast Truck', description: '+20 TPC', baseCost: 6000, cost: 6000, count: 0, tps: 0, tpc: 20 },
+            'franchise': { name: 'Toast Franchise', description: '+45 TPS', baseCost: 12000, cost: 12000, count: 0, tps: 45, tpc: 0 },
+            'industrial_toaster': { name: 'Industrial Toaster', description: '+100 TPC', baseCost: 50000, cost: 50000, count: 0, tps: 0, tpc: 100 },
+            'toast_lab': { name: 'Toast Research Lab', description: '+260 TPS', baseCost: 130000, cost: 130000, count: 0, tps: 260, tpc: 0 },
+            // Late Game (M range)
+            'toast_robot': { name: 'Toasting Robot', description: '+650 TPC', baseCost: 1.5e6, cost: 1.5e6, count: 0, tps: 0, tpc: 650 },
+            'toast_planet': { name: 'Toast Planet', description: '+1,500 TPS', baseCost: 4e6, cost: 4e6, count: 0, tps: 1500, tpc: 0 },
+            'golden_toast': { name: 'Golden Toast Click', description: '+5,000 TPC', baseCost: 1e7, cost: 1e7, count: 0, tps: 0, tpc: 5000 },
+            'toast_moon': { name: 'Moon Base Bakery', description: '+10,000 TPS', baseCost: 2.5e7, cost: 2.5e7, count: 0, tps: 10000, tpc: 0 },
+            // Endgame (Approaching 100M and beyond)
+            'quantum_baker': { name: 'Quantum Baker', description: '+75,000 TPS', baseCost: 8e7, cost: 8e7, count: 0, tps: 75000, tpc: 0 },
+            'antimatter_spreader': { name: 'Antimatter Spreader', description: '+100,000 TPC', baseCost: 1.5e8, cost: 1.5e8, count: 0, tps: 0, tpc: 100000 },
+            'toast_star': { name: 'Toast Star', description: '+500,000 TPS', baseCost: 4e8, cost: 4e8, count: 0, tps: 500000, tpc: 0 },
+            'multiverse_oven': { name: 'Multiverse Oven', description: '+2,000,000 TPS', baseCost: 1e9, cost: 1e9, count: 0, tps: 2e6, tpc: 0 },
+             'infinity_crumb': { name: 'Infinity Crumb', description: '+10,000,000 TPC', baseCost: 5e9, cost: 5e9, count: 0, tps: 0, tpc: 1e7 },
+             'toast_singularity': { name: 'Toast Singularity', description: '+50,000,000 TPS', baseCost: 2e10, cost: 2e10, count: 0, tps: 5e7, tpc: 0 },
         };
 
         // --- DOM Elements ---
@@ -311,30 +350,31 @@
 
         // --- Initialization ---
         function initializeGame() {
-            loadGameState(); // Load saved state first
-            renderUpgrades(); // Then render based on loaded/default state
-            updateDisplay(); // Update display with loaded/default values
-            setInterval(gameLoop, 100); // Run game loop 10 times per second
-            setInterval(updateDisplayLoop, 100); // Update display frequently
+            loadGameState();
+            renderUpgrades();
+            updateDisplay();
+            setInterval(gameLoop, 100); // Game logic loop (10 FPS)
+            setInterval(updateDisplayLoop, 100); // Display update loop (10 FPS) - can be slower if needed
             setInterval(saveGameState, 30000); // Auto-save every 30 seconds
-            window.addEventListener('beforeunload', saveGameState); // Save when closing tab/browser
+            window.addEventListener('beforeunload', saveGameState); // Save on close
         }
 
         // --- Game Loop ---
         function gameLoop() {
-            toastCount += toastsPerSecond * 0.1; // Add toasts generated per second (adjusted for interval)
-            checkPurchaseableUpgrades(); // Check if upgrades can be bought
+            toastCount += toastsPerSecond * 0.1; // Add TPS (adjusted for 100ms interval)
+            // Note: checkPurchaseableUpgrades is now implicitly handled by updateDisplayLoop
         }
 
         // --- Display Update Loop ---
         function updateDisplayLoop() {
-             updateDisplay();
+             updateDisplay(); // Update counters
+             checkPurchaseableUpgrades(); // Update button states based on current toast count
         }
 
         // --- Core Click Function ---
         function toastClicked(event) {
             toastCount += toastsPerClick;
-            updateDisplay();
+            // updateDisplay(); // updateDisplayLoop handles this
             createClickEffect(event);
         }
 
@@ -344,22 +384,22 @@
              effect.className = 'click-effect';
              effect.textContent = `+${formatNumber(toastsPerClick)}`;
              const rect = clickableToast.getBoundingClientRect();
-             // Calculate position relative to the clicker area for better consistency
              const containerRect = clickableToast.parentElement.getBoundingClientRect();
              const x = event.clientX - containerRect.left;
              const y = event.clientY - containerRect.top;
 
              effect.style.left = `${x}px`;
-             effect.style.top = `${y}px`; // Position at click
+             effect.style.top = `${y}px`;
 
              clickableToast.parentElement.appendChild(effect);
 
              requestAnimationFrame(() => {
-                 effect.style.transform = `translate(-50%, -150%)`; // Move up from center
+                 // Animate moving up and fading out
+                 effect.style.transform = `translate(-50%, -180%)`; // Move further up
                  effect.style.opacity = '0';
              });
 
-             setTimeout(() => { effect.remove(); }, 500);
+             setTimeout(() => { effect.remove(); }, 600); // Match transition duration
         }
 
 
@@ -369,12 +409,13 @@
             if (toastCount >= upgrade.cost) {
                 toastCount -= upgrade.cost;
                 upgrade.count++;
-                toastsPerSecond += upgrade.tps;
-                toastsPerClick += upgrade.tpc;
-                upgrade.cost = Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count)); // Recalculate cost
+                // Recalculate TPC and TPS based on ALL upgrades after purchase
+                recalculateStatsFromUpgrades();
+                // Recalculate cost for the purchased upgrade
+                upgrade.cost = Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count));
 
-                updateDisplay();
-                renderUpgrades(); // Re-render to show new cost/count
+                // updateDisplay(); // updateDisplayLoop handles this
+                renderUpgrades(); // Re-render to show new cost/count/disabled states
                 showNotification(`${upgrade.name} purchased!`, 'success');
             } else {
                 showNotification('Not enough toasts!', 'error');
@@ -386,7 +427,8 @@
                  const upgrade = upgrades[id];
                  const button = document.getElementById(`upgrade-btn-${id}`);
                  if (button) {
-                     button.disabled = toastCount < upgrade.cost;
+                     // Disable if not enough toasts OR if cost is Infinity (prevents buying maxed-out upgrades)
+                     button.disabled = (toastCount < upgrade.cost || upgrade.cost === Infinity);
                  }
              }
         }
@@ -394,7 +436,8 @@
 
         // --- Rendering Functions ---
         function renderUpgrades() {
-            upgradesList.innerHTML = ''; // Clear existing upgrades
+            // DocumentFragment improves performance for many additions
+            const fragment = document.createDocumentFragment();
             for (const id in upgrades) {
                 const upgrade = upgrades[id];
                 const upgradeElement = document.createElement('div');
@@ -406,10 +449,13 @@
                         <p>Cost: <span class="cost">${formatNumber(upgrade.cost)}</span> 🍞</p>
                         <p class="owned">Owned: ${upgrade.count}</p>
                     </div>
-                    <button id="upgrade-btn-${id}" onclick="buyUpgrade('${id}')" ${toastCount < upgrade.cost ? 'disabled' : ''}>Buy</button>
+                    <button id="upgrade-btn-${id}" onclick="buyUpgrade('${id}')">Buy</button>
                 `;
-                upgradesList.appendChild(upgradeElement);
+                fragment.appendChild(upgradeElement);
             }
+            upgradesList.innerHTML = ''; // Clear previous list
+            upgradesList.appendChild(fragment); // Append all at once
+            checkPurchaseableUpgrades(); // Update button states immediately after rendering
         }
 
         function updateDisplay() {
@@ -419,24 +465,35 @@
         }
 
         // --- Utility Functions ---
+        const numberSuffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud', 'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Ocd', 'Nod', 'Vg', 'Uvg', 'Dvg']; // Add more as needed
+
         function formatNumber(num, precision = 0) {
-             if (num === Infinity) return 'Infinity';
-             if (isNaN(num)) return '0';
-             // Add logic for K, M, B etc. if needed for very large numbers
-             if (num >= 1e9) {
-                 return (num / 1e9).toFixed(2) + ' B';
-             }
-             if (num >= 1e6) {
-                 return (num / 1e6).toFixed(2) + ' M';
-             }
-             if (num >= 1e3) {
-                 return (num / 1e3).toFixed(2) + ' K';
-             }
-            return num.toLocaleString(undefined, {
-                minimumFractionDigits: precision,
-                maximumFractionDigits: precision
-            });
+            if (num === Infinity) return 'Infinity';
+            if (isNaN(num) || num === 0) return '0';
+            if (num < 1000) { // No abbreviation needed for small numbers
+                return num.toLocaleString(undefined, {
+                    minimumFractionDigits: precision,
+                    maximumFractionDigits: precision
+                });
+            }
+
+            const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
+
+            // If tier is too high for our suffixes, display in scientific notation
+            if (tier >= numberSuffixes.length) {
+                return num.toExponential(2);
+            }
+
+            const suffix = numberSuffixes[tier];
+            const scale = Math.pow(10, tier * 3);
+            const scaled = num / scale;
+
+            // Adjust precision for abbreviated numbers
+            const formattedPrecision = scaled < 10 ? 2 : (scaled < 100 ? 1 : 0);
+
+            return scaled.toFixed(formattedPrecision) + ' ' + suffix;
         }
+
 
         // --- Notification Function ---
         let notificationTimeout;
@@ -459,23 +516,21 @@
 
         // --- Saving/Loading using localStorage ---
         function saveGameState() {
-            // Create a simplified save object to avoid saving complex state like functions
             const simplifiedUpgrades = {};
             for (const id in upgrades) {
-                simplifiedUpgrades[id] = { count: upgrades[id].count }; // Only save the count
+                simplifiedUpgrades[id] = { count: upgrades[id].count };
             }
-
             const gameState = {
                 toastCount: toastCount,
-                // TPC and TPS are derived from upgrades, no need to save them directly
-                savedUpgrades: simplifiedUpgrades // Save the simplified upgrade counts
+                savedUpgrades: simplifiedUpgrades
             };
             try {
                  localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
                  console.log("Game Saved");
             } catch (e) {
                  console.error("Error saving game:", e);
-                 showNotification("Error saving game. Storage might be full.", "error");
+                 // Avoid spamming notifications on auto-save errors
+                 // showNotification("Error saving game. Storage might be full.", "error");
             }
         }
 
@@ -486,56 +541,45 @@
                     const gameState = JSON.parse(savedState);
                     toastCount = gameState.toastCount || 0;
 
-                    // Load upgrade counts and recalculate costs/effects
                     if (gameState.savedUpgrades) {
                         for (const id in upgrades) {
-                            // Check if the saved data has this upgrade and it has a count property
                             if (gameState.savedUpgrades[id] && typeof gameState.savedUpgrades[id].count === 'number') {
                                 upgrades[id].count = gameState.savedUpgrades[id].count;
                             } else {
-                                // If upgrade is missing in save or count is invalid, reset it
-                                upgrades[id].count = 0;
+                                upgrades[id].count = 0; // Initialize if missing in save
                             }
-                            // Recalculate cost based on loaded count
                             upgrades[id].cost = Math.ceil(upgrades[id].baseCost * Math.pow(1.15, upgrades[id].count));
                         }
                     } else {
-                         // If no upgrades in save, reset all counts
-                         for (const id in upgrades) {
-                              upgrades[id].count = 0;
-                              upgrades[id].cost = upgrades[id].baseCost;
-                         }
+                         resetGameVariables(); // Reset if no upgrade data found
                     }
-                    // Important: Recalculate TPS/TPC based on loaded upgrade counts
-                    recalculateStatsFromUpgrades();
+                    recalculateStatsFromUpgrades(); // Recalculate TPC/TPS
                     console.log("Game Loaded");
-                    showNotification("Game loaded successfully!", "success");
+                    // Don't show notification on initial load
+                    // showNotification("Game loaded successfully!", "success");
                 } catch (e) {
                     console.error("Error loading saved game:", e);
                     showNotification("Error loading save data. Resetting game.", "error");
-                    // Clear potentially corrupted save data and reset
                     localStorage.removeItem(SAVE_KEY);
-                    resetGameVariables(); // Reset variables to default
+                    resetGameVariables();
                 }
             } else {
-                 // No save file found, ensure game starts fresh
-                 resetGameVariables();
+                 resetGameVariables(); // No save file, start fresh
             }
         }
 
         function recalculateStatsFromUpgrades() {
              toastsPerSecond = 0;
-             toastsPerClick = 1; // Start with base click value
+             toastsPerClick = 1; // Base click value
              for (const id in upgrades) {
                  const upgrade = upgrades[id];
-                 if (upgrade.count > 0) { // Only apply if owned
+                 if (upgrade.count > 0) {
                     toastsPerSecond += upgrade.tps * upgrade.count;
                     toastsPerClick += upgrade.tpc * upgrade.count;
                  }
              }
         }
 
-        // Function to reset game variables to defaults
         function resetGameVariables() {
              toastCount = 0;
              toastsPerClick = 1;
@@ -546,18 +590,15 @@
              }
         }
 
-
-        // Function to clear save data and reset the game
         function clearSave() {
-             if (confirm("🚨 RESET GAME? 🚨\n\nAre you sure you want to delete your saved progress and start over?")) {
+             if (confirm("🚨 RESET GAME? 🚨\n\nThis will erase all your progress. Are you absolutely sure?")) {
                  localStorage.removeItem(SAVE_KEY);
-                 resetGameVariables(); // Reset game state variables
-                 renderUpgrades(); // Re-render upgrades with default values
-                 updateDisplay(); // Update the display
+                 resetGameVariables();
+                 renderUpgrades(); // Update UI immediately
+                 updateDisplay();
                  showNotification("Game Reset!", "success");
              }
         }
-
 
         // --- Start Game ---
         window.onload = initializeGame;
