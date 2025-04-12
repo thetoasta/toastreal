@@ -7,91 +7,87 @@
         crossorigin="anonymous"></script>
     <title>Toast Clicker</title>
     <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico"> <style>
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <style>
         /* --- Base Styles --- */
         :root {
-            --toast-brown: #F5F5DC; /* Beige - Brighter for dark bg */
-            --toast-crust: #FFD700; /* Gold - Brighter crust */
-            --background-image-url: 'background.png'; /* <<< YOUR BACKGROUND IMAGE PATH HERE */
-            --background-fallback-color: #2c3e50; /* Dark blue/grey fallback */
-            --container-bg: rgba(0, 0, 0, 0.75); /* Transparent black */
-            --container-bg-lighter: rgba(255, 255, 255, 0.1); /* For upgrade items */
-            --text-light: #f0f0f0; /* Light text for dark bg */
-            --text-medium: #bdc3c7; /* Medium light grey */
-            --primary-blue: #3498db; /* Brighter blue */
-            --success-green: #2ecc71; /* Brighter green */
+            --toast-brown: #F5F5DC;
+            --toast-crust: #FFD700;
+            --background-image-url: 'background.png';
+            --background-fallback-color: #2c3e50;
+            --container-bg: rgba(0, 0, 0, 0.75);
+            --container-bg-lighter: rgba(255, 255, 255, 0.1);
+            --text-light: #f0f0f0;
+            --text-medium: #bdc3c7;
+            --primary-blue: #3498db;
+            --success-green: #2ecc71;
             --success-green-dark: #27ae60;
-            --danger-red: #e74c3c; /* Brighter red */
+            --danger-red: #e74c3c;
             --danger-red-dark: #c0392b;
-            --secondary-grey: #95a5a6; /* Lighter grey */
+            --secondary-grey: #95a5a6;
             --secondary-grey-dark: #7f8c8d;
-            --border-color: rgba(255, 255, 255, 0.2); /* Light border */
-            --shadow-color: rgba(0, 0, 0, 0.3); /* Slightly darker shadow for contrast */
+            --border-color: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.3);
         }
 
         *, *::before, *::after {
-             box-sizing: border-box;
+            box-sizing: border-box;
         }
 
         body {
             margin: 0;
             font-family: 'Google Sans', sans-serif;
-            /* --- Background Image --- */
             background-image: var(--background-image-url);
-            background-color: var(--background-fallback-color); /* Fallback color */
+            background-color: var(--background-fallback-color);
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
-            background-attachment: fixed; /* Keeps background fixed during scroll */
-            /* --- Text Color --- */
-            color: var(--text-light); /* Default text color for body */
+            background-attachment: fixed;
+            color: var(--text-light);
             min-height: 100vh;
             padding-bottom: 20px;
         }
 
-        /* --- Main Game Container --- */
         .game-container {
-            max-width: 1000px; /* Wider */
-            margin: 30px auto; /* Center vertically */
+            max-width: 1000px;
+            margin: 30px auto;
             padding: 25px 35px;
-            background-color: var(--container-bg); /* Transparent black */
-            border-radius: 12px; /* More rounded */
+            background-color: var(--container-bg);
+            border-radius: 12px;
             box-shadow: 0 8px 25px var(--shadow-color);
             display: grid;
-            grid-template-columns: 1fr 1.2fr; /* Adjust column ratio */
-            gap: 40px; /* Increased gap */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        @media (max-width: 900px) { /* Adjusted breakpoint */
+        @media (max-width: 900px) {
             .game-container {
-                 grid-template-columns: 1fr; /* Single column */
-                 max-width: 600px;
-                 padding: 20px 25px;
-                 gap: 30px;
+                grid-template-columns: 1fr;
+                max-width: 600px;
+                padding: 20px 25px;
+                gap: 30px;
             }
         }
-         @media (max-width: 650px) {
-             .game-container {
-                  margin: 15px;
-                  padding: 15px 20px;
-             }
-         }
+        @media (max-width: 650px) {
+            .game-container {
+                margin: 15px;
+                padding: 15px 20px;
+            }
+        }
 
-        /* --- Game Title --- */
         .game-title {
-             grid-column: 1 / -1;
-             text-align: center;
-             font-size: 2.2em; /* Larger title */
-             font-weight: 500;
-             color: #fff; /* White title */
-             margin-bottom: 5px;
-             padding-bottom: 20px;
-             border-bottom: 1px solid var(--border-color);
-             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 5px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
 
-        /* --- Clicker Area --- */
         .clicker-area {
             text-align: center;
             padding: 20px 10px;
@@ -102,74 +98,70 @@
             align-items: center;
             justify-content: center;
         }
-         @media (max-width: 900px) {
+        @media (max-width: 900px) {
             .clicker-area {
-                 border-right: none;
-                 border-bottom: 1px solid var(--border-color);
-                 padding: 15px 10px 30px 10px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 15px 10px 30px 10px;
             }
-         }
+        }
 
         #toast-count-display {
             font-size: 2.8em;
             font-weight: 500;
             margin-bottom: 8px;
-            color: var(--toast-brown); /* Brighter color */
+            color: var(--toast-brown);
             word-break: break-all;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
         }
-        #tps-display, #tpc-display { /* Style both displays */
+        #tps-display, #tpc-display {
             font-size: 1.1em;
-            color: var(--text-medium); /* Medium light grey */
-            margin-bottom: 8px; /* Space between TPS/TPC */
+            color: var(--text-medium);
+            margin-bottom: 8px;
         }
         #tpc-display {
-             margin-bottom: 30px; /* Space below TPC */
+            margin-bottom: 30px;
         }
 
         #clickable-toast {
-            font-size: 12em; /* Even larger toast */
+            font-size: 12em;
             cursor: pointer;
             display: inline-block;
             transition: transform 0.1s ease-out;
             user-select: none;
             filter: drop-shadow(5px 7px 6px rgba(0,0,0,0.3));
             margin-bottom: 20px;
-            text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.5); /* Gold glow */
+            text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.5);
         }
         #clickable-toast:active {
             transform: scale(0.95);
             filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.2));
         }
-        /* Click effect */
         .click-effect {
-             position: absolute;
-             font-size: 1.8em; /* Larger click text */
-             font-weight: bold;
-             color: var(--toast-crust); /* Gold color */
-             opacity: 1;
-             transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.7s ease-out;
-             pointer-events: none;
-             user-select: none;
-             z-index: 110;
-             left: 50%;
-             top: 50%;
-             transform: translate(-50%, -50%);
-             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            position: absolute;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--toast-crust);
+            opacity: 1;
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.7s ease-out;
+            pointer-events: none;
+            user-select: none;
+            z-index: 110;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
 
-        /* --- Upgrades Area --- */
         .upgrades-area {
             padding: 10px 0;
-            max-height: 65vh; /* More height */
+            max-height: 65vh;
             overflow-y: auto;
-            padding-right: 15px; /* More space for scrollbar */
-            /* Custom Scrollbar */
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: var(--secondary-grey) rgba(0,0,0,0.1); /* Firefox */
+            padding-right: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--secondary-grey) rgba(0,0,0,0.1);
         }
-        /* Webkit Scrollbar */
         .upgrades-area::-webkit-scrollbar {
             width: 8px;
         }
@@ -180,40 +172,40 @@
         .upgrades-area::-webkit-scrollbar-thumb {
             background-color: var(--secondary-grey);
             border-radius: 4px;
-            border: 2px solid transparent; /* Creates padding around thumb */
+            border: 2px solid transparent;
             background-clip: content-box;
         }
         .upgrades-area::-webkit-scrollbar-thumb:hover {
             background-color: var(--secondary-grey-dark);
         }
 
-         @media (max-width: 900px) {
-             .upgrades-area {
-                  max-height: none;
-                  overflow-y: visible;
-                  padding-right: 0;
-             }
-         }
+        @media (max-width: 900px) {
+            .upgrades-area {
+                max-height: none;
+                overflow-y: visible;
+                padding-right: 0;
+            }
+        }
         .upgrades-area h2 {
             margin-top: 0;
             margin-bottom: 20px;
             text-align: center;
             font-weight: 500;
-            color: #fff; /* White heading */
+            color: #fff;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
             position: sticky;
-            top: -10px; /* Adjust slightly for padding */
-            background-color: var(--container-bg); /* Match container background */
+            top: -10px;
+            background-color: var(--container-bg);
             z-index: 10;
-            margin-left: -15px; /* Counteract parent padding */
-            margin-right: -15px; /* Counteract parent padding */
+            margin-left: -15px;
+            margin-right: -15px;
             padding-left: 15px;
             padding-right: 15px;
-            padding-top: 10px; /* Add padding top */
+            padding-top: 10px;
         }
         .upgrade {
-            background-color: var(--container-bg-lighter); /* Use lighter transparent bg */
+            background-color: var(--container-bg-lighter);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px 20px;
@@ -225,7 +217,7 @@
             transition: background-color 0.2s ease;
         }
         .upgrade:hover {
-             background-color: rgba(255, 255, 255, 0.15); /* Slightly lighter on hover */
+            background-color: rgba(255, 255, 255, 0.15);
         }
         .upgrade-info {
             flex-grow: 1;
@@ -235,23 +227,22 @@
             margin: 0 0 5px 0;
             font-size: 1.15em;
             font-weight: 500;
-            color: var(--text-light); /* Light text */
+            color: var(--text-light);
         }
         .upgrade-info p {
             margin: 3px 0;
             font-size: 0.9em;
-            color: var(--text-medium); /* Medium light grey */
+            color: var(--text-medium);
         }
         .upgrade-info .cost {
             font-weight: bold;
-            color: var(--primary-blue); /* Brighter blue */
+            color: var(--primary-blue);
         }
         .upgrade-info .owned {
-             font-size: 0.85em;
+            font-size: 0.85em;
             color: var(--text-medium);
         }
 
-        /* --- Button Styling --- */
         button {
             border: none;
             padding: 10px 18px;
@@ -261,28 +252,27 @@
             font-size: 0.9em;
             font-weight: 500;
             transition: background-color 0.2s ease, background-image 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2); /* Slightly stronger shadow */
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
             color: white;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.2); /* Subtle text shadow */
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
         }
         button:hover:not(:disabled) {
             box-shadow: 0 5px 10px rgba(0,0,0,0.25);
             transform: translateY(-1px);
         }
         button:active:not(:disabled) {
-             transform: translateY(1px); /* Push down further */
-             box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
         button:disabled {
-             background-image: none; /* Remove gradient when disabled */
-             background-color: #7f8c8d; /* Darker disabled grey */
-             color: #bdc3c7;
-             cursor: not-allowed;
-             box-shadow: none;
-             text-shadow: none;
+            background-image: none;
+            background-color: #7f8c8d;
+            color: #bdc3c7;
+            cursor: not-allowed;
+            box-shadow: none;
+            text-shadow: none;
         }
 
-        /* Specific Button Colors (Adjusted for dark bg) */
         .upgrade button {
             background-image: linear-gradient(to bottom, var(--success-green), var(--success-green-dark));
             flex-shrink: 0;
@@ -290,27 +280,26 @@
             font-size: 0.85em;
         }
         .upgrade button:hover:not(:disabled) {
-            background-image: linear-gradient(to bottom, #35e881, #27ae60); /* Brighter hover */
+            background-image: linear-gradient(to bottom, #35e881, #27ae60);
         }
 
         .options-area button {
-             background-image: linear-gradient(to bottom, var(--secondary-grey), var(--secondary-grey-dark));
-             font-size: 0.8em;
-             padding: 8px 14px;
+            background-image: linear-gradient(to bottom, var(--secondary-grey), var(--secondary-grey-dark));
+            font-size: 0.8em;
+            padding: 8px 14px;
         }
-         .options-area button:hover:not(:disabled) {
-              background-image: linear-gradient(to bottom, #aab7b8, #7f8c8d);
-         }
+        .options-area button:hover:not(:disabled) {
+            background-image: linear-gradient(to bottom, #aab7b8, #7f8c8d);
+        }
 
-         #reset-button {
-              background-image: linear-gradient(to bottom, var(--danger-red), var(--danger-red-dark));
-         }
-         #reset-button:hover:not(:disabled) {
-               background-image: linear-gradient(to bottom, #f16a5c, #c0392b);
-         }
+        #reset-button {
+            background-image: linear-gradient(to bottom, var(--danger-red), var(--danger-red-dark));
+        }
+        #reset-button:hover:not(:disabled) {
+            background-image: linear-gradient(to bottom, #f16a5c, #c0392b);
+        }
 
 
-        /* --- Options Area --- */
         .options-area {
             grid-column: 1 / -1;
             text-align: center;
@@ -320,7 +309,6 @@
         }
 
 
-        /* --- Notification Styles --- */
         .notification {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 6px; color: white; z-index: 1000; font-size: 0.95em; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.3s ease, bottom 0.3s ease; pointer-events: none;
         }
@@ -337,30 +325,33 @@
 
             <div class="clicker-area">
                 <div id="toast-count-display">0</div>
-                <div id="tps-display">0 toasts/s</div> <div id="tpc-display">1 toast/click</div> <div id="clickable-toast" onclick="toastClicked(event)" title="Click me!">🍞</div>
+                <div id="tps-display">0 toasts/s</div>
+                <div id="tpc-display">1 toast/click</div>
+                <div id="clickable-toast" onclick="toastClicked(event)" title="Click me!">🍞</div>
             </div>
 
             <div class="upgrades-area">
                 <h2>Upgrades</h2>
                 <div id="upgrades-list">
-                    </div>
+                </div>
             </div>
 
-             <div class="options-area">
-                  <button onclick="saveGameState()">Save Game</button>
-                  <button id="reset-button" onclick="clearSave()">Reset Game</button>
-             </div>
+            <div class="options-area">
+                <button onclick="saveGameState()">Save Game</button>
+                <button id="reset-button" onclick="clearSave()">Reset Game</button>
+            </div>
         </div>
-    </div> <script>
+    </div>
+    <script>
         // --- Game State ---
         let toastCount = 0;
         let toastsPerClick = 1;
         let toastsPerSecond = 0;
-        const SAVE_KEY = 'toastClickerSave_v1'; // Updated save key due to significant changes
+        const SAVE_KEY = 'toastClickerSave_v2';
 
         // --- Upgrades Definition ---
-        // Structure: id: { name, description, baseCost, cost, count, tps, tpc }
-        const upgrades = {
+                // --- Upgrades Definition ---
+                const upgrades = {
             // Early Game (0 - 1K)
             'toaster': { name: 'Toaster', description: '+0.1 TPS', baseCost: 15, cost: 15, count: 0, tps: 0.1, tpc: 0 },
             'butter_knife': { name: 'Butter Knife', description: '+1 TPC', baseCost: 50, cost: 50, count: 0, tps: 0, tpc: 1 },
@@ -385,28 +376,64 @@
             'multiverse_oven': { name: 'Multiverse Oven', description: '+2M TPS', baseCost: 1e9, cost: 1e9, count: 0, tps: 2e6, tpc: 0 },
 
             // Endgame (1B - 1T+)
-             'infinity_crumb': { name: 'Infinity Crumb', description: '+10M TPC', baseCost: 5e9, cost: 5e9, count: 0, tps: 0, tpc: 1e7 },
-             'toast_singularity': { name: 'Toast Singularity', description: '+50M TPS', baseCost: 2e10, cost: 2e10, count: 0, tps: 5e7, tpc: 0 },
-             'stellar_forge': { name: 'Stellar Forge', description: '+250M TPS', baseCost: 1e11, cost: 1e11, count: 0, tps: 2.5e8, tpc: 0 },
-             'galactic_butter': { name: 'Galactic Butter', description: '+100M TPC', baseCost: 5e11, cost: 5e11, count: 0, tps: 0, tpc: 1e8 },
-             'hyperspace_delivery': { name: 'Hyperspace Delivery', description: '+1B TPS', baseCost: 2e12, cost: 2e12, count: 0, tps: 1e9, tpc: 0 },
-             'temporal_toaster': { name: 'Temporal Toaster', description: '+5B TPS', baseCost: 1e13, cost: 1e13, count: 0, tps: 5e9, tpc: 0 },
-             'reality_crumb': { name: 'Reality Crumb', description: '+250M TPC', baseCost: 5e13, cost: 5e13, count: 0, tps: 0, tpc: 2.5e8 },
+            'infinity_crumb': { name: 'Infinity Crumb', description: '+10M TPC', baseCost: 5e9, cost: 5e9, count: 0, tps: 0, tpc: 1e7 },
+            'toast_singularity': { name: 'Toast Singularity', description: '+50M TPS', baseCost: 2e10, cost: 2e10, count: 0, tps: 5e7, tpc: 0 },
+            'stellar_forge': { name: 'Stellar Forge', description: '+250M TPS', baseCost: 1e11, cost: 1e11, count: 0, tps: 2.5e8, tpc: 0 },
+            'galactic_butter': { name: 'Galactic Butter', description: '+100M TPC', baseCost: 5e11, cost: 5e11, count: 0, tps: 0, tpc: 1e8 },
+            'hyperspace_delivery': { name: 'Hyperspace Delivery', description: '+1B TPS', baseCost: 2e12, cost: 2e12, count: 0, tps: 1e9, tpc: 0 },
+            'temporal_toaster': { name: 'Temporal Toaster', description: '+5B TPS', baseCost: 1e13, cost: 1e13, count: 0, tps: 5e9, tpc: 0 },
+            'reality_crumb': { name: 'Reality Crumb', description: '+250M TPC', baseCost: 5e13, cost: 5e13, count: 0, tps: 0, tpc: 2.5e8 },
 
-             // Very Endgame (1T - ???)
-             'causality_oven': { name: 'Causality Oven', description: '+25B TPS', baseCost: 2e14, cost: 2e14, count: 0, tps: 2.5e10, tpc: 0 },
-             'probability_jam': { name: 'Probability Jam', description: '+1B TPC', baseCost: 1e15, cost: 1e15, count: 0, tps: 0, tpc: 1e9 },
-             'dimension_slicer': { name: 'Dimension Slicer', description: '+150B TPS', baseCost: 8e15, cost: 8e15, count: 0, tps: 1.5e11, tpc: 0 },
-             'existence_toaster': { name: 'Existence Toaster', description: '+1T TPS', baseCost: 5e16, cost: 5e16, count: 0, tps: 1e12, tpc: 0 },
-             'conceptual_spread': { name: 'Conceptual Spread', description: '+10B TPC', baseCost: 3e17, cost: 3e17, count: 0, tps: 0, tpc: 1e10 },
-             'omnitoaster': { name: 'Omni-Toaster', description: '+10T TPS', baseCost: 2e18, cost: 2e18, count: 0, tps: 1e13, tpc: 0 },
-             'final_crumb': { name: 'The Final Crumb', description: '+100T TPS', baseCost: 1e20, cost: 1e20, count: 0, tps: 1e14, tpc: 0 },
+            // Very Endgame (1T - ???)
+            'causality_oven': { name: 'Causality Oven', description: '+25B TPS', baseCost: 2e14, cost: 2e14, count: 0, tps: 2.5e10, tpc: 0 },
+            'probability_jam': { name: 'Probability Jam', description: '+1B TPC', baseCost: 1e15, cost: 1e15, count: 0, tps: 0, tpc: 1e9 },
+            'dimension_slicer': { name: 'Dimension Slicer', description: '+150B TPS', baseCost: 8e15, cost: 8e15, count: 0, tps: 1.5e11, tpc: 0 },
+            'existence_toaster': { name: 'Existence Toaster', description: '+1T TPS', baseCost: 5e16, cost: 5e16, count: 0, tps: 1e12, tpc: 0 },
+            'conceptual_spread': { name: 'Conceptual Spread', description: '+10B TPC', baseCost: 3e17, cost: 3e17, count: 0, tps: 0, tpc: 1e10 },
+            'omnitoaster': { name: 'Omni-Toaster', description: '+10T TPS', baseCost: 2e18, cost: 2e18, count: 0, tps: 1e13, tpc: 0 },
+            'final_crumb': { name: 'The Final Crumb', description: '+100T TPS', baseCost: 1e20, cost: 1e20, count: 0, tps: 1e14, tpc: 0 },
+
+            //Ridiculously expensive upgrades
+            'toast_universe_forge': { name: 'Toast Universe Forge', description: '+1000T TPS', baseCost: 1e22, cost: 1e22, count: 0, tps: 1e15, tpc: 0 },
+            'infinite_bakery': { name: 'Infinite Bakery', description: '+100T TPC', baseCost: 1e23, cost: 1e23, count: 0, tps: 0, tpc: 1e14 },
+            'dimensional_oven': { name: 'Dimensional Oven', description: '+5000T TPS', baseCost: 5e23, cost: 5e23, count: 0, tps: 5e15, tpc: 0 },
+            'transcendent_toaster': { name: 'Transcendent Toaster', description: '+1QT TPS', baseCost: 1e24, cost: 1e24, count: 0, tps: 1e18, tpc: 0 },
+            'quantum_realm_butter': { name: 'Quantum Realm Butter', description: '+500T TPC', baseCost: 5e24, cost: 5e24, count: 0, tps: 0, tpc: 5e14 },
+
+            //Cosmic upgrades
+            'cosmic_oven': { name: 'Cosmic Oven', description: '+10QT TPS', baseCost: 1e25, cost: 1e25, count: 0, tps: 1e19, tpc: 0 },
+            'galactic_forge': { name: 'Galactic Forge', description: '+10QT TPC', baseCost: 1e26, cost: 1e26, count: 0, tps: 0, tpc: 1e19 },
+            'universal_toaster': { name: 'Universal Toaster', description: '+50QT TPS', baseCost: 5e26, cost: 5e26, count: 0, tps: 5e19, tpc: 0 },
+            'multiversal_baker': { name: 'Multiversal Baker', description: '+100QT TPC', baseCost: 1e27, cost: 1e27, count: 0, tps: 0, tpc: 1e20 },
+            'hyperdimensional_oven': { name: 'Hyperdimensional Oven', description: '+1000QT TPS', baseCost: 1e28, cost: 1e28, count: 0, tps: 1e21, tpc: 0 },
+
+            // Ludicrous upgrades
+            'toast_god_forge': { name: 'Toast God Forge', description: '+10000QT TPS', baseCost: 1e29, cost: 1e29, count: 0, tps: 1e22, tpc: 0 },
+            'divine_bakery': { name: 'Divine Bakery', description: '+100QT TPC', baseCost: 1e30, cost: 1e30, count: 0, tps: 0, tpc: 1e20 },
+            'omnipresent_toaster': { name: 'Omnipresent Toaster', description: '+50000QT TPS', baseCost: 5e30, cost: 5e30, count: 0, tps: 5e22, tpc: 0 },
+            'transcendent_butter_forge': { name: 'Transcendent Butter Forge', description: '+1000QT TPC', baseCost: 1e31, cost: 1e31, count: 0, tps: 0, tpc: 1e21 },
+            'infinite_toast_generator': { name: 'Infinite Toast Generator', description: '+100000QT TPS', baseCost: 1e32, cost: 1e32, count: 0, tps: 1e23, tpc: 0 },
+
+            //Absurd upgrades
+            'reality_fabricator': { name: 'Reality Fabricator', description: '+1000000QT TPS', baseCost: 1e33, cost: 1e33, count: 0, tps: 1e24, tpc: 0 },
+            'conceptual_bakery': { name: 'Conceptual Bakery', description: '+10000QT TPC', baseCost: 1e34, cost: 1e34, count: 0, tps: 0, tpc: 1e21 },
+            'existential_toaster': { name: 'Existential Toaster', description: '+5000000QT TPS', baseCost: 5e34, cost: 5e34, count: 0, tps: 5e24, tpc: 0 },
+            'dimensional_butter_refinery': { name: 'Dimensional Butter Refinery', description: '+100000QT TPC', baseCost: 1e35, cost: 1e35, count: 0, tps: 0, tpc: 1e22 },
+            'apocalypse_oven': { name: 'Apocalypse Oven', description: '+10000000QT TPS', baseCost: 1e36, cost: 1e36, count: 0, tps: 1e25, tpc: 0 },
+
+            //Beyond comprehension
+            'toast_creator': { name: 'Toast Creator', description: '+100Sx TPS', baseCost: 1e37, cost: 1e37, count: 0, tps: 1e26, tpc: 0 },
+            'universal_bakery_matrix': { name: 'Universal Bakery Matrix', description: '+1000000QT TPC', baseCost: 1e38, cost: 1e38, count: 0, tps: 0, tpc: 1e22 },
+            'omniverse_toaster': { name: 'Omniverse Toaster', description: '+500Sx TPS', baseCost: 5e38, cost: 5e38, count: 0, tps: 5e26, tpc: 0 },
+            'absolute_butter_essence': { name: 'Absolute Butter Essence', description: '+10000000QT TPC', baseCost: 1e39, cost: 1e39, count: 0, tps: 0, tpc: 1e25 },
+            'the_final_toaster': { name: 'The Final Toaster', description: '+1000Sx TPS', baseCost: 1e40, cost: 1e40, count: 0, tps: 1e27, tpc: 0 },
         };
+
 
         // --- DOM Elements ---
         const toastCountDisplay = document.getElementById('toast-count-display');
         const tpsDisplay = document.getElementById('tps-display');
-        const tpcDisplay = document.getElementById('tpc-display'); // Get TPC display element
+        const tpcDisplay = document.getElementById('tpc-display');
         const clickableToast = document.getElementById('clickable-toast');
         const upgradesList = document.getElementById('upgrades-list');
 
@@ -414,11 +441,11 @@
         function initializeGame() {
             loadGameState();
             renderUpgrades();
-            updateDisplay(); // Initial display update
-            setInterval(gameLoop, 100); // Game logic loop
-            setInterval(updateDisplayLoop, 100); // Display update loop
-            setInterval(saveGameState, 30000); // Auto-save
-            window.addEventListener('beforeunload', saveGameState); // Save on close
+            updateDisplay();
+            setInterval(gameLoop, 100);
+            setInterval(updateDisplayLoop, 100);
+            setInterval(saveGameState, 30000);
+            window.addEventListener('beforeunload', saveGameState);
         }
 
         // --- Game Loop ---
@@ -428,8 +455,8 @@
 
         // --- Display Update Loop ---
         function updateDisplayLoop() {
-             updateDisplay();
-             checkPurchaseableUpgrades();
+            updateDisplay();
+            checkPurchaseableUpgrades();
         }
 
         // --- Core Click Function ---
@@ -440,57 +467,55 @@
 
         // --- Visual Click Effect ---
         function createClickEffect(event) {
-             const effect = document.createElement('div');
-             effect.className = 'click-effect';
-             effect.textContent = `+${formatNumber(toastsPerClick)}`; // Format TPC value
-             const rect = clickableToast.getBoundingClientRect();
-             const containerRect = clickableToast.parentElement.getBoundingClientRect();
-             const x = event.clientX - containerRect.left;
-             const y = event.clientY - containerRect.top;
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = `+${formatNumber(toastsPerClick)}`;
+            const rect = clickableToast.getBoundingClientRect();
+            const containerRect = clickableToast.parentElement.getBoundingClientRect();
+            const x = event.clientX - containerRect.left;
+            const y = event.clientY - containerRect.top;
 
-             effect.style.left = `${x}px`;
-             effect.style.top = `${y}px`;
+            effect.style.left = `${x}px`;
+            effect.style.top = `${y}px`;
 
-             clickableToast.parentElement.appendChild(effect);
+            clickableToast.parentElement.appendChild(effect);
 
-             requestAnimationFrame(() => {
-                 effect.style.transform = `translate(-50%, -180%) scale(0.8)`; // Move up and slightly shrink
-                 effect.style.opacity = '0';
-             });
+            requestAnimationFrame(() => {
+                effect.style.transform = `translate(-50%, -180%) scale(0.8)`;
+                effect.style.opacity = '0';
+            });
 
-             setTimeout(() => { effect.remove(); }, 700); // Match transition duration
+            setTimeout(() => { effect.remove(); }, 700);
         }
 
 
         // --- Upgrade Functions ---
         function buyUpgrade(upgradeId) {
             const upgrade = upgrades[upgradeId];
-            // Check for sufficient funds and if cost is not Infinity (prevents overflow issues)
             if (toastCount >= upgrade.cost && upgrade.cost !== Infinity) {
                 toastCount -= upgrade.cost;
                 upgrade.count++;
-                recalculateStatsFromUpgrades(); // Recalculate TPC/TPS after purchase
-                // Recalculate cost, handle potential Infinity
+                recalculateStatsFromUpgrades();
                 const newCost = Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.count));
-                upgrade.cost = isFinite(newCost) ? newCost : Infinity; // Set to Infinity if calculation overflows
+                upgrade.cost = isFinite(newCost) ? newCost : Infinity;
 
-                renderUpgrades(); // Re-render upgrades
+                renderUpgrades();
                 showNotification(`${upgrade.name} purchased!`, 'success');
             } else if (upgrade.cost === Infinity) {
-                 showNotification('Maximum level reached for this upgrade!', 'error');
+                showNotification('Maximum level reached for this upgrade!', 'error');
             } else {
                 showNotification('Not enough toasts!', 'error');
             }
         }
 
         function checkPurchaseableUpgrades() {
-             for (const id in upgrades) {
-                 const upgrade = upgrades[id];
-                 const button = document.getElementById(`upgrade-btn-${id}`);
-                 if (button) {
-                     button.disabled = (toastCount < upgrade.cost || upgrade.cost === Infinity);
-                 }
-             }
+            for (const id in upgrades) {
+                const upgrade = upgrades[id];
+                const button = document.getElementById(`upgrade-btn-${id}`);
+                if (button) {
+                    button.disabled = (toastCount < upgrade.cost || upgrade.cost === Infinity);
+                }
+            }
         }
 
 
@@ -514,40 +539,36 @@
             }
             upgradesList.innerHTML = '';
             upgradesList.appendChild(fragment);
-            checkPurchaseableUpgrades(); // Update states after rendering
+            checkPurchaseableUpgrades();
         }
 
         function updateDisplay() {
             toastCountDisplay.textContent = formatNumber(Math.floor(toastCount));
-            tpsDisplay.textContent = `${formatNumber(toastsPerSecond, 1)} toasts/s`; // Abbreviated
-            tpcDisplay.textContent = `${formatNumber(toastsPerClick)} toasts/click`; // Update TPC display
+            tpsDisplay.textContent = `${formatNumber(toastsPerSecond, 1)} toasts/s`;
+            tpcDisplay.textContent = `${formatNumber(toastsPerClick)} toasts/click`;
             document.title = `${formatNumber(Math.floor(toastCount))} Toasts - Toast Clicker`;
         }
 
         // --- Utility Functions ---
-        // Extended suffixes for larger numbers
-        const numberSuffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud', 'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Ocd', 'Nod', 'Vg', 'Uvg', 'Dvg', 'Tvg', 'Qavg', 'Qivg', 'Sxvg', 'Spvg', 'Ocvg', 'Novg', 'Tg']; // Up to Trigintillion
+        const numberSuffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud', 'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Ocd', 'Nod', 'Vg', 'Uvg', 'Dvg', 'Tvg', 'Qavg', 'Qivg', 'Sxvg', 'Spvg', 'Ocvg', 'Novg', 'Tg'];
 
         function formatNumber(num, precision = 0) {
-            num = Number(num); // Ensure it's a number
+            num = Number(num);
             if (num === Infinity) return 'Infinity';
             if (isNaN(num) || num === 0) return '0';
 
             const absNum = Math.abs(num);
             if (absNum < 1000) {
-                // Handle small numbers and potential floating point issues for TPS/TPC display
                 const fixedNum = num.toFixed(precision);
-                // Only show decimals if they are non-zero or if explicitly requested non-zero precision
                 return parseFloat(fixedNum).toLocaleString(undefined, {
-                     minimumFractionDigits: precision > 0 && (fixedNum % 1 !== 0) ? precision : 0,
-                     maximumFractionDigits: precision
-                 });
+                    minimumFractionDigits: precision > 0 && (fixedNum % 1 !== 0) ? precision : 0,
+                    maximumFractionDigits: precision
+                });
             }
 
             const tier = Math.floor(Math.log10(absNum) / 3);
 
             if (tier >= numberSuffixes.length) {
-                // Use scientific notation for numbers beyond defined suffixes
                 return num.toExponential(2);
             }
 
@@ -555,8 +576,7 @@
             const scale = Math.pow(10, tier * 3);
             const scaled = num / scale;
 
-            // Determine precision for abbreviated numbers
-            let formattedPrecision = 2; // Default to 2 decimal places
+            let formattedPrecision = 2;
             if (scaled >= 100) formattedPrecision = 0;
             else if (scaled >= 10) formattedPrecision = 1;
 
@@ -567,11 +587,11 @@
         // --- Notification Function ---
         let notificationTimeout;
         function showNotification(message, type) {
-             const existingNotification = document.querySelector('.notification');
-             if (existingNotification) {
-                 existingNotification.remove();
-                 clearTimeout(notificationTimeout);
-             }
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+                clearTimeout(notificationTimeout);
+            }
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
@@ -579,7 +599,7 @@
             setTimeout(() => { notification.classList.add('show'); }, 10);
             notificationTimeout = setTimeout(() => {
                 notification.classList.remove('show');
-                 setTimeout(() => notification.remove(), 300);
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
 
@@ -594,10 +614,9 @@
                 savedUpgrades: simplifiedUpgrades
             };
             try {
-                 localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
-                 // console.log("Game Saved"); // Reduce console noise
+                localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
             } catch (e) {
-                 console.error("Error saving game:", e);
+                console.error("Error saving game:", e);
             }
         }
 
@@ -610,21 +629,18 @@
 
                     if (gameState.savedUpgrades) {
                         for (const id in upgrades) {
-                             // Check if the upgrade exists in the current game definition
                             if (upgrades.hasOwnProperty(id)) {
-                                // Load count if it exists in save, otherwise default to 0
                                 if (gameState.savedUpgrades[id] && typeof gameState.savedUpgrades[id].count === 'number') {
                                     upgrades[id].count = gameState.savedUpgrades[id].count;
                                 } else {
                                     upgrades[id].count = 0;
                                 }
-                                // Recalculate cost based on loaded/defaulted count
                                 const newCost = Math.ceil(upgrades[id].baseCost * Math.pow(1.15, upgrades[id].count));
                                 upgrades[id].cost = isFinite(newCost) ? newCost : Infinity;
                             }
                         }
                     } else {
-                         resetGameVariables(); // Reset if no upgrade data found
+                        resetGameVariables();
                     }
                     recalculateStatsFromUpgrades();
                     console.log("Game Loaded");
@@ -635,41 +651,39 @@
                     resetGameVariables();
                 }
             } else {
-                 resetGameVariables(); // No save file, start fresh
+                resetGameVariables();
             }
         }
 
         function recalculateStatsFromUpgrades() {
-             toastsPerSecond = 0;
-             toastsPerClick = 1; // Base click value
-             for (const id in upgrades) {
-                 const upgrade = upgrades[id];
-                 if (upgrade.count > 0) {
+            toastsPerSecond = 0;
+            toastsPerClick = 1;
+            for (const id in upgrades) {
+                const upgrade = upgrades[id];
+                if (upgrade.count > 0) {
                     toastsPerSecond += upgrade.tps * upgrade.count;
                     toastsPerClick += upgrade.tpc * upgrade.count;
-                 }
-             }
+                }
+            }
         }
 
         function resetGameVariables() {
-             toastCount = 0;
-             // Recalculate base stats
-             recalculateStatsFromUpgrades(); // Call this first to reset TPC/TPS
-             // Then reset counts and costs
-             for (const id in upgrades) {
-                  upgrades[id].count = 0;
-                  upgrades[id].cost = upgrades[id].baseCost;
-             }
+            toastCount = 0;
+            recalculateStatsFromUpgrades();
+            for (const id in upgrades) {
+                upgrades[id].count = 0;
+                upgrades[id].cost = upgrades[id].baseCost;
+            }
         }
 
         function clearSave() {
-             if (confirm("🚨 RESET GAME? 🚨\n\nThis will erase all your progress. Are you absolutely sure?")) {
-                 localStorage.removeItem(SAVE_KEY);
-                 resetGameVariables();
-                 renderUpgrades(); // Update UI immediately
-                 updateDisplay();
-                 showNotification("Game Reset!", "success");
-             }
+            if (confirm("🚨 RESET GAME? 🚨\n\nThis will erase all your progress. Are you absolutely sure?")) {
+                localStorage.removeItem(SAVE_KEY);
+                resetGameVariables();
+                renderUpgrades();
+                updateDisplay();
+                showNotification("Game Reset!", "success");
+            }
         }
 
         // --- Start Game ---
