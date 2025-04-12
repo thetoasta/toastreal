@@ -83,13 +83,15 @@ app.post('/send-notification', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-    const filePath = path.join(__dirname, 'public', req.url + '.html');
+    const filePath = '/workspaces/toastreal/public' + req.url + '.html'; // Use absolute path
+    console.log(`Catch-all route: File Path: ${filePath}`);
+  
     if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
+      res.sendFile(filePath);
     } else {
-        res.status(404).send('Page not found');
+      res.status(404).send('Page not found');
     }
-});
+  });
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
