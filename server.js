@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const messaging = require('./firebaseAdmin');
 const fs = require('fs');
 const path = require('path');
-const expresssession = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
