@@ -470,6 +470,7 @@ window.toast = {
 
         // Add the amount to the global toastCount
         toastCount += amount;
+        originalToastCount = toastCount; // Update original count
 
         // Ensure toast count doesn't go below zero if you add negative numbers
         // (Optional, remove if you want negative toasts allowed)
@@ -477,13 +478,11 @@ window.toast = {
             toastCount = 0;
         }
 
-        // Update the display immediately to show the new count
-        updateDisplay();
-
         // Log confirmation to the console
         console.log(`Added ${amount} toasts. New total: ${formatNumber(Math.floor(toastCount))}`);
-        toastCount = "CHEATER!";
-        updateDisplay()
+
+        // Update the display.
+        updateDisplay();
     },
 
     /**
@@ -492,18 +491,30 @@ window.toast = {
      */
     set: function(amount) {
         if (typeof amount !== 'number' || isNaN(amount) || amount < 0) {
-             console.error('Error: Invalid amount provided to toast.set(). Please use a non-negative number.');
-             return;
+            console.error('Error: Invalid amount provided to toast.set(). Please use a non-negative number.');
+            return;
         }
         toastCount = amount;
+        originalToastCount = toastCount; // Update original count
         updateDisplay();
         console.log(`Toast count set to ${formatNumber(Math.floor(toastCount))}`);
     }
-
-    // You could add more debug functions here later, like:
-    // reset: function() { clearSave(); },
-    // getCount: function() { console.log(toastCount); return toastCount; }
 };
+
+let originalToastCount = 0;
+
+function checkCheating() {
+    if (toastCount !== originalToastCount && toastCount !== "CHEATER!") {
+        console.log("Cheating detected!");
+        toastCount = "CHEATER!";
+        updateDisplay();
+    }
+}
+
+// Call checkCheating every 100 milliseconds (adjust as needed)
+setInterval(checkCheating, 100);
+
+// Your other functions (updateDisplay, formatNumber, etc.)
 
 // Log a message so you know the debug tools are ready when you open the console
 console.log("Toast Clicker debug tools loaded. Use 'toast.add(number)' or 'toast.set(number)'.");
