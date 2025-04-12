@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2534767097663166"
-        crossorigin="anonymous"></script>
+            crossorigin="anonymous"></script>
     <title>Toast Clicker</title>
-    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
     <style>
         /* --- Base Styles --- */
         :root {
             --toast-brown: #F5F5DC;
             --toast-crust: #FFD700;
-            --background-image-url: 'background.png';
+            --background-image-url: 'background.png'; /* Make sure this path is correct */
             --background-fallback-color: #2c3e50;
             --container-bg: rgba(1, 15, 27, 0.75);
             --container-bg-lighter: rgba(255, 255, 255, 0.1);
@@ -36,7 +36,7 @@
 
         body {
             margin: 0;
-            font-family: 'Google Sans', sans-serif;
+            font-family: 'Google Sans', sans-serif; /* Use Google Sans */
             background: url('background.png') no-repeat center center fixed;
             background-color: var(--background-fallback-color);
             background-size: cover;
@@ -46,6 +46,12 @@
             color: var(--text-light);
             min-height: 100vh;
             padding-bottom: 20px;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .game-container {
@@ -78,8 +84,8 @@
         .game-title {
             grid-column: 1 / -1;
             text-align: center;
-            font-size: 2.2em;
-            font-weight: 500;
+            font-size: 2.5em;
+            font-weight: 700; /* Use 700 for bold */
             color: #fff;
             margin-bottom: 5px;
             padding-bottom: 20px;
@@ -107,8 +113,8 @@
         }
 
         #toast-count-display {
-            font-size: 2.8em;
-            font-weight: 500;
+            font-size: 3em;
+            font-weight: 700; /* Use 700 for bold */
             margin-bottom: 8px;
             color: var(--toast-brown);
             word-break: break-all;
@@ -124,7 +130,7 @@
         }
 
         #clickable-toast {
-            font-size: 12em;
+            font-size: 14em;
             cursor: pointer;
             display: inline-block;
             transition: transform 0.1s ease-out;
@@ -190,7 +196,7 @@
             margin-top: 0;
             margin-bottom: 20px;
             text-align: center;
-            font-weight: 500;
+            font-weight: 600;
             color: #fff;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
@@ -225,8 +231,8 @@
         }
         .upgrade-info h3 {
             margin: 0 0 5px 0;
-            font-size: 1.15em;
-            font-weight: 500;
+            font-size: 1.2em;
+            font-weight: 600;
             color: var(--text-light);
         }
         .upgrade-info p {
@@ -243,27 +249,29 @@
             color: var(--text-medium);
         }
 
-          /* --- Buttons --- */
-          button {
+        /* --- Buttons --- */
+        button {
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 5px;
+            padding: 12px 22px;
+            border-radius: 8px;
             cursor: pointer;
             margin-right: 8px;
             margin-bottom: 8px;
-            font-size: 0.9em;
-            font-weight: 500;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
         }
         button:hover:not(:disabled) {
-            box-shadow: 0 5px 10px rgba(0,0,0,0.25);
-            transform: translateY(-1px);
+            background-color: #0056b3;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+            transform: translateY(-2px);
         }
         button:active:not(:disabled) {
-            transform: translateY(1px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            background-color: #004080;
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         button:disabled {
             background-image: none;
@@ -277,8 +285,8 @@
         .upgrade button {
             background-image: linear-gradient(to bottom, var(--success-green), var(--success-green-dark));
             flex-shrink: 0;
-            padding: 8px 15px;
-            font-size: 0.85em;
+            padding: 10px 18px;
+            font-size: 0.9em;
         }
         .upgrade button:hover:not(:disabled) {
             background-image: linear-gradient(to bottom, #35e881, #27ae60);
@@ -286,8 +294,8 @@
 
         .options-area button {
             background-image: linear-gradient(to bottom, var(--secondary-grey), var(--secondary-grey-dark));
-            font-size: 0.8em;
-            padding: 8px 14px;
+            font-size: 0.85em;
+            padding: 10px 16px;
         }
         .options-area button:hover:not(:disabled) {
             background-image: linear-gradient(to bottom, #aab7b8, #7f8c8d);
@@ -300,23 +308,75 @@
             background-image: linear-gradient(to bottom, #f16a5c, #c0392b);
         }
 
-
         .options-area {
             grid-column: 1 / -1;
             text-align: center;
             padding-top: 20px;
             border-top: 1px solid var(--border-color);
             margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
 
         .notification {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 6px; color: white; z-index: 1000; font-size: 0.95em; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.3s ease, bottom 0.3s ease; pointer-events: none;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 15px 25px; border-radius: 8px; color: white; z-index: 1000; font-size: 1em; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.3s ease, bottom 0.3s ease; pointer-events: none;
         }
         .notification.show { opacity: 1; bottom: 30px; }
         .notification.success { background-color: var(--success-green); }
         .notification.error { background-color: var(--danger-red); }
 
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.2em;
+            }
+            #toast-count-display {
+                font-size: 2.5em;
+            }
+            #clickable-toast {
+                font-size: 12em;
+            }
+            .upgrade-info h3 {
+                font-size: 1em;
+            }
+            button {
+                font-size: 0.9em;
+                padding: 10px 18px;
+            }
+            .notification {
+                font-size: 0.95em;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 15px;
+            }
+            .upgrades-area h2 {
+                font-size: 1.2em;
+                margin-left: -10px;
+                margin-right: -10px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .upgrade {
+                padding: 12px 15px;
+            }
+            .upgrade-info {
+                margin-right: 10px;
+            }
+            button {
+                font-size: 0.85em;
+                padding: 8px 15px;
+            }
+            .options-area button{
+                font-size: 0.8em;
+                padding: 8px 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -351,8 +411,7 @@
         const SAVE_KEY = 'toastClickerSave_v1';
 
         // --- Upgrades Definition ---
-                // --- Upgrades Definition ---
-                const upgrades = {
+        const upgrades = {
             // Early Game (0 - 1K)
             'toaster': { name: 'Toaster', description: '+0.1 TPS', baseCost: 15, cost: 15, count: 0, tps: 0.1, tpc: 0 },
             'butter_knife': { name: 'Butter Knife', description: '+1 TPC', baseCost: 50, cost: 50, count: 0, tps: 0, tpc: 1 },
@@ -453,63 +512,6 @@
         function gameLoop() {
             toastCount += toastsPerSecond * 0.1;
         }
-        
-        // --- Console Debug Functions ---
-// Expose a 'toast' object to the window for console access
-window.toast = {
-    /**
-     * Adds a specified amount to the current toast count.
-     * @param {number} amount - The number of toasts to add. Can be negative.
-     */
-    add: function(amount) {
-        // Validate input
-        if (typeof amount !== 'number' || isNaN(amount)) {
-            console.error('Error: Invalid amount provided to toast.add(). Please use a number.');
-            return; // Stop execution if input is invalid
-        }
-
-        // Add the amount to the global toastCount
-        toastCount += amount;
-        originalToastCount = toastCount; // Update original count
-
-        // Ensure toast count doesn't go below zero if you add negative numbers
-        // (Optional, remove if you want negative toasts allowed)
-        if (toastCount < 0) {
-            toastCount = 0;
-        }
-
-        // Log confirmation to the console
-        console.log(`Added ${amount} toasts. New total: ${formatNumber(Math.floor(toastCount))}`);
-
-        // Update the display.
-        updateDisplay();
-    },
-
-    /**
-     * Sets the toast count to a specific value.
-     * @param {number} amount - The number to set the toast count to.
-     */
-    set: function(amount) {
-        if (typeof amount !== 'number' || isNaN(amount) || amount < 0) {
-            console.error('Error: Invalid amount provided to toast.set(). Please use a non-negative number.');
-            return;
-        }
-        toastCount = amount;
-        originalToastCount = toastCount; // Update original count
-        updateDisplay();
-        console.log(`Toast count set to ${formatNumber(Math.floor(toastCount))}`);
-    }
-};
-// Call checkCheating every 100 milliseconds (adjust as needed)
-setInterval(checkCheating, 100);
-function checkCheating() {
-    // Check if the toast count is greater than the original count
-
-}
-// Your other functions (updateDisplay, formatNumber, etc.)
-
-// Log a message so you know the debug tools are ready when you open the console
-console.log("Toast Clicker debug tools loaded. Use 'toast.add(number)' or 'toast.set(number)'.");
 
         // --- Display Update Loop ---
         function updateDisplayLoop() {
@@ -675,6 +677,7 @@ console.log("Toast Clicker debug tools loaded. Use 'toast.add(number)' or 'toast
                 localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
             } catch (e) {
                 console.error("Error saving game:", e);
+                showNotification("Error saving game. Please ensure your browser allows local storage.", "error");
             }
         }
 
@@ -718,35 +721,31 @@ console.log("Toast Clicker debug tools loaded. Use 'toast.add(number)' or 'toast
             toastsPerClick = 1;
             for (const id in upgrades) {
                 const upgrade = upgrades[id];
-                if (upgrade.count > 0) {
-                    toastsPerSecond += upgrade.tps * upgrade.count;
-                    toastsPerClick += upgrade.tpc * upgrade.count;
-                }
+                toastsPerSecond += upgrade.tps * upgrade.count;
+                toastsPerClick += upgrade.tpc * upgrade.count;
             }
+        }
+
+        function clearSave() {
+            localStorage.removeItem(SAVE_KEY);
+            resetGameVariables();
+            renderUpgrades();
+            updateDisplay();
+            showNotification('Game reset!', 'success');
         }
 
         function resetGameVariables() {
             toastCount = 0;
-            recalculateStatsFromUpgrades();
+            toastsPerClick = 1;
+            toastsPerSecond = 0;
             for (const id in upgrades) {
                 upgrades[id].count = 0;
                 upgrades[id].cost = upgrades[id].baseCost;
             }
         }
 
-        function clearSave() {
-            if (confirm("🚨 RESET GAME? 🚨\n\nThis will erase all your progress. Are you absolutely sure?")) {
-                localStorage.removeItem(SAVE_KEY);
-                resetGameVariables();
-                renderUpgrades();
-                updateDisplay();
-                showNotification("Game Reset!", "success");
-            }
-        }
-
-        // --- Start Game ---
-        window.onload = initializeGame;
-
+        // --- Start the Game ---
+        initializeGame();
     </script>
 </body>
 </html>
