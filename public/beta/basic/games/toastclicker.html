@@ -500,15 +500,6 @@ window.toast = {
         console.log(`Toast count set to ${formatNumber(Math.floor(toastCount))}`);
     }
 };
-let originalToastCount = 0; // Store the original toast count
-function checkCheating() {
-    if (toastCount !== originalToastCount && toastCount !== "CHEATER!") {
-        console.error("Cheating detected!");
-        console.warn("people like u make the game boring");
-        toastCount = "CHEATER!";
-        updateDisplay();
-    }
-}
 // Call checkCheating every 100 milliseconds (adjust as needed)
 setInterval(checkCheating, 100);
 
