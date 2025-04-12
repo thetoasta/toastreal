@@ -445,7 +445,7 @@
             updateDisplay();
             setInterval(gameLoop, 100);
             setInterval(updateDisplayLoop, 100);
-            setInterval(saveGameState, 30000);
+            setInterval(saveGameState, 1000);
             window.addEventListener('beforeunload', saveGameState);
         }
 
