@@ -502,8 +502,13 @@ window.toast = {
 };
 
 function checkCheating() {
-    // Check if the toast count is significantly higher than expected
+    if (toastCount !== originalToastCount && toastCount !== "CHEATER!") {
+        console.error("Cheating detected!");
+        console.warn("people like u make the game boring");
+        toastCount = "CHEATER!";
+        updateDisplay();
     }
+}
 // Call checkCheating every 100 milliseconds (adjust as needed)
 setInterval(checkCheating, 100);
 
