@@ -1,7 +1,7 @@
 {
   "name": "toastreal",
   "version": "1.0.0",
-  "description": "",
+  "description": "Toast Social is a social media app for the public.",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,7 +10,7 @@
     "build": "electron-builder"
   },
   "keywords": [],
-  "author": "",
+  "author": "Toast Stuff, Toasta",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -24,7 +24,8 @@
   },
   "build": {
     "appId": "toaststuff.social.toastsocial",  
-    "productName": "Toast Stuff",    
+    "productName": "Toast Stuff",
+      
     "win": {
       "target": [
         "nsis"    
