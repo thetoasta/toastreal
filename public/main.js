@@ -6,12 +6,11 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false, // Disable Node.js integration in the renderer process for security
     },
   })
 
-  mainWindow.loadURL('YOUR_WEBSITE_URL')  // Replace with your website's URL
+  mainWindow.loadURL('https://toastreal.xyz')  // Replace with your website's URL
 }
 
 app.whenReady().then(() => {
