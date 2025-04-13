@@ -4,12 +4,9 @@
   "description": "Toast Social is a social media app for the public.",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dev": "electron . --dev",
     "build": "electron-builder"
   },
-  "keywords": [],
   "author": "Toast Stuff, Toasta",
   "license": "ISC",
   "dependencies": {
@@ -23,14 +20,11 @@
     "electron-builder": "^24.12.0"
   },
   "build": {
-    "appId": "toaststuff.social.toastsocial",  
+    "appId": "toaststuff.social.toastsocial",
     "productName": "Toast Stuff",
-      
     "win": {
-      "target": [
-        "nsis"    
-      ],
-       "icon": "images/toastlogo.ico" 
+      "target": ["nsis"],
+      "icon": "images/toastlogo.ico"
     }
   }
 }
