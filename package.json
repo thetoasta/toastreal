@@ -24,10 +24,6 @@
 
     "@genkit-ai/googleai": "^0.9.12",
 
-    "electron": "^35.1.5",
-
-    "electron-builder": "^26.0.12",
-
     "express": "^4.21.2",
 
     "express-session": "^1.18.1",
@@ -40,7 +36,11 @@
 
   "devDependencies": {
 
-    "supabase": "^2.15.8"
+    "supabase": "^2.15.8",
+
+    "electron": "^35.1.5",
+
+    "electron-builder": "^26.0.12"
 
   },
 
