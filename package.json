@@ -26,7 +26,7 @@
     "productName": "Toast Social",
     "win": {
       "target": "nsis",
-      "icon": "images/toastlogo.ico" 
+      "icon": "public/images/toastlogo.ico" 
     }
   }
 }
