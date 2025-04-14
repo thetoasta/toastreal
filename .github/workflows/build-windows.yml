@@ -1,13 +1,6 @@
-name: Build Windows Electron App
-
-on:
-  push:
-    branches:
-      - main # Or your default branch
-
 jobs:
   build:
-    runs-on: windows-latest # Specifies the Windows runner
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
@@ -16,16 +9,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20' # Or your desired Node.js version
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
 
       - name: Build Electron app
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} # Add this line
         run: npx electron-builder --win
 
       - name: Upload artifact
         uses: actions/upload-artifact@main
         with:
           name: windows-build
-          path: dist/*.exe # Upload the .exe from the dist folder.
+          path: dist/*.exe
