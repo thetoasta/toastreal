@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Updating Toast Social</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Google Sans', sans-serif;
+            background-color: #2c3e50;
+            color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 400px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .message {
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+
+        .progress {
+            margin-top: 20px;
+            width: 100%;
+            height: 20px;
+            background-color: #7f8c8d;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #27ae60;
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="title">Updating Toast Social...</div>
+    <div class="message" id="update-message">Checking for updates...</div>
+    <div class="progress">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+</div>
+<script>
+    const { ipcRenderer } = require('electron');
+
+    ipcRenderer.on('update-message', (event, message) => {
+        document.getElementById('update-message').textContent = message;
+    });
+
+    ipcRenderer.on('update-progress', (event, progress) => {
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${progress}%`;
+    });
+</script>
+</body>
+</html>
