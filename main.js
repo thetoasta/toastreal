@@ -1,5 +1,6 @@
 const { app, BrowserWindow, autoUpdater } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 
 // Log updater behavior (optional)
 autoUpdater.logger = require('electron-log');
