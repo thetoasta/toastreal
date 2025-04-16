@@ -12,7 +12,7 @@ app.on('ready', () => {
     },
   });
 
-  mainWindow.loadURL('https://example.com');
+  mainWindow.loadURL('https://toastreal.xyz');
 
   // AutoUpdater Setup
   autoUpdater.checkForUpdatesAndNotify();
