@@ -1,9 +1,10 @@
-const { app, BrowserWindow, autoUpdater } = require('electron');
+const { app, BrowserWindow } = require('electron');
+const { autoUpdater } = require('electron-updater'); // Use electron-updater directly
 const path = require('path');
-const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 
-// Log updater behavior (optional)
-autoUpdater.logger = require('electron-log');
+// Setup logging
+autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
 autoUpdater.autoDownload = true;
 
@@ -19,46 +20,46 @@ function createMainWindow() {
   });
 
   mainWindow.loadURL('https://toastreal.xyz');
-
   setupAutoUpdater();
 }
 
 function setupAutoUpdater() {
-  // Check for updates when app is ready
+  // Attach autoUpdater triggers
   autoUpdater.checkForUpdatesAndNotify();
 
   autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for updates...');
+    log.info('Checking for updates...');
   });
 
   autoUpdater.on('update-available', (info) => {
-    console.log('Update available:', info);
+    log.info('Update available:', info);
     if (mainWindow) {
       mainWindow.webContents.send('update-message', 'Update available. Downloading...');
     }
   });
 
   autoUpdater.on('update-not-available', () => {
-    console.log('No updates available.');
+    log.info('No updates available.');
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
-    console.log(`Downloaded ${progressObj.percent}%`);
+    log.info(`Downloaded ${progressObj.percent}%`);
     if (mainWindow) {
       mainWindow.webContents.send('update-progress', progressObj.percent);
     }
   });
 
   autoUpdater.on('update-downloaded', () => {
-    console.log('Update downloaded. Restarting...');
+    log.info('Update downloaded. Restarting...');
     autoUpdater.quitAndInstall();
   });
 
   autoUpdater.on('error', (err) => {
-    console.error('Update error:', err);
+    log.error('Update error:', err);
   });
 }
 
+// Electron lifecycle hooks
 app.on('ready', createMainWindow);
 
 app.on('window-all-closed', () => {
