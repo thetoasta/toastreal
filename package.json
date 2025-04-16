@@ -11,22 +11,38 @@
   },
   "dependencies": {
     "@genkit-ai/googleai": "^0.9.12",
+    "electron-updater": "^6.6.2",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "firebase-admin": "^13.2.0",
     "genkit": "^0.9.12"
   },
   "devDependencies": {
-    "supabase": "^2.15.8",
     "electron": "^35.1.5",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "supabase": "^2.15.8"
   },
   "build": {
     "appId": "com.toaststuff.toastreal",
     "productName": "Toast Social",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "thetoasta",
+        "repo": "toastreal"
+      }
+    ],
     "win": {
       "target": "nsis",
-      "icon": "public/images/toastlogo.ico" 
+      "icon": "public/images/toastlogo.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.social-networking"
     }
   }
+
 }
