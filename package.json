@@ -33,7 +33,8 @@
       {
         "provider": "github",
         "owner": "thetoasta",
-        "repo": "toastreal"
+        "repo": "toastreal",
+        "releaseType": "release"
       }
     ],
     "win": {

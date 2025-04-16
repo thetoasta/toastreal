@@ -1,17 +1,10 @@
 const { app, BrowserWindow } = require('electron');
-const { autoUpdater } = require('electron-updater'); // Use electron-updater directly
+const { autoUpdater } = require('electron-updater'); // Import electron-updater
 const path = require('path');
-const log = require('electron-log');
 
-// Setup logging
-autoUpdater.logger = log;
-autoUpdater.logger.transports.file.level = 'info';
-autoUpdater.autoDownload = true;
-
-let mainWindow;
-
-function createMainWindow() {
-  mainWindow = new BrowserWindow({
+// Electron lifecycle hooks
+app.on('ready', () => {
+  const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -19,48 +12,23 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.loadURL('https://toastreal.xyz');
-  setupAutoUpdater();
-}
+  mainWindow.loadURL('https://example.com');
 
-function setupAutoUpdater() {
-  // Attach autoUpdater triggers
+  // AutoUpdater Setup
   autoUpdater.checkForUpdatesAndNotify();
 
-  autoUpdater.on('checking-for-update', () => {
-    log.info('Checking for updates...');
-  });
-
-  autoUpdater.on('update-available', (info) => {
-    log.info('Update available:', info);
-    if (mainWindow) {
-      mainWindow.webContents.send('update-message', 'Update available. Downloading...');
-    }
+  autoUpdater.on('update-available', () => {
+    console.log('Update available.');
   });
 
   autoUpdater.on('update-not-available', () => {
-    log.info('No updates available.');
-  });
-
-  autoUpdater.on('download-progress', (progressObj) => {
-    log.info(`Downloaded ${progressObj.percent}%`);
-    if (mainWindow) {
-      mainWindow.webContents.send('update-progress', progressObj.percent);
-    }
-  });
-
-  autoUpdater.on('update-downloaded', () => {
-    log.info('Update downloaded. Restarting...');
-    autoUpdater.quitAndInstall();
+    console.log('No updates available.');
   });
 
   autoUpdater.on('error', (err) => {
-    log.error('Update error:', err);
+    console.error('Error in auto-updater:', err);
   });
-}
-
-// Electron lifecycle hooks
-app.on('ready', createMainWindow);
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
