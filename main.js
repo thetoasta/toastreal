@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require('electron');
-const { autoUpdater } = require('electron-updater'); // Import electron-updater
+import { autoUpdater } from 'electron-updater';
 const path = require('path');
 
 // Electron lifecycle hooks
