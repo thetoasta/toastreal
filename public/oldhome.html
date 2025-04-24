@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>toast social</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notifications.css">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/images/toastlogo.ico">
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="notifications.js"></script>
+    <script type="module" src="beta/genai.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIi3_sc81JogKi_UjMGYqUMvsf4WBDJPc", // Replace with your actual API key
+            authDomain: "toastrealxyz.firebaseapp.com",
+            projectId: "toastrealxyz",
+            storageBucket: "toastrealxyz.appspot.com",
+            messagingSenderId: "774884910313",
+            appId: "1:774884910313:web:e11002887adf1055acfc78",
+            measurementId: "G-3H38LZB2BX"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        let shit = 1; // say how many times i've shit
+        let easteregg01 = "upcoming";
+        let restrictionNoticeShown = false; // Flag for restriction notice
+        let globalNoticeShown = false;      // Flag for global notice
+
+        // --- Styling for Notices (can be shared or separate CSS) ---
+        const noticeBaseStyle = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.85); /* Slightly darker */
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 90%;
+            width: 400px; /* Adjust as needed */
+        `;
+
+        // --- Function to disable/enable page interaction ---
+        function setPageInteraction(enabled) {
+             document.body.style.overflow = enabled ? 'auto' : 'hidden';
+             // Temporarily disable pointer events on body, enable on notice later
+             document.body.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+
+        // --- Function to display RESTRICTION notice ---
+        function displayRestrictionNotice(restrictions) {
+            if (restrictionNoticeShown || globalNoticeShown) return; // Prevent overlapping notices
+            restrictionNoticeShown = true;
+            setPageInteraction(false); // Disable page
+
+            const noticeDiv = document.createElement('div');
+            noticeDiv.id = 'restriction-notice';
+            noticeDiv.style.cssText = noticeBaseStyle; // Use base style
+
+            let message = '<h2>Account Restriction</h2>You have restrictions on your account:';
+            let blockedFeatures = [];
+            if (restrictions.posting) blockedFeatures.push('posting');
+            if (restrictions.messaging) blockedFeatures.push('messaging');
+
+            if (blockedFeatures.length > 0) {
+                message += `<br><br><strong>Blocked Features:</strong> ${blockedFeatures.join(', ')}.`;
+            }
+            if (restrictions.note) {
+                message += `<br><br><strong>Reason:</strong> ${restrictions.note}`;
+            }
+
+            noticeDiv.innerHTML = `
+                ${message}
+                <br><br>
+                <label style="display: block; margin: 10px 0;">
+                    <input type="checkbox" id="restriction-acknowledged"> I have read and understand these limitations.
+                </label>
+                <br>
+                <button onclick="window.location.href = 'https://www.notion.so/toastsocial/1c31def6da0e802eb517d19e379ee431?v=1c31def6da0e802e81ca000cbd70a59c&pvs=4';">This wasn't me / Appeal</button>
+                <button id="restriction-acknowledge-button" disabled>Acknowledge</button>
+            `;
+
+            document.body.appendChild(noticeDiv);
+            noticeDiv.style.pointerEvents = 'auto'; // Make notice interactive
+
+            const acknowledgeCheckbox = document.getElementById('restriction-acknowledged');
+            const acknowledgeButton = document.getElementById('restriction-acknowledge-button');
+
+            acknowledgeCheckbox.addEventListener('change', function () {
+                acknowledgeButton.disabled = !this.checked;
+            });
+
+            acknowledgeButton.addEventListener('click', function () {
+                acknowledgeButton.disabled = true; // Prevent double click
+                acknowledgeButton.textContent = 'Acknowledging...';
+                const userRef = db.collection('users').doc(firebase.auth().currentUser.email);
+                userRef.update({ hasAcknowledgedRestrictions: true })
+                    .then(() => {
+                        noticeDiv.remove();
+                        setPageInteraction(true); // Re-enable page
+                        restrictionNoticeShown = false;
+                    })
+                    .catch(error => {
+                        console.error("Error updating user document for restriction ack: ", error);
+                        alert('Error acknowledging restriction. Please try again.');
+                        acknowledgeButton.disabled = false; // Re-enable button on error
+                         acknowledgeButton.textContent = 'Acknowledge';
+                    });
+            });
+        }
+
+        // --- Function to display GLOBAL notice ---
+        function displayGlobalNotice(noticeData) {
+            if (restrictionNoticeShown || globalNoticeShown) return; // Prevent overlapping notices
+            globalNoticeShown = true;
+            setPageInteraction(false); // Disable page
+
+            const noticeDiv = document.createElement('div');
+            noticeDiv.id = 'global-notice';
+            noticeDiv.style.cssText = noticeBaseStyle; // Use base style
+            noticeDiv.style.backgroundColor = 'rgba(30, 30, 80, 0.9)'; // Different color?
+
+            noticeDiv.innerHTML = `
+                <h2>Site Notice</h2>
+                <p>${noticeData.message}</p> <br>
+                <button id="global-acknowledge-button">Got it!</button>
+            `;
+
+            document.body.appendChild(noticeDiv);
+            noticeDiv.style.pointerEvents = 'auto'; // Make notice interactive
+
+            const acknowledgeButton = document.getElementById('global-acknowledge-button');
+
+            acknowledgeButton.addEventListener('click', function () {
+                acknowledgeButton.disabled = true; // Prevent double click
+                acknowledgeButton.textContent = 'Processing...';
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.error("User not logged in during global notice acknowledgement.");
+                    alert("Error: You seem to be logged out. Please refresh.");
+                    noticeDiv.remove();
+                    setPageInteraction(true);
+                    globalNoticeShown = false;
+                    return;
+                }
+                const userRef = db.collection('users').doc(user.email);
+                const noticeId = noticeData.noticeId; // Get the ID from the notice data
+
+                // Update the acknowledgedNotices map using dot notation for nested fields
+                userRef.update({
+                    [`acknowledgedNotices.${noticeId}`]: true
+                 })
+                    .then(() => {
+                        noticeDiv.remove();
+                        setPageInteraction(true); // Re-enable page
+                        globalNoticeShown = false;
+                    })
+                    .catch(error => {
+                        console.error("Error updating user document for global notice ack: ", error);
+                        alert('Error acknowledging notice. Please try again.');
+                        acknowledgeButton.disabled = false; // Re-enable button on error
+                        acknowledgeButton.textContent = 'Got it!';
+                    });
+            });
+        }
+
+
+        // --- Check Auth State and Handle Notices ---
+        firebase.auth().onAuthStateChanged(user => {
+            const profileButton = document.getElementById('profile');
+            const loginButton = document.getElementById('login');
+            const logoutButton = document.getElementById('logout-button');
+
+            if (user) {
+                // User is signed in.
+                profileButton.style.display = 'block';
+                loginButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+
+                const userRef = db.collection('users').doc(user.email);
+                const globalNoticeRef = db.collection('site_config').doc('global_notice');
+
+                // 1. Fetch User Data (for restrictions and acknowledgements)
+                userRef.get().then(userDoc => {
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    const restrictions = userData.restrictions || {};
+                    const hasAcknowledgedRestrictions = userData.hasAcknowledgedRestrictions || false;
+                    const acknowledgedNotices = userData.acknowledgedNotices || {}; // Get acknowledged notices
+
+                    // 2. Check for Restrictions FIRST
+                    if ((restrictions.posting || restrictions.messaging) && !hasAcknowledgedRestrictions) {
+                        displayRestrictionNotice(restrictions);
+                    } else {
+                         // 3. If no restriction notice shown, check for Global Notice
+                        globalNoticeRef.get().then(noticeDoc => {
+                            if (noticeDoc.exists) {
+                                const noticeData = noticeDoc.data();
+                                // Check if active AND if this specific noticeId has NOT been acknowledged by user
+                                if (noticeData.active && noticeData.noticeId && !acknowledgedNotices[noticeData.noticeId]) {
+                                    displayGlobalNotice(noticeData); // Pass the whole notice data object
+                                }
+                            }
+                        }).catch(error => {
+                             console.error('Error fetching global notice:', error);
+                        });
+                    }
+
+                }).catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
+
+            } else {
+                // User is signed out.
+                profileButton.style.display = 'none';
+                loginButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+                // Make sure notices are hidden if user logs out
+                const restrictionNotice = document.getElementById('restriction-notice');
+                const globalNotice = document.getElementById('global-notice');
+                if (restrictionNotice) restrictionNotice.remove();
+                if (globalNotice) globalNotice.remove();
+                restrictionNoticeShown = false;
+                globalNoticeShown = false;
+                setPageInteraction(true); // Ensure page is usable
+            }
+        });
+
+        // Log out user
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'accounts.html';
+            }).catch((error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function signin() {
+            window.location.href = 'accounts.html';
+        }
+
+        function profile(){
+            window.location.href = 'profile.html'
+        }
+    </script>
+</head>
+<body>
+    <header class="v2">
+        <nav>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="index.html">home</a></li>
+                <li class="nav-item"><a href="post.html">posts</a></li>
+                <li class="nav-item"><a href="profile.html">profile</a></li>
+                <li class="nav-item"><a href="users.html">friends</a></li>
+                <li class="nav-item"><a href="friendrequests.html">friend requests</a></li>
+                <li class="nav-item"><a href="group.html">group chats</a></li>
+                <li class="nav-item"><a href="news.html">news</a></li>
+                <li class="nav-item"><a href="https://status.toastreal.xyz">status</a></li>
+                <li class="nav-item"><a href="https://toastsocial.notion.site/1c31def6da0e8032926dd3c881aa3b48">support / report</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <header>
+            <h1><strong>toast social</strong></h1>
+            <h2><strong>welcome! 🔥</strong></h2>
+            <h3><em>new!</em> some cool new game... toast clicker!</h3>
+            <div class="container">
+                <button id="profile" onclick="profile()" style="display: none;">profile</button>
+                <button id="login" onclick="signin()" style="display: block;">log in</button>
+                <button onclick="window.location.href = 'beta/basic/games/toastclicker.html';">toast clicker <em>beta!</em></button>
+                <button onclick="window.location.href = 'post.html';">social</button>
+                <button onclick="window.location.href = 'news.html';">news</button>
+                <button onclick="window.location.href = 'users.html';">friends</button>
+                <button onclick="window.location.href = 'friendrequests.html';">friend requests</button>
+                <button onclick="window.location.href = 'group.html';">group chats</button>
+                <button id="logout-button" onclick="logout()" style="display: none;">sign out</button>
+            </div>
+        </header>
+        <div id="notifications-container"></div>
+        </div>
+</body>
+</html>
