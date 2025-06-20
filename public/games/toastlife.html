@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toast Life</title>
+    <title>Life's Journey: The Simulator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -15,7 +15,7 @@
             color: #e2e8f0; /* Light gray text */
         }
 
-        /* Custom scrollbar for message log */
+        /* Custom scrollbar for message log AND other scrollable modals */
         .scrollbar-thin::-webkit-scrollbar {
             width: 8px;
         }
@@ -94,6 +94,9 @@
             opacity: 0;
             transition: transform 0.3s ease-out, opacity 0.3s ease-out;
             position: relative;
+            display: flex; /* Flexbox for content inside modal */
+            flex-direction: column; /* Stack children vertically */
+            max-height: 90vh; /* Max height for modal itself */
         }
 
         .modal-overlay.active .modal-content {
@@ -125,7 +128,7 @@
         <div class="flex flex-col gap-6 w-full lg:w-1/3">
             <!-- Header: Title and Time -->
             <div class="panel-card text-center bg-gradient-to-br from-purple-800 to-indigo-900 text-white">
-                <h1 class="text-4xl font-extrabold mb-2 drop-shadow-md">Toast Life</h1>
+                <h1 class="text-4xl font-extrabold mb-2 drop-shadow-md">Life's Journey</h1>
                 <p id="gameTime" class="text-xl font-medium">Day 1, 08:00 AM</p>
                 <p id="playerAge" class="text-sm text-gray-200">Age: 18</p>
             </div>
@@ -197,7 +200,7 @@
         <div class="modal-content">
             <button class="modal-close-button" onclick="closeModal('jobModal')">&times;</button>
             <h3 class="text-3xl font-bold mb-6 text-blue-300 text-center">Available Jobs</h3>
-            <div id="availableJobsList" class="space-y-4">
+            <div id="availableJobsList" class="space-y-4 flex-grow overflow-y-auto scrollbar-thin max-h-[calc(90vh-160px)]">
                 <!-- Jobs listed here -->
             </div>
         </div>
@@ -224,7 +227,7 @@
         <div class="modal-content">
             <button class="modal-close-button" onclick="closeModal('shopModal')">&times;</button>
             <h3 class="text-3xl font-bold mb-6 text-blue-300 text-center">Shop</h3>
-            <div id="shopItemsList" class="space-y-4">
+            <div id="shopItemsList" class="space-y-4 flex-grow overflow-y-auto scrollbar-thin max-h-[calc(90vh-160px)]">
                 <!-- Shop items listed here -->
             </div>
         </div>
@@ -615,7 +618,7 @@
             player.money -= bet; // Deduct bet immediately
             casinoBalanceDisplay.textContent = `$${player.money}`;
 
-            const slots = ['🍒', '🍋', '🔔', '💰', '7️⃣'];
+            const slots = ['🍒', '🍋', '�', '💰', '7️⃣'];
             const reel1 = slots[Math.floor(Math.random() * slots.length)];
             const reel2 = slots[Math.floor(Math.random() * slots.length)];
             const reel3 = slots[Math.floor(Math.random() * slots.length)];
