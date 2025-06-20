@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toast Life</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Deep charcoal */
+            color: #e2e8f0; /* Light gray text */
+        }
+
+        /* Custom scrollbar for message log */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #2d3748; /* Tailwind gray-700 */
+            border-radius: 10px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #4a5568; /* Tailwind gray-600 */
+            border-radius: 10px;
+            border: 2px solid #2d3748;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #718096; /* Tailwind gray-500 */
+        }
+
+        .panel-card {
+            background-color: #2d3748; /* gray-700 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem; /* p-6 */
+        }
+
+        .action-button {
+            @apply px-6 py-3 rounded-full font-semibold shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-75;
+        }
+
+        .action-button-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-400;
+        }
+
+        .action-button-secondary {
+            @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-400;
+        }
+
+        .action-button-danger {
+            @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-400;
+        }
+
+        .action-button-neutral {
+            @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-400;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #2d3748; /* gray-700 */
+            border-radius: 0.75rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #cbd5e0; /* gray-300 */
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close-button:hover {
+            color: #ef4444; /* red-500 */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 bg-gray-900">
+    <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
+
+        <!-- Left Column: Stats & Actions -->
+        <div class="flex flex-col gap-6 w-full lg:w-1/3">
+            <!-- Header: Title and Time -->
+            <div class="panel-card text-center bg-gradient-to-br from-purple-800 to-indigo-900 text-white">
+                <h1 class="text-4xl font-extrabold mb-2 drop-shadow-md">Toast Life</h1>
+                <p id="gameTime" class="text-xl font-medium">Day 1, 08:00 AM</p>
+                <p id="playerAge" class="text-sm text-gray-200">Age: 18</p>
+            </div>
+
+            <!-- Player Stats -->
+            <div class="panel-card">
+                <h2 class="text-2xl font-bold mb-4 text-blue-300">Your Stats</h2>
+                <div class="space-y-3">
+                    <p class="flex justify-between items-center text-lg"><span class="font-semibold">💰 Money:</span> <span id="statMoney" class="text-yellow-400">$0</span></p>
+                    <p class="flex justify-between items-center text-lg"><span class="font-semibold">😊 Happiness:</span> <span id="statHappiness" class="text-green-400">50</span></p>
+                    <p class="flex justify-between items-center text-lg"><span class="font-semibold">⚡ Energy:</span> <span id="statEnergy" class="text-red-400">100</span></p>
+                    <p class="flex justify-between items-center text-lg"><span class="font-semibold">❤️ Health:</span> <span id="statHealth" class="text-pink-400">100</span></p>
+                    <p class="flex justify-between items-center text-lg"><span class="font-semibold">🧠 Skills:</span> <span id="statSkills" class="text-purple-400">0</span></p>
+                </div>
+            </div>
+
+            <!-- Main Actions -->
+            <div class="panel-card grid grid-cols-2 gap-4">
+                <button id="workBtn" class="action-button action-button-primary">💼 Work</button>
+                <button id="socializeBtn" class="action-button action-button-secondary">🤝 Socialize</button>
+                <button id="restBtn" class="action-button action-button-neutral">🛌 Rest</button>
+                <button id="sleepBtn" class="action-button action-button-neutral">😴 Sleep</button>
+                <button id="eatBtn" class="action-button action-button-secondary">🍽️ Eat Meal</button>
+                <button id="exerciseBtn" class="action-button action-button-secondary">🏃 Exercise</button>
+                <button id="studyBtn" class="action-button action-button-primary">📚 Study</button>
+                <button id="playGamesBtn" class="action-button action-button-secondary">🎮 Play Games</button>
+                <button id="shopBtn" class="action-button action-button-primary col-span-2">🛒 Shop</button>
+                <button id="casinoBtn" class="action-button action-button-danger col-span-2">🎰 Casino</button>
+            </div>
+        </div>
+
+        <!-- Right Column: Messages & Details -->
+        <div class="flex flex-col gap-6 w-full lg:w-2/3">
+            <!-- Message Log -->
+            <div class="panel-card h-72 flex flex-col">
+                <h2 class="text-2xl font-bold mb-4 text-blue-300">Messages</h2>
+                <div id="messageLog" class="flex-grow overflow-y-auto scrollbar-thin space-y-2 text-sm text-gray-300 bg-gray-800 p-3 rounded-md">
+                    <!-- Messages will appear here -->
+                </div>
+                <p id="autosaveMessage" class="text-right text-xs text-gray-500 mt-2">Autosaving...</p>
+            </div>
+
+            <!-- Job Details -->
+            <div class="panel-card">
+                <h2 class="text-2xl font-bold mb-4 text-blue-300">Job</h2>
+                <p class="text-lg"><span class="font-semibold">Current Job:</span> <span id="jobTitle">Unemployed</span></p>
+                <p class="text-lg"><span class="font-semibold">Salary:</span> <span id="jobSalary">$0/hr</span></p>
+                <div id="jobActions" class="mt-4 flex flex-wrap gap-4">
+                    <button id="applyJobBtn" class="action-button action-button-primary">Apply for Job</button>
+                    <button id="quitJobBtn" class="action-button action-button-danger hidden">Quit Job</button>
+                    <button id="promoteJobBtn" class="action-button action-button-secondary hidden">Seek Promotion</button>
+                </div>
+            </div>
+
+            <!-- Relationships -->
+            <div class="panel-card">
+                <h2 class="text-2xl font-bold mb-4 text-blue-300">Relationships</h2>
+                <div id="relationshipList" class="space-y-3">
+                    <!-- Relationships will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Job Modal -->
+    <div id="jobModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-button" onclick="closeModal('jobModal')">&times;</button>
+            <h3 class="text-3xl font-bold mb-6 text-blue-300 text-center">Available Jobs</h3>
+            <div id="availableJobsList" class="space-y-4">
+                <!-- Jobs listed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Casino Modal -->
+    <div id="casinoModal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <button class="modal-close-button" onclick="closeModal('casinoModal')">&times;</button>
+            <h3 class="text-3xl font-bold mb-6 text-blue-300">Casino</h3>
+            <p class="text-xl mb-4">Current Balance: <span id="casinoBalance" class="font-bold text-yellow-400">$0</span></p>
+
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <input type="number" id="betAmount" class="w-32 p-2 rounded-md bg-gray-700 border border-gray-600 text-center text-white" value="10" min="1">
+                <button id="playSlotsBtn" class="action-button action-button-danger">Spin Slots!</button>
+            </div>
+            <p id="casinoResult" class="text-xl font-bold min-h-[30px] mb-4"></p>
+            <button class="action-button action-button-neutral" onclick="closeModal('casinoModal')">Leave Casino</button>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shopModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-button" onclick="closeModal('shopModal')">&times;</button>
+            <h3 class="text-3xl font-bold mb-6 text-blue-300 text-center">Shop</h3>
+            <div id="shopItemsList" class="space-y-4">
+                <!-- Shop items listed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game State Variables ---
+        let player = {
+            money: 100,
+            happiness: 50,
+            energy: 100,
+            health: 100,
+            skills: 0,
+            age: 18,
+            day: 1,
+            hour: 8 // Start at 8 AM
+        };
+
+        let currentJob = null; // { id: 'janitor', title: "Janitor", salary: 5, energyCost: 8, healthCost: 1, skillRequirement: 0, promotionTo: 'cleaner', description: "..." }
+
+        const jobs = [
+            // Entry-level
+            { id: 'janitor', title: "Janitor", salary: 5, energyCost: 8, healthCost: 1, skillRequirement: 0, promotionTo: 'cleaner', description: "Clean buildings for a modest wage." },
+            { id: 'cashier', title: "Cashier", salary: 8, energyCost: 7, healthCost: 1, skillRequirement: 0, promotionTo: 'storeManager', description: "Operate a cash register and assist customers." },
+            { id: 'deliveryDriver', title: "Delivery Driver", salary: 7, energyCost: 10, healthCost: 2, skillRequirement: 0, promotionTo: null, description: "Deliver packages and food around the city." },
+            // Mid-level
+            { id: 'cleaner', title: "Professional Cleaner", salary: 10, energyCost: 10, healthCost: 2, skillRequirement: 5, promotionTo: 'supervisor', description: "More advanced cleaning tasks, better pay." },
+            { id: 'storeManager', title: "Store Manager", salary: 20, energyCost: 15, healthCost: 4, skillRequirement: 15, promotionTo: null, description: "Oversee daily store operations." },
+            { id: 'juniorProgrammer', title: "Junior Programmer", salary: 25, energyCost: 15, healthCost: 3, skillRequirement: 20, promotionTo: 'seniorProgrammer', description: "Write basic code and solve problems." },
+            { id: 'juniorArtist', title: "Junior Artist", salary: 20, energyCost: 12, healthCost: 2, skillRequirement: 18, promotionTo: 'seniorArtist', description: "Create digital or traditional art for projects." },
+            // Advanced
+            { id: 'supervisor', title: "Cleaning Supervisor", salary: 15, energyCost: 12, healthCost: 3, skillRequirement: 10, promotionTo: null, description: "Manage a team of cleaners." },
+            { id: 'seniorProgrammer', title: "Senior Programmer", salary: 40, energyCost: 18, healthCost: 4, skillRequirement: 35, promotionTo: 'leadDeveloper', description: "Lead development projects and mentor juniors." },
+            { id: 'seniorArtist', title: "Senior Artist", salary: 35, energyCost: 15, healthCost: 3, skillRequirement: 30, promotionTo: 'artDirector', description: "Lead artistic vision for creative projects." },
+            // Top-tier
+            { id: 'leadDeveloper', title: "Lead Developer", salary: 60, energyCost: 20, healthCost: 5, skillRequirement: 50, promotionTo: null, description: "Oversee entire software development lifecycles." },
+            { id: 'artDirector', title: "Art Director", salary: 55, energyCost: 18, healthCost: 4, skillRequirement: 45, promotionTo: null, description: "Direct and approve all visual elements of major productions." },
+        ];
+
+        let npcs = [
+            { name: "Alice", relationship: 20, type: "Acquaintance" }, // 0-100, friend threshold 25
+            { name: "Bob", relationship: 10, type: "Acquaintance" },
+            { name: "Charlie", relationship: 5, type: "Stranger" },
+            { name: "Diana", relationship: 30, type: "Friend" },
+        ];
+
+        const shopItems = [
+            { id: 'cheapMeal', name: 'Cheap Meal', price: 5, effects: { health: 10, energy: 15 }, description: 'Basic nutrition.' },
+            { id: 'healthyMeal', name: 'Healthy Meal', price: 15, effects: { health: 30, energy: 25, happiness: 5 }, description: 'Good for your body and soul.' },
+            { id: 'coffee', name: 'Coffee', price: 3, effects: { energy: 20, happiness: 2 }, description: 'A quick energy boost.' },
+            { id: 'movieTicket', name: 'Movie Ticket', price: 12, effects: { happiness: 20, energy: -5 }, description: 'Enjoy a film, but it takes a little energy.' },
+            { id: 'book', name: 'Book', price: 8, effects: { skills: 2, happiness: 10 }, description: 'Learn something new and relax.' },
+            { id: 'healthKit', name: 'Health Kit', price: 25, effects: { health: 50 }, description: 'Emergency medical supplies.' },
+            { id: 'gymMembership', name: 'Gym Membership', price: 50, effects: { health: 0, energy: 0, initialCost: true }, description: 'A one-time fee for long-term health benefits (increases exercise effectiveness).' }, // Special item
+        ];
+
+        let hasGymMembership = false; // New state for gym membership
+
+        let messageLog = [];
+        const MAX_MESSAGES = 100; // Keep log from growing indefinitely
+
+        // --- DOM Elements ---
+        const gameTimeDisplay = document.getElementById('gameTime');
+        const playerAgeDisplay = document.getElementById('playerAge');
+        const statMoney = document.getElementById('statMoney');
+        const statHappiness = document.getElementById('statHappiness');
+        const statEnergy = document.getElementById('statEnergy');
+        const statHealth = document.getElementById('statHealth');
+        const statSkills = document.getElementById('statSkills');
+
+        const workBtn = document.getElementById('workBtn');
+        const socializeBtn = document.getElementById('socializeBtn');
+        const restBtn = document.getElementById('restBtn');
+        const sleepBtn = document.getElementById('sleepBtn');
+        const eatBtn = document.getElementById('eatBtn');
+        const exerciseBtn = document.getElementById('exerciseBtn');
+        const studyBtn = document.getElementById('studyBtn');
+        const playGamesBtn = document.getElementById('playGamesBtn');
+        const shopBtn = document.getElementById('shopBtn');
+        const casinoBtn = document.getElementById('casinoBtn');
+
+        const messageLogElement = document.getElementById('messageLog');
+        const autosaveMessageElement = document.getElementById('autosaveMessage');
+
+        const jobTitleDisplay = document.getElementById('jobTitle');
+        const jobSalaryDisplay = document.getElementById('jobSalary');
+        const applyJobBtn = document.getElementById('applyJobBtn');
+        const quitJobBtn = document.getElementById('quitJobBtn');
+        const promoteJobBtn = document.getElementById('promoteJobBtn');
+
+        const relationshipListElement = document.getElementById('relationshipList');
+
+        const jobModal = document.getElementById('jobModal');
+        const availableJobsList = document.getElementById('availableJobsList');
+        const casinoModal = document.getElementById('casinoModal');
+        const casinoBalanceDisplay = document.getElementById('casinoBalance');
+        const betAmountInput = document.getElementById('betAmount');
+        const playSlotsBtn = document.getElementById('playSlotsBtn');
+        const casinoResultDisplay = document.getElementById('casinoResult');
+        const shopModal = document.getElementById('shopModal');
+        const shopItemsList = document.getElementById('shopItemsList');
+
+
+        // --- Game Logic Functions ---
+
+        /**
+         * Adds a message to the game log and updates the display.
+         * @param {string} messageText The message to add.
+         * @param {string} type Optional type for styling (e.g., 'event', 'warning', 'money').
+         */
+        function addMessage(messageText, type = 'info') {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const msgElement = document.createElement('p');
+            msgElement.innerHTML = `<span class="text-gray-500">[${player.day}D ${timeString}]</span> ${messageText}`;
+
+            let colorClass = 'text-gray-300'; // Default
+            if (type === 'success') colorClass = 'text-green-400';
+            else if (type === 'warning') colorClass = 'text-yellow-400';
+            else if (type === 'danger') colorClass = 'text-red-400';
+            else if (type === 'money') colorClass = 'text-yellow-300';
+            else if (type === 'event') colorClass = 'text-blue-300';
+            else if (type === 'relationship') colorClass = 'text-pink-300';
+
+            msgElement.classList.add(colorClass);
+            messageLogElement.prepend(msgElement); // Add to top for most recent
+
+            messageLog.unshift({ text: messageText, type: type, time: timeString, day: player.day });
+
+            // Trim message log
+            if (messageLog.length > MAX_MESSAGES) {
+                messageLog.pop();
+                // Optionally remove from DOM
+                if (messageLogElement.childElementCount > MAX_MESSAGES) {
+                    messageLogElement.lastChild.remove();
+                }
+            }
+        }
+
+        /**
+         * Updates all displayed player stats.
+         */
+        function updateStatsDisplay() {
+            statMoney.textContent = `$${player.money}`;
+            statHappiness.textContent = player.happiness;
+            statEnergy.textContent = player.energy;
+            statHealth.textContent = player.health;
+            statSkills.textContent = player.skills;
+
+            gameTimeDisplay.textContent = `Day ${player.day}, ${String(player.hour).padStart(2, '0')}:00 ${player.hour < 12 ? 'AM' : 'PM'}`;
+            playerAgeDisplay.textContent = `Age: ${player.age}`;
+
+            // Update job display
+            if (currentJob) {
+                jobTitleDisplay.textContent = currentJob.title;
+                jobSalaryDisplay.textContent = `$${currentJob.salary}/hr`;
+                applyJobBtn.classList.add('hidden');
+                quitJobBtn.classList.remove('hidden');
+                promoteJobBtn.classList.remove('hidden');
+            } else {
+                jobTitleDisplay.textContent = "Unemployed";
+                jobSalaryDisplay.textContent = "$0/hr";
+                applyJobBtn.classList.remove('hidden');
+                quitJobBtn.classList.add('hidden');
+                promoteJobBtn.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Renders the relationship list.
+         */
+        function renderRelationships() {
+            relationshipListElement.innerHTML = '';
+            npcs.forEach(npc => {
+                const relationshipDiv = document.createElement('div');
+                relationshipDiv.classList.add('flex', 'justify-between', 'items-center', 'text-lg', 'border-b', 'border-gray-600', 'pb-2', 'mb-2');
+                relationshipDiv.innerHTML = `
+                    <span class="font-semibold">${npc.name} (${npc.type}):</span>
+                    <span class="font-bold text-pink-300">${npc.relationship}</span>
+                `;
+                relationshipListElement.appendChild(relationshipDiv);
+            });
+        }
+
+        /**
+         * Opens a specified modal.
+         * @param {string} modalId The ID of the modal to open.
+         */
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.getElementById(modalId).classList.remove('hidden');
+            if (modalId === 'casinoModal') {
+                casinoBalanceDisplay.textContent = `$${player.money}`;
+                casinoResultDisplay.textContent = '';
+            } else if (modalId === 'jobModal') {
+                populateJobsModal();
+            } else if (modalId === 'shopModal') {
+                populateShopModal();
+            }
+        }
+
+        /**
+         * Closes a specified modal.
+         * @param {string} modalId The ID of the modal to close.
+         */
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            // Allow transition to finish before hiding completely
+            setTimeout(() => {
+                document.getElementById(modalId).classList.add('hidden');
+            }, 300);
+        }
+
+        // --- Action Handlers ---
+
+        /**
+         * Handles the Work action.
+         */
+        function doWork() {
+            if (currentJob) {
+                if (player.energy >= currentJob.energyCost && player.health >= currentJob.healthCost) {
+                    player.money += currentJob.salary;
+                    player.energy -= currentJob.energyCost;
+                    player.health -= currentJob.healthCost;
+                    player.skills += 1;
+                    player.happiness -= 1; // Work can be a bit draining
+                    addMessage(`You worked at ${currentJob.title} and earned $${currentJob.salary}.`, 'money');
+                    addMessage(`Energy -${currentJob.energyCost}, Health -${currentJob.healthCost}. Skills +1.`, 'info');
+                } else {
+                    addMessage("You don't have enough energy or health to work!", 'warning');
+                }
+            } else {
+                addMessage("You don't have a job! Apply for one.", 'warning');
+            }
+            advanceTime(1); // Advance 1 hour for working
+            updateStatsDisplay();
+        }
+
+        /**
+         * Handles the Socialize action.
+         */
+        function doSocialize() {
+            if (player.energy >= 5) {
+                player.energy -= 5;
+                player.happiness += 10;
+                player.skills += 0.5; // Learn social skills
+                player.money -= Math.floor(Math.random() * 5) + 1; // Cost of socializing (1-5$)
+
+                const randomNPC = npcs[Math.floor(Math.random() * npcs.length)];
+                randomNPC.relationship += Math.floor(Math.random() * 10) + 5; // Gain 5-14 relationship
+                randomNPC.relationship = Math.min(100, randomNPC.relationship); // Cap at 100
+
+                // Update NPC type based on relationship
+                if (randomNPC.relationship >= 75) { randomNPC.type = "Best Friend"; }
+                else if (randomNPC.relationship >= 50) { randomNPC.type = "Close Friend"; }
+                else if (randomNPC.relationship >= 25) { randomNPC.type = "Friend"; }
+                else { randomNPC.type = "Acquaintance"; }
+
+
+                addMessage(`You socialized with ${randomNPC.name}. Happiness +10. You spent some money.`, 'success');
+                updateStatsDisplay();
+                renderRelationships();
+                advanceTime(1);
+            } else {
+                addMessage("You're too tired to socialize!", 'warning');
+            }
+        }
+
+        /**
+         * Handles the Rest action.
+         */
+        function doRest() {
+            player.energy += 30;
+            player.health += 15;
+            player.happiness += 5;
+            addMessage("You rested and feel re-energized!", 'success');
+            advanceTime(2); // Rest for 2 hours
+            updateStatsDisplay();
+        }
+
+        /**
+         * Handles the Sleep action.
+         */
+        function doSleep() {
+            if (player.hour >= 22 || player.hour < 6) { // Can only sleep at night
+                player.energy += 60;
+                player.health += 30;
+                player.happiness += 10;
+                addMessage("You had a good night's sleep!", 'success');
+                advanceTime(8); // Sleep for 8 hours
+                updateStatsDisplay();
+            } else {
+                addMessage("You can only sleep at night (between 10 PM and 6 AM).", 'warning');
+            }
+        }
+
+        /**
+         * Handles the Eat Meal action.
+         */
+        function doEat() {
+            const mealCost = 10; // Generic meal cost
+            if (player.money >= mealCost) {
+                player.money -= mealCost;
+                player.health += 20;
+                player.energy += 20;
+                player.happiness += 5;
+                addMessage(`You ate a meal, restoring health and energy. Spent $${mealCost}.`, 'money');
+                advanceTime(1);
+            } else {
+                addMessage("You don't have enough money for a meal!", 'warning');
+            }
+            updateStatsDisplay();
+        }
+
+        /**
+         * Handles the Exercise action.
+         */
+        function doExercise() {
+            const energyCost = hasGymMembership ? 10 : 15;
+            const healthGain = hasGymMembership ? 25 : 15;
+            const skillGain = hasGymMembership ? 0.75 : 0.5;
+
+            if (player.energy >= energyCost) {
+                player.energy -= energyCost; // Immediate energy cost
+                player.health += healthGain;
+                player.skills += skillGain;
+                player.happiness += 5; // Feeling good after workout
+                addMessage(`You exercised, improving health! Energy -${energyCost}.`, 'success');
+                advanceTime(1);
+            } else {
+                addMessage("You're too tired to exercise!", 'warning');
+            }
+            updateStatsDisplay();
+        }
+
+        /**
+         * Handles the Study action.
+         */
+        function doStudy() {
+            if (player.energy >= 10) {
+                player.energy -= 10;
+                player.skills += 3;
+                player.happiness -= 2; // Studying can be a bit draining on happiness
+                addMessage("You studied hard and improved your skills!", 'success');
+                advanceTime(1);
+            } else {
+                addMessage("You're too tired to study!", 'warning');
+            }
+            updateStatsDisplay();
+        }
+
+        /**
+         * Handles the Play Games action.
+         */
+        function doPlayGames() {
+            const cost = 5; // Cost for casual gaming/entertainment
+            if (player.money >= cost && player.energy >= 5) {
+                player.money -= cost;
+                player.energy -= 5;
+                player.happiness += 15;
+                addMessage(`You played some games and had fun! Happiness +15.`, 'success');
+                advanceTime(1);
+            } else if (player.money < cost) {
+                addMessage("You don't have enough money to play games!", 'warning');
+            } else {
+                addMessage("You're too tired to play games!", 'warning');
+            }
+            updateStatsDisplay();
+        }
+
+
+        /**
+         * Handles the Play Casino action.
+         */
+        function playSlots() {
+            let bet = parseInt(betAmountInput.value);
+            if (isNaN(bet) || bet <= 0) {
+                casinoResultDisplay.textContent = "Enter a valid bet amount.";
+                casinoResultDisplay.className = 'text-red-400 font-bold';
+                return;
+            }
+            if (player.money < bet) {
+                casinoResultDisplay.textContent = "Not enough money!";
+                casinoResultDisplay.className = 'text-red-400 font-bold';
+                return;
+            }
+
+            player.money -= bet; // Deduct bet immediately
+            casinoBalanceDisplay.textContent = `$${player.money}`;
+
+            const slots = ['🍒', '🍋', '🔔', '💰', '7️⃣'];
+            const reel1 = slots[Math.floor(Math.random() * slots.length)];
+            const reel2 = slots[Math.floor(Math.random() * slots.length)];
+            const reel3 = slots[Math.floor(Math.random() * slots.length)];
+
+            casinoResultDisplay.textContent = `${reel1} | ${reel2} | ${reel3}`;
+
+            let outcomeMessage = '';
+            let outcomeClass = '';
+
+            if (reel1 === reel2 && reel2 === reel3) {
+                let winMultiplier = 0;
+                if (reel1 === '7️⃣') winMultiplier = 5; // Jackpot
+                else if (reel1 === '💰') winMultiplier = 3;
+                else winMultiplier = 2; // Any other triple
+                
+                const winnings = bet * winMultiplier;
+                player.money += winnings;
+                outcomeMessage = `JACKPOT! You won $${winnings}!`;
+                outcomeClass = 'text-green-400 font-bold';
+                addMessage(`Won $${winnings} at the casino!`, 'money');
+            } else if (reel1 === reel2 || reel2 === reel3 || reel1 === reel3) {
+                const winnings = Math.floor(bet * 0.5); // Small win for doubles
+                player.money += winnings;
+                outcomeMessage = `Almost! You won $${winnings}.`;
+                outcomeClass = 'text-yellow-400';
+                addMessage(`Won $${winnings} at the casino.`, 'money');
+            } else {
+                outcomeMessage = `You lost $${bet}. Try again!`;
+                outcomeClass = 'text-red-400';
+                addMessage(`Lost $${bet} at the casino.`, 'danger');
+            }
+
+            casinoResultDisplay.textContent = `${reel1} | ${reel2} | ${reel3} - ${outcomeMessage}`;
+            casinoResultDisplay.className = outcomeClass;
+            casinoBalanceDisplay.textContent = `$${player.money}`; // Update balance after win/loss
+            updateStatsDisplay();
+            advanceTime(1); // Casino takes 1 hour
+        }
+
+        /**
+         * Populates the job modal with available jobs.
+         */
+        function populateJobsModal() {
+            availableJobsList.innerHTML = '';
+            jobs.forEach(job => {
+                const jobDiv = document.createElement('div');
+                jobDiv.classList.add('p-4', 'bg-gray-800', 'rounded-lg', 'flex', 'flex-col', 'md:flex-row', 'justify-between', 'items-center', 'gap-4');
+                jobDiv.innerHTML = `
+                    <div>
+                        <h4 class="text-xl font-bold text-yellow-300">${job.title}</h4>
+                        <p class="text-gray-400 text-sm">${job.description}</p>
+                        <p class="text-green-400 mt-1">Salary: $${job.salary}/hr</p>
+                        ${job.skillRequirement > 0 ? `<p class="text-purple-300 text-sm">Skills Req: ${job.skillRequirement}</p>` : ''}
+                    </div>
+                    ${currentJob && currentJob.id === job.id
+                        ? `<span class="text-blue-400 font-semibold">Current Job</span>`
+                        : `<button class="action-button action-button-primary ${player.skills >= job.skillRequirement ? '' : 'opacity-50 cursor-not-allowed'}" 
+                                ${player.skills >= job.skillRequirement ? `onclick="applyForJob('${job.id}')"` : 'disabled'}
+                            >
+                                Apply
+                            </button>`
+                    }
+                `;
+                availableJobsList.appendChild(jobDiv);
+            });
+        }
+
+        /**
+         * Handles applying for a specific job.
+         * @param {string} jobId The ID of the job to apply for.
+         */
+        function applyForJob(jobId) {
+            const jobToApply = jobs.find(job => job.id === jobId);
+            if (jobToApply && player.skills >= jobToApply.skillRequirement) {
+                currentJob = jobToApply;
+                addMessage(`You are now a ${currentJob.title}!`, 'success');
+                closeModal('jobModal');
+                updateStatsDisplay();
+            } else {
+                addMessage(`You don't meet the skill requirements for ${jobToApply.title}!`, 'warning');
+            }
+        }
+
+        /**
+         * Handles quitting the current job.
+         */
+        function quitJob() {
+            if (currentJob) {
+                addMessage(`You quit your job as a ${currentJob.title}.`, 'danger');
+                currentJob = null;
+                updateStatsDisplay();
+            }
+        }
+
+        /**
+         * Handles seeking a promotion.
+         */
+        function seekPromotion() {
+            if (!currentJob) {
+                addMessage("You need a job to seek a promotion!", 'warning');
+                return;
+            }
+
+            const nextJobId = currentJob.promotionTo;
+            if (!nextJobId) {
+                addMessage("You're at the top of your current career path!", 'info');
+                return;
+            }
+
+            const nextJob = jobs.find(job => job.id === nextJobId);
+            if (nextJob) {
+                if (player.skills >= nextJob.skillRequirement) {
+                    currentJob = nextJob;
+                    addMessage(`Congratulations! You've been promoted to ${currentJob.title}!`, 'success');
+                    player.happiness += 15; // Promotion makes you happy
+                    player.money += 50; // Promotion bonus
+                } else {
+                    addMessage(`You need ${nextJob.skillRequirement} skills for ${nextJob.title}. You have ${player.skills}.`, 'warning');
+                }
+            } else {
+                addMessage("There's no clear promotion path from your current job.", 'info');
+            }
+            updateStatsDisplay();
+        }
+
+        /**
+         * Populates the shop modal with available items.
+         */
+        function populateShopModal() {
+            shopItemsList.innerHTML = '';
+            shopItems.forEach(item => {
+                // Special handling for Gym Membership
+                if (item.id === 'gymMembership' && hasGymMembership) {
+                    // Don't display if already bought
+                    return;
+                }
+
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('p-4', 'bg-gray-800', 'rounded-lg', 'flex', 'flex-col', 'md:flex-row', 'justify-between', 'items-center', 'gap-4');
+                itemDiv.innerHTML = `
+                    <div>
+                        <h4 class="text-xl font-bold text-yellow-300">${item.name}</h4>
+                        <p class="text-gray-400 text-sm">${item.description}</p>
+                        <p class="text-green-400 mt-1">Price: $${item.price}</p>
+                        ${item.effects.health ? `<p class="text-pink-300 text-sm">Health +${item.effects.health}</p>` : ''}
+                        ${item.effects.energy ? `<p class="text-red-300 text-sm">Energy +${item.effects.energy}</p>` : ''}
+                        ${item.effects.happiness ? `<p class="text-green-300 text-sm">Happiness +${item.effects.happiness}</p>` : ''}
+                        ${item.effects.skills ? `<p class="text-purple-300 text-sm">Skills +${item.effects.skills}</p>` : ''}
+                    </div>
+                    <button class="action-button action-button-primary ${player.money >= item.price ? '' : 'opacity-50 cursor-not-allowed'}" 
+                            ${player.money >= item.price ? `onclick="buyItem('${item.id}')"` : 'disabled'}
+                        >
+                            Buy
+                        </button>
+                `;
+                shopItemsList.appendChild(itemDiv);
+            });
+        }
+
+        /**
+         * Handles buying an item from the shop.
+         * @param {string} itemId The ID of the item to buy.
+         */
+        function buyItem(itemId) {
+            const itemToBuy = shopItems.find(item => item.id === itemId);
+            if (itemToBuy && player.money >= itemToBuy.price) {
+                player.money -= itemToBuy.price;
+                if (itemToBuy.effects.health) player.health += itemToBuy.effects.health;
+                if (itemToBuy.effects.energy) player.energy += itemToBuy.effects.energy;
+                if (itemToBuy.effects.happiness) player.happiness += itemToBuy.effects.happiness;
+                if (itemToBuy.effects.skills) player.skills += itemToBuy.effects.skills;
+
+                // Special handling for Gym Membership
+                if (itemToBuy.id === 'gymMembership') {
+                    hasGymMembership = true;
+                    addMessage("You bought a gym membership! Exercise will be more effective.", 'success');
+                } else {
+                    addMessage(`You bought ${itemToBuy.name}!`, 'success');
+                }
+
+                // Cap stats at 100
+                player.health = Math.min(100, player.health);
+                player.energy = Math.min(100, player.energy);
+                player.happiness = Math.min(100, player.happiness);
+
+                updateStatsDisplay();
+                populateShopModal(); // Re-populate to reflect changes (e.g., remove bought gym membership)
+            } else {
+                addMessage("Not enough money to buy that!", 'warning');
+            }
+        }
+
+
+        // --- Save/Load Game Functions ---
+
+        /**
+         * Saves the current game state to localStorage.
+         */
+        function saveGame() {
+            const gameState = {
+                player: player,
+                currentJob: currentJob,
+                npcs: npcs,
+                messageLog: messageLog,
+                hasGymMembership: hasGymMembership
+            };
+            try {
+                localStorage.setItem('lifeSimulatorGame', JSON.stringify(gameState));
+                autosaveMessageElement.textContent = `Autosaved (${new Date().toLocaleTimeString()})`;
+            } catch (e) {
+                console.error("Error saving game to localStorage:", e);
+                autosaveMessageElement.textContent = `Autosave failed!`;
+            }
+        }
+
+        /**
+         * Loads the game state from localStorage.
+         */
+        function loadGame() {
+            const savedState = localStorage.getItem('lifeSimulatorGame');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                player = gameState.player;
+                currentJob = gameState.currentJob;
+                npcs = gameState.npcs;
+                messageLog = gameState.messageLog;
+                hasGymMembership = gameState.hasGymMembership || false; // Default to false if not in old save
+
+                // Re-populate message log element from loaded data
+                messageLogElement.innerHTML = '';
+                messageLog.forEach(msg => {
+                    const msgElement = document.createElement('p');
+                    let colorClass = 'text-gray-300';
+                    if (msg.type === 'success') colorClass = 'text-green-400';
+                    else if (msg.type === 'warning') colorClass = 'text-yellow-400';
+                    else if (msg.type === 'danger') colorClass = 'text-red-400';
+                    else if (msg.type === 'money') colorClass = 'text-yellow-300';
+                    else if (msg.type === 'event') colorClass = 'text-blue-300';
+                    else if (msg.type === 'relationship') colorClass = 'text-pink-300';
+
+                    msgElement.classList.add(colorClass);
+                    msgElement.innerHTML = `<span class="text-gray-500">[${msg.day}D ${msg.time}]</span> ${msg.text}`;
+                    messageLogElement.appendChild(msgElement); // Add to bottom for loaded order
+                });
+
+                addMessage("Game loaded!", 'info');
+            } else {
+                // If no saved game, initialize with starting message
+                addMessage("Welcome to Life's Journey! Start building your life.", 'info');
+                // Ensure initial message is in log for saving
+                messageLog.push({ text: "Welcome to Life's Journey! Start building your life.", type: "info", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), day: player.day });
+            }
+            updateStatsDisplay();
+            renderRelationships();
+        }
+
+        // --- Game Loop and Events ---
+        /**
+         * Advances time by a specified number of hours.
+         * @param {number} hours The number of hours to advance.
+         */
+        function advanceTime(hours) {
+            player.hour += hours;
+            // Daily reset/events
+            while (player.hour >= 24) {
+                player.hour -= 24;
+                player.day++;
+                addMessage(`It's a new day! Day ${player.day}.`, 'event');
+
+                // Age up every 365 days (simulated)
+                if (player.day % 365 === 0) { // Changed to more realistic year
+                    player.age++;
+                    addMessage(`Happy Birthday! You are now ${player.age} years old.`, 'event');
+                }
+
+                // Daily energy/health decay
+                player.energy = Math.max(0, player.energy - 5);
+                player.health = Math.max(0, player.health - 2);
+                if (player.energy < 20) addMessage("You're feeling very low on energy.", 'warning');
+                if (player.health < 20) addMessage("Your health is getting low.", 'danger');
+                if (player.health <= 0) {
+                    addMessage("Your health has reached zero. Game Over!", 'danger');
+                    // Optionally, reset game or show game over screen
+                    resetGame();
+                    return;
+                }
+
+
+                // Random events (occur once per day)
+                if (Math.random() < 0.15) { // 15% chance of a random event each day
+                    const eventRoll = Math.random();
+                    if (eventRoll < 0.3) {
+                        player.money += Math.floor(Math.random() * 30) + 10;
+                        addMessage("Found some money on the ground!", 'money');
+                    } else if (eventRoll < 0.6) {
+                        player.happiness -= Math.floor(Math.random() * 10) + 5;
+                        addMessage("Something annoying happened today, happiness decreased.", 'warning');
+                    } else {
+                        player.health -= Math.floor(Math.random() * 8) + 3;
+                        addMessage("Caught a minor cold, health decreased slightly.", 'danger');
+                    }
+                }
+            }
+            // Ensure stats don't go below zero or above 100 (except money, skills, age, day, hour)
+            player.happiness = Math.max(0, Math.min(100, player.happiness));
+            player.energy = Math.max(0, Math.min(100, player.energy));
+            player.health = Math.max(0, Math.min(100, player.health));
+
+            updateStatsDisplay();
+        }
+
+        function resetGame() {
+            player = {
+                money: 100,
+                happiness: 50,
+                energy: 100,
+                health: 100,
+                skills: 0,
+                age: 18,
+                day: 1,
+                hour: 8
+            };
+            currentJob = null;
+            npcs = [
+                { name: "Alice", relationship: 20, type: "Acquaintance" },
+                { name: "Bob", relationship: 10, type: "Acquaintance" },
+                { name: "Charlie", relationship: 5, type: "Stranger" },
+                { name: "Diana", relationship: 30, type: "Friend" },
+            ];
+            messageLog = [];
+            hasGymMembership = false;
+            addMessage("Game Over! Starting a new life...", 'event');
+            addMessage("Welcome to Life's Journey! Start building your life.", 'info');
+            updateStatsDisplay();
+            renderRelationships();
+            saveGame(); // Save initial state of new game
+        }
+
+
+        // --- Event Listeners and Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGame(); // Load game state on page load
+
+            // Set up main action buttons
+            workBtn.addEventListener('click', doWork);
+            socializeBtn.addEventListener('click', doSocialize);
+            restBtn.addEventListener('click', doRest);
+            sleepBtn.addEventListener('click', doSleep);
+            eatBtn.addEventListener('click', doEat);
+            exerciseBtn.addEventListener('click', doExercise);
+            studyBtn.addEventListener('click', doStudy);
+            playGamesBtn.addEventListener('click', doPlayGames);
+            shopBtn.addEventListener('click', () => openModal('shopModal'));
+            casinoBtn.addEventListener('click', () => openModal('casinoModal'));
+
+            // Job actions
+            applyJobBtn.addEventListener('click', () => openModal('jobModal'));
+            quitJobBtn.addEventListener('click', quitJob);
+            promoteJobBtn.addEventListener('click', seekPromotion);
+
+            // Casino actions
+            playSlotsBtn.addEventListener('click', playSlots);
+
+            // Set up an interval for core daily/hourly progression checks
+            // Player actions advance time. This interval handles passive time progression for age/random events.
+            // Let's make this slower so it doesn't just fly by if user is idle.
+            setInterval(() => advanceTime(1), 5000); // Advance 1 hour every 5 seconds if idle
+
+            // Autosave every 1 second
+            setInterval(saveGame, 1000);
+        });
+    </script>
+</body>
+</html>
